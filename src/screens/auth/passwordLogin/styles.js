@@ -18,8 +18,9 @@ export const styles = StyleSheet.create({
   },
   forgotText: {
     color: appColors.secondary,
-    fontFamily: fonts.PoppinsRegular,
+    fontFamily: fonts.PoppinsSemiBold,
     fontSize: 13,
+    fontWeight:"700"
   },
 
   // Footer text

@@ -67,15 +67,20 @@ const PasswordLoginScreen = ({ navigation }) => {
     }
   };
 
+  // ✅ Button disable condition
+  const isDisabled =
+    !email ||
+    !password ||
+    errors.email ||
+    errors.password;
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>
         <BannerHeader
-          bannerImage={require('../../../assets/images/register.png')}
-          title="Welcome Back 👋"
+          bannerImage={require('../../../assets/images/background.png')}
+          title="Welcome Back"
           subtitle="Sign in to your account"
-          defaultAvatar={require('../../../assets/images/avtar.jpg')}
-          onBackPress={() => navigation.goBack()}
         />
 
         <View style={styles.mainContainerStyle}>
@@ -106,7 +111,12 @@ const PasswordLoginScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <CustomButton title="Sign In" onPress={handleLogin} />
+        {/* ✅ Disabled if wrong details */}
+        <CustomButton
+          title="Sign In"
+          onPress={handleLogin}
+          disabled={isDisabled}
+        />
       </View>
     </SafeAreaView>
   );

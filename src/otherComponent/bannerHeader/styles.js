@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
    // Banner as background
   bannerContainer: {
     width: windowWidth(480),
-    height: windowHeight(240),
+    height: windowHeight(290),
     justifyContent: "flex-end",
     paddingHorizontal: 20,
     paddingBottom: 8,
@@ -34,16 +34,30 @@ export const styles = StyleSheet.create({
   // Overlay content on banner
   mainStyle: {
     alignItems: "center",
+    marginTop:windowHeight(20)
   },
 
   // Banner text
   title: {
     fontSize: 20,
-    fontFamily: fonts.PoppinsSemiBold,
+    fontFamily: fonts.InterSemiBold,
     marginBottom: 6,
     color: appColors.title,
     textAlign: "center",
     fontWeight: "700",
+  },
+  titleWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+    marginHorizontal: 20,
+  },
+   line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#ccc", // light gray line
+    marginHorizontal: 10,
   },
   subText: {
     fontSize: 12,
@@ -52,30 +66,5 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
     fontFamily: fonts.PoppinsRegular,
   },
-    // Vendor / profile picker
-  vendorBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: appColors.border,
-    borderRadius: 10,
-    padding: 8,
-    width: '100%',
-    marginVertical: windowHeight(4),
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    justifyContent: "center",
-    paddingVertical:7
-  },
-  avatar: {
-    width: 35,
-    height: 35,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  vendorText: {
-    fontSize: fontSizes.FONT17,
-    color: appColors.black,
-    fontFamily: fonts.PoppinsMedium,
-    fontWeight: "500",
-  },
+  
 })

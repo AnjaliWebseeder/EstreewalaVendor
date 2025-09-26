@@ -1,6 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from '../screens/auth/login'
+import WelcomeScreen from '../screens/auth/welcome'
 import OtpScreen from '../screens/auth/otp'
 import PasswordLoginScreen from '../screens/auth/passwordLogin'
 import RegisterScreen from '../screens/auth/registration'
@@ -16,14 +16,16 @@ import VerifyDetails from '../screens/vendorRegistration/verifyDetails'
 import PaymentSetup from '../screens/vendorRegistration/paymentSetup'
 import SetPrice from '../screens/vendorRegistration/setPrice'
 import CreateCoupon from '../screens/vendorRegistration/createCoupon'
+import Spalsh from '../screens/spalsh'
 
 const Stack = createStackNavigator();
 
 const Navigation = () => {
   return (
     <NavigationContainer >
-      <Stack.Navigator  screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Navigator initialRouteName='VendorRegistration'  screenOptions={{ headerShown: false }}>
+         <Stack.Screen name="Spalsh" component={Spalsh} />
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Otp" component={OtpScreen} />
         <Stack.Screen name="PasswordLogin" component={PasswordLoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />

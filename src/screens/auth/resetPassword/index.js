@@ -11,20 +11,29 @@ export default function ResetPassword({ navigation }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
 
-  // ✅ Live validation: clear errors as user types
+  // ✅ Validation regex
+  const passwordRegex =
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{};':"\\|,.<>/?-]).{8,}$/;
+
+  // ✅ Live validation: enable button only when form is valid
   useEffect(() => {
+    if (
+      passwordRegex.test(password) &&
+      confirmPassword === password
+    ) {
+      setIsFormValid(true);
+    } else {
+      setIsFormValid(false);
+    }
+
     if (!isSubmitted) return;
 
     setErrors(prev => {
       const newErrors = { ...prev };
-
-      const passwordRegex =
-        /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{};':"\\|,.<>/?-]).{8,}$/;
-
       if (password && passwordRegex.test(password)) newErrors.password = '';
       if (confirmPassword && confirmPassword === password) newErrors.confirmPassword = '';
-
       return newErrors;
     });
   }, [password, confirmPassword, isSubmitted]);
@@ -32,8 +41,6 @@ export default function ResetPassword({ navigation }) {
   const handleNext = () => {
     setIsSubmitted(true);
     const newErrors = {};
-    const passwordRegex =
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{};':"\\|,.<>/?-]).{8,}$/;
 
     if (!password) newErrors.password = 'Password is required';
     else if (!passwordRegex.test(password))
@@ -46,7 +53,6 @@ export default function ResetPassword({ navigation }) {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      // ✅ Passed validation
       navigation.navigate('StatusScreen', {
         title: 'Password Reset Successful !',
         message:
@@ -62,8 +68,8 @@ export default function ResetPassword({ navigation }) {
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>
         <BannerHeader
-          bannerImage={require('../../../assets/images/register.png')}
-          title="Create New Password 👋"
+          bannerImage={require('../../../assets/images/background.png')}
+          title="Create New Password"
           subtitle="Enter your new password below here!"
           onBackPress={() => navigation.goBack()}
         />
@@ -92,7 +98,8 @@ export default function ResetPassword({ navigation }) {
           </Text>
         </View>
 
-        <CustomButton title="Next" onPress={handleNext} />
+        {/* ✅ Button disabled until form is valid */}
+        <CustomButton title="Next" onPress={handleNext} disabled={!isFormValid} />
       </View>
     </SafeAreaView>
   );

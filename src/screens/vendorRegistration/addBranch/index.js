@@ -124,12 +124,7 @@ export default function AddBranch({ navigation }) {
           placeholder="e.g. Abc Nagar 1st Block, 17-A Abc Society"
           error={errors.address}
         />
-
-        <TouchableOpacity style={styles.locationRow}>
-          <Feather name="map-pin" size={18} color={appColors.blue} />
-          <Text style={styles.locationText}>Change Current Location</Text>
-        </TouchableOpacity>
-
+        
         <InputField
           label="Pincode*"
           value={pincode}

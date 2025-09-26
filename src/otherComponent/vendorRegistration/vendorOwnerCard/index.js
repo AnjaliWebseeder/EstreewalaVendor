@@ -1,9 +1,10 @@
 import { View, Text,TouchableOpacity } from 'react-native'
-import React, { useContext , useState } from 'react';
+import React, { useContext  } from 'react';
 import {styles} from './styles'
 import Icon from 'react-native-vector-icons/Ionicons';
 import { VendorContext } from '../../../utils/context/vendorContext';
 import appColors from '../../../theme/appColors';
+import { windowWidth } from '../../../theme/appConstant';
 
 export default function VendorOwnerCard({owner,navigation}) {
 
@@ -35,7 +36,8 @@ deleteOwner
 
     {/* Owner Info */}
    <View style={styles.main}>
-     <View style={styles.infoRow}>
+     <View style={{flexDirection:"row",justifyContent:"space-between"}}>
+         <View style={styles.infoRow}>
       <Icon name="person-outline" size={16} color={appColors.secondary} style={styles.infoIcon} />
       
       <View>
@@ -44,13 +46,15 @@ deleteOwner
       </View>
     </View>
 
-    <View style={styles.infoRow}>
+    <View style={[styles.infoRow,{paddingHorizontal:8,width:windowWidth(180)}]}>
       <Icon name="person-outline" size={16} color={appColors.secondary} style={styles.infoIcon} />
       <View>
         <Text style={styles.infoText}>Last Name</Text>
         <Text style={styles.detail}>{owner.lastName}</Text>
       </View>
     </View>
+     </View>
+    
 
     <View style={{flexDirection:"row",justifyContent:"space-between"}}>
         <View style={styles.infoRow}>
@@ -63,7 +67,7 @@ deleteOwner
       </View>
     </View>
 
-    <View style={[styles.infoRow,{paddingHorizontal:8}]}>
+    <View style={[styles.infoRow,{paddingHorizontal:8,width:windowWidth(180)}]}>
       <Icon name="logo-whatsapp" size={16} color="#25D366" style={styles.infoIcon} />
       <View>
           <Text style={styles.infoText}>Whatsapp Number</Text>

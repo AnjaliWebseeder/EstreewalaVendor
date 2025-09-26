@@ -13,12 +13,16 @@ export default function ForgotPassword({ navigation }) {
   const [error, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // ✅ Clear error automatically when user types a valid email
+  // ✅ Live validation
   useEffect(() => {
     if (!isSubmitted) return;
 
     if (email && /\S+@\S+\.\S+/.test(email)) {
       setError('');
+    } else if (!email.trim()) {
+      setError('Email is required');
+    } else {
+      setError('Enter a valid email');
     }
   }, [email, isSubmitted]);
 
@@ -38,12 +42,15 @@ export default function ForgotPassword({ navigation }) {
     navigation.navigate('VerifyEmail');
   };
 
+  // ✅ Disable button if email invalid or empty
+  const isDisabled = !email || !!error;
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>
         <BannerHeader
-          bannerImage={require('../../../assets/images/register.png')}
-          title="Forgot Password 👋"
+          bannerImage={require('../../../assets/images/background.png')}
+          title="Forgot Password"
           subtitle="Enter your email to receive reset instructions"
           defaultAvatar={require('../../../assets/images/avtar.jpg')}
           onImagePick={uri => setVendorImage(uri)}
@@ -65,13 +72,19 @@ export default function ForgotPassword({ navigation }) {
           </Text>
         </View>
 
-        <CustomButton title="Next" onPress={handleNext} />
+        {/* ✅ Disabled until valid email */}
+        <CustomButton disabled={isDisabled} title="Next" onPress={handleNext} />
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate('Register')}
         >
-          <Text style={[styles.footerText, { textAlign: "center", color: appColors.black }]}>
+          <Text
+            style={[
+              styles.footerText,
+              { textAlign: 'center', color: appColors.black },
+            ]}
+          >
             Don’t have an account? <Text style={styles.link}>Register</Text>
           </Text>
         </TouchableOpacity>

@@ -56,7 +56,7 @@ const OtpScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.title}>Verification Code 👋</Text>
+        <Text style={styles.title}>Verification Code</Text>
         <Text style={styles.subText}>We have sent the code verification to your Mobile Number</Text>
 
         <OtpInput otp={otp} setOtp={setOtp} />
@@ -68,7 +68,7 @@ const OtpScreen = ({ navigation }) => {
           <Text style={styles.resend}>Resend OTP in 0:45</Text>
         </View>
 
-        <CustomButton title="Verify" onPress={handleVerify} />
+        <CustomButton title="Verify" onPress={handleVerify}   disabled={otp.join('').length !== 4 || !!error}  />
 
         <Text style={styles.textStyle}>
           By continuing, you agree to our <Text style={styles.link}> Terms of Service </Text> and acknowledge that you have read our <Text style={styles.link}>Privacy Policy.</Text>

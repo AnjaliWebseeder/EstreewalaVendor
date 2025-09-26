@@ -1,53 +1,283 @@
-import React, { useContext, useMemo } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import Header from '../../../components/header'
-import { VendorContext } from '../../../utils/context/vendorContext';
-import ServiceItem from '../../../otherComponent/vendorRegistration/serviceItem'
-import {styles} from './styles'
+import React, { useContext, useState, useEffect } from "react";
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  ScrollView, 
+  Alert, 
+  FlatList, 
+  TextInput,
+  Animated,
+  Dimensions,
+  Image,
+  Modal,
+  TouchableWithoutFeedback
+} from "react-native";
+import Header from "../../../components/header";
+import { styles } from "./styles";
+import { mockData } from "../../../utils/data";
+import { VendorContext } from "../../../utils/context/vendorContext";
+import Icon from 'react-native-vector-icons/Ionicons';
+import appColors from "../../../theme/appColors";
+import FilterIcon from '../../../assets/Icons/filter'
 
 export default function SetPrice({ navigation }) {
-const { services, selectedServiceIds, priceMap, setItemPrice } = useContext(VendorContext);
-const categories = useMemo(() => services.filter((s) => selectedServiceIds.includes(s.id)), [services, selectedServiceIds]);
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [prices, setPrices] = useState({});
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [priceInput, setPriceInput] = useState("");
+  const [activeServiceId, setActiveServiceId] = useState(null);
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const { services, selectedServiceIds } = useContext(VendorContext);
+
+  // Animation
+  const [fadeAnim] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    if (selectedServiceIds.length > 0) {
+      setActiveServiceId(selectedServiceIds[0]);
+    }
+
+    const initialPrices = {};
+    Object.keys(mockData).forEach(category => {
+      mockData[category].forEach(item => {
+        initialPrices[item.id] = item.price;
+      });
+    });
+    setPrices(initialPrices);
+
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  const filters = [
+    { key: "all", label: "All Items", icon: "grid-outline" },
+    { key: "mens", label: "Men's Wear", icon: "man-outline" },
+    { key: "womens", label: "Women's Wear", icon: "woman-outline" },
+    { key: "kids", label: "Kids Wear", icon: "heart-outline" },
+  ];
+
+  const getAllItems = () => {
+    let allItems = [];
+    Object.keys(mockData).forEach(category => {
+      allItems = [...allItems, ...mockData[category].map(item => ({ ...item, category }))];
+    });
+    return allItems;
+  };
+
+  const getFilteredItems = () => {
+    if (selectedFilter === "all") return getAllItems();
+    if (mockData[selectedFilter]) {
+      return mockData[selectedFilter].map(item => ({ ...item, category: selectedFilter }));
+    }
+    return [];
+  };
+
+  const startEditing = (item) => {
+    setEditingItemId(item.id);
+    setPriceInput(prices[item.id]?.toString() || item.price.toString());
+  };
+
+  const savePrice = () => {
+    if (editingItemId && priceInput) {
+      const priceValue = parseFloat(priceInput);
+      if (!isNaN(priceValue) && priceValue >= 0) {
+        setPrices(prev => ({ ...prev, [editingItemId]: priceValue }));
+        const itemName = getFilteredItems().find(item => item.id === editingItemId)?.name;
+        // Alert.alert("✅ Price Set", `₹${priceValue} for ${itemName}`);
+        setEditingItemId(null);
+        setPriceInput("");
+      } else {
+        Alert.alert("❌ Invalid Price", "Please enter a valid price");
+      }
+    }
+  };
+
+  const cancelEditing = () => {
+    setEditingItemId(null);
+    setPriceInput("");
+  };
 
 
-const onSavePrices = () => {
-Alert.alert('Success', 'You have set the prices Successfully.');
-navigation.navigate('VendorRegistration');
-};
 
+  
 
-return (
-<View style={{ flex: 1 }}>
-<Header title="Set Price" onBack={() => navigation.goBack()} />
-<ScrollView contentContainerStyle={{ padding: 16 }}>
-{categories.length === 0 ? (
-<Text style={{ color: '#777' }}>No services selected. Go back and select services.</Text>
-) : (
-categories.map((cat) => (
-<View key={cat.id} style={{ marginBottom: 18 }}>
-<Text style={{ fontWeight: '700', marginBottom: 8 }}>{cat.name}</Text>
-{cat.items.map((it) => (
-<ServiceItem key={it.id} item={it} price={priceMap[it.id]} onChangePrice={(id, p) => setItemPrice(id, Number(p || 0))} />
-))}
+  const getTotalValue = () => getAllItems().reduce((total, item) => total + (prices[item.id] || 0), 0);
+
+  const PriceCard = ({ item }) => {
+    const price = prices[item.id] || item.price;
+    const isEditing = editingItemId === item.id;
+    const isCustomPrice = prices[item.id] !== undefined && prices[item.id] !== item.price;
+
+    return (
+      <Animated.View style={[styles.priceCard, { opacity: fadeAnim, transform: [{ scale: fadeAnim }] }]}>
+        <View style={styles.itemHeader}>
+          <Image source={item.image} style={styles.itemImage} />
+          <View style={styles.itemDetails}>
+            <Text style={styles.itemName}>{item.name}</Text>
+            <View style={styles.itemMeta}>
+              <Text style={styles.itemCategory}>
+               
+                {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
+              </Text>
+              <Text style={styles.basePrice}>Base: ₹{item.price}</Text>
+            </View>
+          </View>
+
+          {!isEditing ? (
+            <View style={styles.priceActions}>
+              <Text style={[styles.currentPrice, isCustomPrice && styles.customPrice]}>₹{price}</Text>
+              <View style={styles.actionButtons}>
+                <TouchableOpacity style={styles.editButton} onPress={() => startEditing(item)}>
+                  <Icon name="pencil-outline" size={14} color={appColors.white} />
+                </TouchableOpacity>
+             
+              </View>
+            </View>
+          ) : (
+            <View style={styles.editingContainer}>
+              <TextInput
+                style={styles.priceInput}
+                value={priceInput}
+                onChangeText={setPriceInput}
+                keyboardType="numeric"
+                placeholder="Enter price"
+                autoFocus
+              />
+              <View style={styles.editActions}>
+                <TouchableOpacity style={styles.saveEditButton} onPress={savePrice}>
+                  <Icon name="checkmark" size={16} color={appColors.secondary} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.cancelEditButton} onPress={cancelEditing}>
+                  <Icon name="close" size={16} color={appColors.error} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </View>
+
+      
+      </Animated.View>
+    );
+  };
+
+  const filteredItems = getFilteredItems();
+
+  return (
+    <View style={styles.container}>
+      <Header 
+        title="Set Pricing" 
+        onBack={() => navigation.goBack()}
+       
+      />
+    
+   
+
+      {/* Filter Dropdown */}
+      {showFilterDropdown && (
+        <TouchableWithoutFeedback onPress={() => setShowFilterDropdown(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.filterDropdown}>
+              <Text style={styles.filterTitle}>Filter by Category</Text>
+              {filters.map((filter) => (
+                <TouchableOpacity
+                  key={filter.key}
+                  style={[styles.filterItem, selectedFilter === filter.key && styles.filterItemActive]}
+                  onPress={() => { setSelectedFilter(filter.key); setShowFilterDropdown(false); }}
+                >
+                  <Icon 
+                    name={filter.icon} 
+                    size={17} 
+                    color={selectedFilter === filter.key ? appColors.secondary : appColors.primary} 
+                  />
+                  <Text style={[styles.filterText, selectedFilter === filter.key && styles.filterTextActive]}>
+                    {filter.label}
+                  </Text>
+                  {selectedFilter === filter.key && (
+                    <Icon name="checkmark" size={18} color={appColors.white} style={styles.checkIcon} />
+                  )}
+                </TouchableOpacity>
+              ))}
+               <TouchableOpacity style={styles.closeFilterButton} onPress={() => setShowFilterDropdown(false)}>
+                <Text style={styles.closeFilterText}>Close</Text>
+              </TouchableOpacity> 
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      )}
+
+      {/* Service Tabs */}
+<View style={styles.serviceTabsContainer}>
+  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    {(selectedServiceIds.length > 0 ? 
+      services.filter(s => selectedServiceIds.includes(s.id)) 
+      : services
+    ).map((service) => (
+      <TouchableOpacity
+        key={service.id}
+        onPress={() => setActiveServiceId(service.id)}
+        style={[
+          styles.serviceTab, 
+          activeServiceId === service.id && styles.serviceTabActive
+        ]}
+      >
+       
+        <Text 
+          style={[
+            styles.serviceTabText, 
+            activeServiceId === service.id && styles.serviceTabTextActive
+          ]}
+        >
+          {service.name}
+        </Text>
+      </TouchableOpacity>
+    ))}
+  </ScrollView>
 </View>
-))
-)}
 
+  <View style={styles.containerStyle}>
+                  <Text style={styles.summaryValue}>{filters.find(f => f.key === selectedFilter)?.label}</Text>
 
-<TouchableOpacity style={styles.createCoupon} onPress={() => navigation.navigate('CreateCoupon')}>
-<Text style={{ color: '#4b4bff' }}>+ Create Coupon</Text>
-</TouchableOpacity>
+           <TouchableOpacity onPress={() => setShowFilterDropdown(!showFilterDropdown)} style={styles.filter}>
+        <FilterIcon/>
+      </TouchableOpacity>
+      </View>
 
+      
 
-<TouchableOpacity style={styles.button} onPress={onSavePrices}>
-<Text style={styles.buttonText}>Set Prices</Text>
-</TouchableOpacity>
+      {/* Price List */}
+     <FlatList
+        data={filteredItems}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <PriceCard item={item} />}
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Icon name="pricetags-outline" size={64} color={appColors.lightGray} />
+            <Text style={styles.emptyText}>No items found for this filter</Text>
+            <Text style={styles.emptySubtext}>Try selecting a different category</Text>
+          </View>
+        }
+      />
 
+     
 
-<View style={{ height: 40 }} />
-</ScrollView>
-</View>
-);
+      {/* Action Buttons */}
+      {/* <View style={styles.actionContainer}>
+        <TouchableOpacity style={styles.couponButton} onPress={() => navigation.navigate("CreateCoupon")}>
+          <Icon name="gift-outline" size={18} color={appColors.primary} />
+          <Text style={styles.couponText}>Coupons</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.saveButton} onPress={onSaveAllPrices}>
+          <Text style={styles.saveButtonText}>Save Prices</Text>
+          <Icon name="checkmark-done" size={18} color={appColors.white} />
+        </TouchableOpacity>
+      </View> */}
+    </View>
+  );
 }
-
-

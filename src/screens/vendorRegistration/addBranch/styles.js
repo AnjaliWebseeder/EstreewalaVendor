@@ -23,14 +23,4 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
     color: appColors.text,
   },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  locationText: {
-    marginLeft: 6,
-    color: appColors.blue,
-    fontWeight: '500',
-  },
 });

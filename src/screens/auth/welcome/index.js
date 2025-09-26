@@ -1,24 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
 import { styles } from './styles';
 import appColors from '../../../theme/appColors';
 import ArrowRightIcon from '../../../assets/Icons/back-btn';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const LoginScreen = ({ navigation }) => {
+const WelcomeScreen = ({ navigation }) => {
   const [phone, setPhone] = useState('');
-  const [profileImage, setProfileImage] = useState(null);
   const [error, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false); // track if Request OTP clicked
-
-  const pickImage = () => {
-    launchImageLibrary({ mediaType: 'photo' }, response => {
-      if (!response.didCancel && !response.errorCode) {
-        setProfileImage(response.assets[0].uri);
-      }
-    });
-  };
 
   // ✅ Clear error automatically when user types a valid phone number
   useEffect(() => {
@@ -55,25 +45,12 @@ const LoginScreen = ({ navigation }) => {
         <Image source={require('../../../assets/images/login.png')} style={styles.banner} />
 
         {/* Title */}
-        <Text style={styles.title}>Welcome Back  👋</Text>
+        <Text style={styles.title}>Welcome Back </Text>
         <Text style={styles.subText}>
           Enter your phone number we will send you a confirmation code there
         </Text> 
 
         <View style={styles.main}>
-          {/* Vendor Box (avatar + name inside input-style box) */}
-          <TouchableOpacity onPress={pickImage} style={styles.vendorBox}>
-            {profileImage ? (
-              <Image source={{ uri: profileImage }} style={styles.avatar} />
-            ) : (
-              <Image
-                source={require('../../../assets/images/avtar.jpg')}
-                style={styles.avatar}
-              />
-            )}
-            <Text style={styles.vendorText}>Vendor</Text>
-          </TouchableOpacity> 
-
           {/* Phone Input */}
           <View style={styles.phoneContainer}>
             <Text style={styles.flag}>🇮🇳</Text>
@@ -96,9 +73,13 @@ const LoginScreen = ({ navigation }) => {
           </Text>
 
           {/* Request OTP Button */}
-          <TouchableOpacity style={styles.button} onPress={handleRequestOtp}>
-            <Text style={styles.buttonText}>Request OTP</Text>
-            <ArrowRightIcon />
+          <TouchableOpacity style={[styles.button,{
+            backgroundColor:phone.length === 10 ? appColors.secondary : appColors.inActive
+          }]} onPress={handleRequestOtp}
+           disabled={phone.length < 10}
+          >
+            <Text style={[styles.buttonText,{color : phone.length === 10? appColors.white : appColors.disableText}]}>Request OTP</Text>
+            <ArrowRightIcon color={phone.length === 10 ? appColors.white : appColors.disableText} />
           </TouchableOpacity>
 
           {/* Divider */}
@@ -132,4 +113,4 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
-export default LoginScreen;
+export default WelcomeScreen;

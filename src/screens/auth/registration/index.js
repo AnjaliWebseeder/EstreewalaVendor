@@ -60,13 +60,11 @@ const RegisterScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>
         <BannerHeader
-          bannerImage={require('../../../assets/images/register.png')}
-          title="Create Account 👋"
+          bannerImage={require('../../../assets/images/background.png')}
+          title="Create Account"
           subtitle="Join us to get started"
-          defaultAvatar={require('../../../assets/images/avtar.jpg')}
-          onImagePick={uri => setVendorImage(uri)}
+          bannerStyle={{ height: windowHeight(220) }}
           onBackPress={() => navigation.goBack()}
-          bannerStyle={{ height: windowHeight(200) }}
         />
 <ScrollView contentContainerStyle={styles.contentContainerStyle}>
  <View style={styles.mainStyle}>

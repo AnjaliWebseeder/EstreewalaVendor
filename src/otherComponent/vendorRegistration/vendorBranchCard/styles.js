@@ -88,6 +88,9 @@ infoRow: {
   marginTop: 6,
   marginBottom:4
 },
+rowStyle:{
+  flexDirection:"row",justifyContent:"space-between"
+},
 
 infoIcon: {
   marginRight: 8,

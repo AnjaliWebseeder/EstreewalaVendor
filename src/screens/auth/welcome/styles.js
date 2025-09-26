@@ -6,30 +6,13 @@ import fonts from '../../../theme/appFonts'
 export const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: appColors.white},
   banner:
-   { width: "100%", height:'40%', resizeMode:'cover' },
+   { width: "100%", height:'45%', resizeMode:'cover' },
   title: { fontSize: 20,marginTop:windowHeight(14),fontFamily:fonts.InterSemiBold,textAlign:"center",fontWeight:"700" },
   subText: { fontSize: 14, color: appColors.subTitle, textAlign: 'center', marginVertical: 10, lineHeight: 22,fontFamily:fonts.InterRegular,marginHorizontal:windowHeight(20) },
   main:{
     marginHorizontal:windowHeight(15),
     
-  },
-  // Vendor box
-  vendorBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: appColors.border,
-    borderRadius: 10,
-    padding: 8,
-    width: '100%',
-    marginVertical:windowHeight(4),
-    backgroundColor: appColors.white,
-    alignItems:"center",
-    justifyContent:"center"
-  },
-  avatar: { width: 35, height: 35, borderRadius: 15, marginRight: 10 },
-  vendorText: { fontSize: fontSizes.FONT17, color: appColors.black,fontFamily:fonts.PoppinsMedium,fontWeight:"500" },
-
+  }, 
   // Phone Input
   input: {
     borderWidth: 1,
@@ -119,9 +102,9 @@ text:{
     flexDirection:"row",
     justifyContent:"center"
   },
-  secondaryText: { color: appColors.subTitle, fontSize: 16,fontFamily:fonts.PoppinsRegular },
+  secondaryText: { color: appColors.subTitle, fontSize: 16,fontFamily:fonts.PoppinsRegular,marginHorizontal:6 },
 
   // Footer
-  footerText: { fontSize: 14, marginTop: 15,alignItems:"center",justifyContent:"center" ,fontFamily:fonts.PoppinsRegular,color:appColors.font,fontWeight:"700"},
-  link: { color: appColors.secondary, textAlign:"center",fontFamily:fonts.PoppinsMedium,fontSize:14,textDecorationLine:"underline"},
+  footerText: { fontSize: 14, marginTop: 15,alignItems:"center",justifyContent:"center" ,fontFamily:fonts.PoppinsRegular,color:appColors.font},
+  link: { color: appColors.secondary, textAlign:"center",fontFamily:fonts.PoppinsMedium,fontSize:14,textDecorationLine:"underline",fontWeight:"700"},
 });

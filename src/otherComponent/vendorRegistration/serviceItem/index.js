@@ -1,29 +1,51 @@
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+// otherComponent/vendorRegistration/serviceItem.js
+import React from "react";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 
-export default function ServiceItem({ item, price, onChangePrice }) {
-return (
-<View style={styles.container}>
-<View style={styles.info}>
-<Text style={styles.name}>{item.name}</Text>
-</View>
-<View style={styles.controls}>
-<TextInput
-value={price === undefined ? '' : String(price)}
-onChangeText={(t) => onChangePrice(item.id, t.replace(/[^0-9]/g, ''))}
-placeholder={`${item.price}`}
-keyboardType="numeric"
-style={styles.priceInput}
-/>
-</View>
-</View>
-);
+export default function ServiceItem({ item, quantity, onIncrease, onDecrease }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 14 }}>
+      <Image source={item.image} style={{ width: 40, height: 40, marginRight: 10 }} />
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontWeight: "600" }}>{item.name}</Text>
+        <Text style={{ color: "#666" }}>Dry Wash</Text>
+        <Text style={{ color: "#4b4bff" }}>₹{item.price}.00 each</Text>
+      </View>
+
+      {/* Decrement */}
+      <TouchableOpacity
+        onPress={onDecrease}
+        style={{
+          width: 28,
+          height: 28,
+          borderWidth: 1,
+          borderColor: "#aaa",
+          borderRadius: 14,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text>-</Text>
+      </TouchableOpacity>
+
+      {/* Quantity */}
+      <Text style={{ marginHorizontal: 8 }}>{quantity}</Text>
+
+      {/* Increment */}
+      <TouchableOpacity
+        onPress={onIncrease}
+        style={{
+          width: 28,
+          height: 28,
+          borderWidth: 1,
+          borderColor: "#aaa",
+          borderRadius: 14,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text>+</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
-
-
-const styles = StyleSheet.create({
-container: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10 },
-info: { flex: 1 },
-name: { fontSize: 16 },
-controls: { width: 120, alignItems: 'flex-end' },
-priceInput: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingVertical: 6, paddingHorizontal: 10, width: 110, textAlign: 'right' },
-});

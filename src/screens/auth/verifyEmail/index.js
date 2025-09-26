@@ -26,7 +26,6 @@ export default function VerifyEmail({ navigation }) {
   // ✅ Clear error automatically when OTP becomes valid
   useEffect(() => {
     if (!isSubmitted) return;
-
     const otpValue = otp.join('');
     if (otpValue.length === 4 && /^\d+$/.test(otpValue)) {
       setError('');
@@ -53,14 +52,7 @@ export default function VerifyEmail({ navigation }) {
     // ✅ Passed validation
     setError('');
     try {
-      navigation.navigate('StatusScreen', {
-        title: 'Email Verified!',
-        message:
-          'Your email has been successfully verified. You can now create a new password to secure your account.',
-        buttonText: 'Continue',
-        onButtonPress: () => navigation.navigate('ResetPassword'),
-        onBackPress: () => navigation.goBack(),
-      });
+     navigation.navigate('ResetPassword')
     } catch (err) {
       console.error(err);
       Alert.alert('Error', 'Invalid or expired OTP. Please try again.');
@@ -72,7 +64,6 @@ export default function VerifyEmail({ navigation }) {
       try {
         console.log('Resend OTP called');
         setTimer(30);
-        // Alert.alert('OTP Sent', 'We’ve sent a new verification code to your email.');
       } catch (error) {
         console.error(error);
         Alert.alert('Error', 'Something went wrong while resending the code.');
@@ -80,14 +71,19 @@ export default function VerifyEmail({ navigation }) {
     }
   };
 
+  // ✅ Disable Next button if OTP invalid
+  const otpValue = otp.join('');
+  const isDisabled = otpValue.length !== 4 || !/^\d+$/.test(otpValue) || !!error;
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>
         <BannerHeader
-          bannerImage={require('../../../assets/images/register.png')}
-          title="Verify Your Email 👋"
+          bannerImage={require('../../../assets/images/background.png')}
+          title="Verify Your Email"
           subtitle="We’ve sent a 4-digit code to your email. Please enter it below to verify your number."
           onBackPress={() => navigation.goBack()}
+          subTitleStyle={{ marginHorizontal: 20 }}
         />
 
         <OtpInput otp={otp} setOtp={setOtp} />
@@ -97,7 +93,8 @@ export default function VerifyEmail({ navigation }) {
 
         <View style={styles.blankView} />
 
-        <CustomButton title="Next" onPress={handleVerify} />
+        {/* ✅ Disabled until OTP valid */}
+        <CustomButton title="Next" onPress={handleVerify} disabled={isDisabled} />
 
         <TouchableOpacity
           style={styles.button}
