@@ -19,85 +19,15 @@ filter:{
     justifyContent:"center",
     marginTop:windowHeight(5)
 },
-  // Modal Overlay for Filter
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-
-  // Filter Dropdown
-  filterDropdown: {
-    backgroundColor: appColors.white,
-    borderRadius: 16,
-    padding: 20,
-    width: width * 0.8,
-    shadowColor: appColors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  filterTitle: {
-    fontSize: fontSizes.FONT18,
-    fontWeight: '700',
-    color: appColors.title,
-    textAlign: 'center',
-    marginBottom: 10,
-    fontFamily:fonts.InterSemiBold
-  },
-  filterItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    marginVertical: 4,
-    borderWidth: 1,
-    borderColor: appColors.border,
-    marginBottom:10
-  },
-  filterItemActive: {
-    backgroundColor: appColors.primary,
-    borderColor: appColors.primary,
-  },
-  filterTextActive: {
-    color: appColors.secondary,
-    fontFamily:fonts.InterSemiBold,
-    fontSize:fontSizes.FONT16HALF,
-    fontWeight:"600"
-  },
-  checkIcon: {
-    marginLeft: 'auto',
-  },
-  closeFilterButton: {
-    marginTop: 6,
-    backgroundColor: appColors.lightBlue,
-    borderRadius: 8,
-    alignItems: 'center',
-    padding:10
-  },
-  closeFilterText: {
-    fontSize: fontSizes.FONT15,
-    fontWeight: '600',
-    color: appColors.white,
-    fontFamily:fonts.InterRegular
-  },
-
+ 
+ 
   // Service Tabs
   serviceTabsContainer: {
-    paddingVertical: 12,
-    paddingHorizontal: 15,
     backgroundColor: appColors.white,
     borderBottomWidth: 1,
     borderBottomColor: appColors.borderLight,
-   paddingBottom:20
+   paddingBottom:20,
+    
   },
   serviceTab: {
     flexDirection: 'row',
@@ -105,10 +35,11 @@ filter:{
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    marginRight: 8,
+    marginRight: 15,
     backgroundColor: appColors.white,
     borderWidth: 1,
     borderColor: appColors.border,
+   
   },
   serviceTabActive: {
     backgroundColor: appColors.secondary,
@@ -129,7 +60,6 @@ filter:{
 
   // Price Cards
   listContainer: {
-    paddingHorizontal: 12,
     paddingBottom: 120,
     paddingVertical:windowHeight(7)
   },
@@ -145,7 +75,8 @@ filter:{
     elevation: 1,
     borderColor:appColors.secondary,
     borderWidth:1,
-    paddingVertical:7
+    paddingVertical:7,
+     marginHorizontal:windowHeight(10)
   },
   itemHeader: {
     flexDirection: 'row',
@@ -246,59 +177,6 @@ filter:{
     justifyContent: 'center',
     alignItems: 'center',
   },
- 
-  
-
-  // Action Buttons
-  actionContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    padding: 12,
-    backgroundColor: appColors.white,
-    borderTopWidth: 1,
-    borderTopColor: appColors.border,
-    shadowColor: appColors.shadow,
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  couponButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    marginRight: 8,
-    borderRadius: 8,
-    backgroundColor: appColors.lightBlue,
-    borderWidth: 1,
-    borderColor: appColors.primaryLight,
-  },
-  couponText: {
-    fontSize: fontSizes.FONT13,
-    fontWeight: '600',
-    color: appColors.primary,
-    marginLeft: 6,
-  },
-  saveButton: {
-    flex: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: appColors.primary,
-  },
-  saveButtonText: {
-    fontSize: fontSizes.FONT15,
-    fontWeight: '700',
-    color: appColors.white,
-    marginRight: 6,
-  },
 
   // Empty State
   emptyState: {
@@ -372,10 +250,9 @@ summaryValue:{
 },
 containerStyle:{
   flexDirection:"row",justifyContent:"space-between",paddingBottom:0,  alignItems:"center",
-
-  paddingHorizontal:18,
-  paddingTop:7,
-  paddingBottom:10
-}
+  paddingTop:10,
+  paddingBottom:10,
+  marginHorizontal:windowHeight(10)
+} 
 
 });

@@ -1,28 +1,31 @@
-import React, { useContext, useState } from 'react';
-import { View, Text, TouchableOpacity, Switch , ScrollView } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { View, Text, Switch, ScrollView, Alert } from 'react-native';
 import Header from '../../../components/header';
 import InputField from '../../../components/InputField';
 import { VendorContext } from '../../../utils/context/vendorContext';
 import { styles } from './styles';
 import CustomButton from '../../../components/button';
-import Feather from 'react-native-vector-icons/Feather';
 import appColors from '../../../theme/appColors';
 
-export default function AddBranch({ navigation }) {
-  const { addBranch } = useContext(VendorContext);
+export default function AddBranch({ navigation, route }) {
+  const { addBranch, editBranch, deleteBranch } = useContext(VendorContext);
+  const editingBranch = route.params?.branch; // if editing
 
-  const [branchName, setBranchName] = useState('');
-  const [contactFirst, setContactFirst] = useState('');
-  const [contactLast, setContactLast] = useState('');
-  const [primary, setPrimary] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [sameAsPrimary, setSameAsPrimary] = useState(false);
-  const [address, setAddress] = useState('');
-  const [pincode, setPincode] = useState('');
-  const [state, setState] = useState('');
-  const [city, setCity] = useState('');
-
+  const [branchName, setBranchName] = useState(editingBranch?.branchName || '');
+  const [contactFirst, setContactFirst] = useState(editingBranch?.contactFirst || '');
+  const [contactLast, setContactLast] = useState(editingBranch?.contactLast || '');
+  const [primary, setPrimary] = useState(editingBranch?.primary || '');
+  const [whatsapp, setWhatsapp] = useState(editingBranch?.whatsapp || '');
+  const [sameAsPrimary, setSameAsPrimary] = useState(editingBranch?.whatsapp === editingBranch?.primary);
+  const [address, setAddress] = useState(editingBranch?.address || '');
+  const [pincode, setPincode] = useState(editingBranch?.pincode || '');
+  const [state, setState] = useState(editingBranch?.state || '');
+  const [city, setCity] = useState(editingBranch?.city || '');
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (sameAsPrimary) setWhatsapp(primary);
+  }, [sameAsPrimary, primary]);
 
   const validate = () => {
     let newErrors = {};
@@ -43,7 +46,8 @@ export default function AddBranch({ navigation }) {
 
   const submit = () => {
     if (!validate()) return;
-    addBranch({
+
+    const branchData = {
       branchName,
       contactFirst,
       contactLast,
@@ -53,112 +57,138 @@ export default function AddBranch({ navigation }) {
       pincode,
       state,
       city,
-    });
+    };
+
+    if (editingBranch) {
+      editBranch(editingBranch.id, branchData);
+    } else {
+      addBranch(branchData);
+    }
+
     navigation.goBack();
+  };
+
+  const handleDelete = () => {
+    if (!editingBranch) return;
+
+    Alert.alert(
+      'Delete Branch',
+      'Are you sure you want to delete this branch?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => {
+            deleteBranch(editingBranch.id);
+            navigation.goBack();
+          }
+        },
+      ]
+    );
   };
 
   return (
     <View style={styles.mainContainer}>
-      <Header title="Add New Branch Details" onBack={() => navigation.goBack()} />
-        <ScrollView>
- <View style={styles.container}>
+      <Header title={editingBranch ? "Edit Branch" : "Add New Branch Details"} onBack={() => navigation.goBack()} />
+      <ScrollView>
+        <View style={styles.container}>
 
-        <InputField
-          label="Branch Name*"
-          value={branchName}
-          onChangeText={(t) => { setBranchName(t); if (errors.branchName) setErrors({ ...errors, branchName: null }); }}
-          placeholder="e.g. QuickClean Laundry"
-          error={errors.branchName}
-        />
-
-        <InputField
-          label="Contact Person’s First Name*"
-          value={contactFirst}
-          onChangeText={(t) => { setContactFirst(t); if (errors.contactFirst) setErrors({ ...errors, contactFirst: null }); }}
-          placeholder="e.g. Raj"
-          error={errors.contactFirst}
-        />
-
-        <InputField
-          label="Contact Person’s Last Name*"
-          value={contactLast}
-          onChangeText={(t) => { setContactLast(t); if (errors.contactLast) setErrors({ ...errors, contactLast: null }); }}
-          placeholder="e.g. Patel"
-          error={errors.contactLast}
-        />
-
-        <InputField
-          label="Primary Number*"
-          value={primary}
-          keyboardType="phone-pad"
-          onChangeText={(t) => { setPrimary(t); if (errors.primary) setErrors({ ...errors, primary: null }); }}
-          placeholder="e.g. 9876543210"
-          error={errors.primary}
-        />
-
-        <View style={styles.switchRow}>
-          <Text style={styles.switchLabel}>Same as primary number</Text>
-          <Switch
-            value={sameAsPrimary}
-            onValueChange={(val) => { setSameAsPrimary(val); if (val) setWhatsapp(primary); }}
-            trackColor={{ false: appColors.border, true: appColors.blue }}
-            thumbColor={appColors.white}
-          />
-        </View>
-
-        {!sameAsPrimary && (
           <InputField
-            label="Whatsapp Number*"
-            value={whatsapp}
-            keyboardType="phone-pad"
-            onChangeText={(t) => { setWhatsapp(t); if (errors.whatsapp) setErrors({ ...errors, whatsapp: null }); }}
-            placeholder="e.g. 9876543210"
-            error={errors.whatsapp}
+            label="Branch Name*"
+            value={branchName}
+            onChangeText={(t) => { setBranchName(t); if (errors.branchName) setErrors({ ...errors, branchName: null }); }}
+            placeholder="e.g. QuickClean Laundry"
+            error={errors.branchName}
           />
-        )}
 
-        <InputField
-          label="Address*"
-          value={address}
-          onChangeText={(t) => { setAddress(t); if (errors.address) setErrors({ ...errors, address: null }); }}
-          placeholder="e.g. Abc Nagar 1st Block, 17-A Abc Society"
-          error={errors.address}
-        />
-        
-        <InputField
-          label="Pincode*"
-          value={pincode}
-          keyboardType="numeric"
-          onChangeText={(t) => { setPincode(t); if (errors.pincode) setErrors({ ...errors, pincode: null }); }}
-          placeholder="e.g. 380001"
-          error={errors.pincode}
-        />
+          <InputField
+            label="Contact Person’s First Name*"
+            value={contactFirst}
+            onChangeText={(t) => { setContactFirst(t); if (errors.contactFirst) setErrors({ ...errors, contactFirst: null }); }}
+            placeholder="e.g. Raj"
+            error={errors.contactFirst}
+          />
 
-        <View style={styles.row}>
-          <View style={{ flex: 1, marginRight: 8 }}>
-            <InputField
-              label="State*"
-              value={state}
-              onChangeText={(t) => { setState(t); if (errors.state) setErrors({ ...errors, state: null }); }}
-              placeholder="e.g. Gujarat"
-              error={errors.state}
+          <InputField
+            label="Contact Person’s Last Name*"
+            value={contactLast}
+            onChangeText={(t) => { setContactLast(t); if (errors.contactLast) setErrors({ ...errors, contactLast: null }); }}
+            placeholder="e.g. Patel"
+            error={errors.contactLast}
+          />
+
+          <InputField
+            label="Primary Number*"
+            value={primary}
+            keyboardType="phone-pad"
+            onChangeText={(t) => { setPrimary(t); if (errors.primary) setErrors({ ...errors, primary: null }); }}
+            placeholder="e.g. 9876543210"
+            error={errors.primary}
+          />
+
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Same as primary number</Text>
+            <Switch
+              value={sameAsPrimary}
+              onValueChange={(val) => setSameAsPrimary(val)}
+              trackColor={{ false: appColors.border, true: appColors.blue }}
+              thumbColor={appColors.white}
             />
           </View>
-          <View style={{ flex: 1 }}>
+
+          {!sameAsPrimary && (
             <InputField
-              label="City*"
-              value={city}
-              onChangeText={(t) => { setCity(t); if (errors.city) setErrors({ ...errors, city: null }); }}
-              placeholder="e.g. Ahmedabad"
-              error={errors.city}
+              label="Whatsapp Number*"
+              value={whatsapp}
+              keyboardType="phone-pad"
+              onChangeText={(t) => { setWhatsapp(t); if (errors.whatsapp) setErrors({ ...errors, whatsapp: null }); }}
+              placeholder="e.g. 9876543210"
+              error={errors.whatsapp}
             />
+          )}
+
+          <InputField
+            label="Address*"
+            value={address}
+            onChangeText={(t) => { setAddress(t); if (errors.address) setErrors({ ...errors, address: null }); }}
+            placeholder="e.g. Abc Nagar 1st Block, 17-A Abc Society"
+            error={errors.address}
+          />
+
+          <InputField
+            label="Pincode*"
+            value={pincode}
+            keyboardType="numeric"
+            onChangeText={(t) => { setPincode(t); if (errors.pincode) setErrors({ ...errors, pincode: null }); }}
+            placeholder="e.g. 380001"
+            error={errors.pincode}
+          />
+
+          <View style={styles.row}>
+            <View style={{ flex: 1, marginRight: 8 }}>
+              <InputField
+                label="State*"
+                value={state}
+                onChangeText={(t) => { setState(t); if (errors.state) setErrors({ ...errors, state: null }); }}
+                placeholder="e.g. Gujarat"
+                error={errors.state}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <InputField
+                label="City*"
+                value={city}
+                onChangeText={(t) => { setCity(t); if (errors.city) setErrors({ ...errors, city: null }); }}
+                placeholder="e.g. Ahmedabad"
+                error={errors.city}
+              />
+            </View>
           </View>
         </View>
-      </View>
-        </ScrollView>
-     
+      </ScrollView>
 
-      <CustomButton title="Submit" onPress={submit} />
+      {/* Submit / Update Button */}
+      <CustomButton title={editingBranch ? 'Update' : 'Submit'} onPress={submit} />
+
+      
     </View>
   );
 }

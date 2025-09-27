@@ -28,8 +28,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottomWidth: 0.5,
-    borderBottomColor: appColors.border,
     paddingVertical: windowHeight(20),
     backgroundColor: appColors.secondary,
   },

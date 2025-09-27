@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
-import Header from '../../../components/header';
+import React, { useContext } from 'react';
+import { View, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { styles } from './styles';
+import { VendorContext } from '../../../utils/context/vendorContext';
+import Header from '../../../components/header';
 
-export default function PaymentSetup({ navigation }) {
-  const [qrImage, setQrImage] = useState(null);
-
-  const submit = () => navigation.navigate('VendorRegistration');
-
+export default function PaymentSetup({navigation,route}) {
+ const { qrImage, setQrImage } = useContext(VendorContext);
+  const { showHeaderBar } = route?.params || {}; // Safely access params
   const handleUpload = async () => {
     const result = await launchImageLibrary({
       mediaType: 'photo',
@@ -23,27 +22,23 @@ export default function PaymentSetup({ navigation }) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
-      <Header title="Payment Setup" onBack={() => navigation.goBack()} />
-
-      <View style={styles.container}>
-        {/* Title + Subtitle */}
-        <Text style={styles.title}>Payment Setup</Text>
-        <Text style={styles.subtitle}>Upload QR Code</Text>
-        <Text style={styles.subtitleStyle}>
-        Add your payment QR code so customers can scan and pay.
-        </Text>
-
-        {/* QR Placeholder */}
-        <View style={styles.qrWrapper}>
+    <View style={styles.mainContainer}>
+      <View style={[styles.container,{padding : showHeaderBar ? 0 : 20}]}>
+     {showHeaderBar &&   <Header title={"Payment Setup"}  onBack={() => navigation.goBack() }/>}
+        <View style={showHeaderBar && styles.centerView}>
+            <View >
           {qrImage ? (
+            <View style={styles.qrWrapper}>
             <Image
               source={{ uri: qrImage }}
               style={styles.qrImage}
               resizeMode="contain"
             />
+            </View>
           ) : (
+             <View style={styles.qrWrapper}>
             <Icon name="qrcode-scan" size={100} color="#999" />
+            </View>
           )}
 
           {/* Floating Edit Button */}
@@ -51,14 +46,12 @@ export default function PaymentSetup({ navigation }) {
             <MaterialIcons name="edit" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
+        </View> 
+        {/* QR Placeholder */}
+       
       </View>
 
-      {/* Continue Button at bottom */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.button} onPress={submit}>
-          <Text style={styles.buttonText}>Continue</Text>
-        </TouchableOpacity>
-      </View>
+     
     </View>
   );
 }

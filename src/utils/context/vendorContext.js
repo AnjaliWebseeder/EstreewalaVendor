@@ -20,6 +20,7 @@ export const VendorProvider = ({ children }) => {
   const [coupons, setCoupons] = useState([]);
   const [pricingSet, setPricingSet] = useState(false);
   const [servicePrices, setServicePrices] = useState({});
+  const [qrImage, setQrImage] = useState(null);
 
   const setPricingComplete = (prices) => {
     setServicePrices(prices);
@@ -123,6 +124,8 @@ export const VendorProvider = ({ children }) => {
         getPricingSummary,
         clearPricing,
         updateServicePrice,
+         qrImage,    
+      setQrImage,    
       }}
     >
       {children}

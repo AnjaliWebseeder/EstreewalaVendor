@@ -15,7 +15,11 @@ const appColors = {
   orange:"#E58D3E",
   lightBlue:"#3D4163",
     inActive:'#e2ddd5',
-    disableText:'#7a7a7a'
+    disableText:'#7a7a7a',
+      background:"#FCFBFA",
+        menuCard:"#F8F5F1",
+          card:"#FAF8F6",
+           blue:"#2d2f4e",
 }
 
 export default appColors;
