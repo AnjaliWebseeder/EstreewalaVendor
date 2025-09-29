@@ -1,44 +1,115 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 import appColors from "../../../theme/appColors";
 import fonts from "../../../theme/appFonts";
+import { fontSizes, windowHeight } from "../../../theme/appConstant";
+
+const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
-     headerRow: {
+  headerContainer: {
+    backgroundColor: appColors.secondary,
+    paddingHorizontal: 20,
+    paddingBottom: windowHeight(20),
+    paddingTop:windowHeight(9),
+    overflow: 'hidden',
+    position: 'relative',
+       borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  waveBackground: {
+    position: 'absolute',
+    top: -50,
+    left: -50,
+    right: -50,
+    height: 200,
+    backgroundColor: appColors.secondary,
+    borderBottomLeftRadius: 100,
+    borderBottomRightRadius: 100,
+    opacity: 0.8,
+  },
+  headerContent: {
+    paddingTop: windowHeight(15),
+  },
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
-  location: {
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
+  locationIconWrapper: {
+    width: 28,
+    height: 28,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  locationTextContainer: {
+    flex: 1,
+  },
+  
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   locationText: {
-    color: appColors.font,
+    color: appColors.white,
     fontWeight: '600',
-    marginLeft: 6,
-    fontSize: 14,
-    fontFamily:fonts.InterSemiBold,
-    marginHorizontal:5
+    fontSize: fontSizes.FONT18,
+    fontFamily: fonts.InterSemiBold,
+    marginRight: 4,
   },
   headerIcons: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
   },
-  headerIconBtn: {
-    marginLeft: 12,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 0.6,
-    borderColor: '#e6e9ee',
+  iconButton: {
+    position: 'relative',
+   width: 28,
+    height: 28,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
-
-})
+  notificationBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#FF4757',
+    width: 14,
+    height: 14,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+    borderWidth: 1.5,
+    borderColor: appColors.secondary,
+  },
+  badgeText: {
+    color: appColors.white,
+    fontSize: 6,
+    fontFamily: fonts.InterBold,
+    lineHeight: 14,
+    bottom:2,
+    fontWeight:"bold"
+  },
+  profileImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 18,
+    backgroundColor: appColors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+});

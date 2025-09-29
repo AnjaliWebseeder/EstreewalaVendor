@@ -6,6 +6,7 @@ import {
   ScrollView,
   Linking,
   Image,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -54,6 +55,7 @@ export default function Account({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+         <StatusBar backgroundColor={appColors.secondary} barStyle="dark-content" />
       <View style={styles.main}>
         <Header  onBack={() => navigation.goBack()}  title="My Account" />
         <View style={styles.profileSection}>
@@ -84,7 +86,7 @@ export default function Account({ navigation }) {
           <MenuItem
             icon={<VendorIcon/>}
             label="Vendor Details"
-            onPress={() => navigation.navigate("")}
+            onPress={() => navigation.navigate("VendorRegistration",{ fromScreen: "Account"})}
           />
           <MenuItem
             icon={<PaymentIcon size={18} color={appColors.font} />}

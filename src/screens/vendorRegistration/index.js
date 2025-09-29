@@ -37,7 +37,7 @@ const filters = [
     { key: "womens", label: "Women's Wear", icon: "woman-outline" },
     { key: "kids", label: "Kids Wear", icon: "heart-outline" },
   ];
-const VendorRegistration = () => {
+const VendorRegistration = ({route}) => {
   const navigation = useNavigation();
   const {
     services,
@@ -49,6 +49,7 @@ const VendorRegistration = () => {
     branches,
   } = useContext(VendorContext);
 
+const { fromScreen } = route?.params || {};
   const [businessName, setBusinessName] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
     const [showFilterModal, setShowFilterModal] = useState(false);
@@ -93,7 +94,7 @@ const renderStepSlider = () => {
   <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <BackIcon />
         </TouchableOpacity>
-         <Text style={styles.titleStyle}>Vendor Registration</Text>
+         <Text style={styles.titleStyle}>{fromScreen ? "Vendor Details" : "Vendor Registration" }</Text>
           <View style={styles.right} />
       </View>
          {/* Stepper Slider */}
@@ -277,7 +278,7 @@ const renderStepSlider = () => {
             <Text style={styles.buttonText}>Next</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={styles.buttonmainContainerStyle} onPress={() => navigation.navigate("Main")}>
+          <TouchableOpacity style={styles.buttonmainContainerStyle} onPress={() => fromScreen ? navigation.goBack() : navigation.navigate("SubscriptionPlans")}>
             <Text style={styles.buttonText}>Submit</Text>
           </TouchableOpacity>
         )}

@@ -21,13 +21,14 @@ import ContactSupport from "../screens/otherSetting/contactSupport"
 import AboutUs from "../screens/otherSetting/aboutUs"
 import PrivacyPolicy from "../screens/otherSetting/privacyPolicy"
 import FAQS from "../screens/otherSetting/faq"
+import SubscriptionPlans from "../screens/subscriptionPlans"
 
 const Stack = createStackNavigator();
 
 const Navigation = () => {
   return (
     <NavigationContainer >
-      <Stack.Navigator initialRouteName='Main'  screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName='Spalsh'  screenOptions={{ headerShown: false }}>
          <Stack.Screen name="Spalsh" component={Spalsh} />
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Otp" component={OtpScreen} />
@@ -49,6 +50,7 @@ const Navigation = () => {
       <Stack.Screen name="AboutUs" component={AboutUs} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
         <Stack.Screen name="Faq" component={FAQS} />
+          <Stack.Screen name="SubscriptionPlans" component={SubscriptionPlans} />
     
       </Stack.Navigator>
     </NavigationContainer>
