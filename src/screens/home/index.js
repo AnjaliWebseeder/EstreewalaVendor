@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   StyleSheet,
@@ -12,24 +12,25 @@ import Header from "../../otherComponent/home/header"
 import StatusCard from '../../otherComponent/home/statusCard';
 import { windowHeight } from '../../theme/appConstant';
 import CustomerPickup from "../../otherComponent/home/customerPickupCard"
-import TitleSubtitle from '../../otherComponent/vendorRegistration/titleSubTitle';
 import Title from "../../components/title"
+import {VendorContext} from "../../utils/context/vendorContext"
 
 export default function Home() {
+   const { newPickups } = useContext(VendorContext);
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.contentContainerStyle}>
-
-      
       <StatusBar barStyle="dark-content" backgroundColor={appColors.secondary} />
-   
     <View style={styles.headerStyle}>
         <Header/>
     </View>
          <View style={styles.container}>
       <StatusCard/>   
       <Title children={"New Customer Pickup"}/>
-        <CustomerPickup/>
+        <CustomerPickup 
+            data={newPickups} 
+            showButtons={true}
+          />
       </View> 
     </ScrollView>
     </SafeAreaView>
@@ -37,7 +38,7 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: appColors.white },
+  safe: { flex: 1, backgroundColor: appColors.background },
   headerStyle:{
     headerStyle: {
     backgroundColor: appColors.secondary,

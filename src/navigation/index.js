@@ -23,6 +23,7 @@ import PrivacyPolicy from "../screens/otherSetting/privacyPolicy"
 import FAQS from "../screens/otherSetting/faq"
 import SubscriptionPlans from "../screens/subscriptionPlans"
 
+
 const Stack = createStackNavigator();
 
 const Navigation = () => {

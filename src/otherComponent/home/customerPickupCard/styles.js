@@ -1,94 +1,302 @@
 import appColors from "../../../theme/appColors";
+import { windowHeight } from "../../../theme/appConstant";
 import fonts from "../../../theme/appFonts";
 
 const { StyleSheet } = require("react-native");
 
 export const styles = StyleSheet.create({
+  listContainer: {
+    paddingHorizontal: windowHeight(4),
+    paddingBottom: 20,
+  },
+  separator: {
+    height: 12,
+  },
   card: {
     backgroundColor: appColors.white,
-    borderRadius: 12,
-    padding: 12,
-    marginVertical: 10,
-    elevation: 4,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 0,
+    elevation: 1,
     shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 6,
+    shadowRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor:appColors.secondary,
   },
-  deliveryBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f2f4ff",
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: windowHeight(4),
+  },
+  orderInfo: {
+    flex: 1,
+  },
+  orderId: {
+    fontSize: 14,
+    fontFamily: fonts.InterSemiBold,
+    color: appColors.subTitle,
+    marginBottom: 2,
+  },
+  daysLeftBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  daysLeftText: {
+    fontSize: 12,
+    fontFamily: fonts.InterSemiBold,
+    fontWeight:"700"
+  },
+  stageBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 8,
-    padding: 8,
-    borderColor:appColors.secondary,
-    borderWidth:1
+    marginBottom: 12,
   },
-  deliveryLabel: { fontSize: 12, color: appColors.font,fontFamily:fonts.InterSemiBold },
-  deliveryValue: { fontSize: 13, fontWeight: "600", color: "#2a2a9f" ,fontFamily:fonts.InterSemiBold},
-
+  stageText: {
+    fontSize: 12,
+    fontFamily: fonts.InterSemiBold,
+    marginLeft: 6,
+  },
   profileRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 12,
+    marginBottom: 12,
   },
-  avatar: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
-  name: { fontSize: 14, fontWeight: "600" },
-  location: { fontSize: 12, color: "#666" },
-
-  pickupRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 12,
+  avatar: { 
+    width: 48, 
+    height: 48, 
+    borderRadius: 24, 
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: "#4361ee" + '20',
   },
-  pickupBox: { flexDirection: "row", alignItems: "center" },
-  pickupText: { marginLeft: 6, fontSize: 13, color: "#333" },
-
-  routeBox: { marginBottom: 12 },
-  routeItem: { marginBottom: 2 },
-  greenDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "green",
-    marginRight: 6,
+  profileInfo: {
+    flex: 1,
   },
-  redDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "red",
-    marginRight: 6,
+  name: { 
+    fontSize: 16, 
+    fontFamily: fonts.InterSemiBold,
+    color: appColors.font,
+    marginBottom: 2,
   },
-  routeLabel: { fontSize: 12, fontWeight: "600", marginTop: 2 },
-  routeValue: { fontSize: 13, color: "#333" },
-  routeLine: {
+  location: { 
+    fontSize: 13, 
+    color: "#6c757d",
+    fontFamily: fonts.InterMedium,
+  },
+  acceptedTime: {
+    fontSize: 11,
+    color: "#adb5bd",
+    fontFamily: fonts.InterRegular,
+    marginTop: 2,
+  },
+  
+  timeline: {
+    marginBottom: windowHeight(11),
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  timelineDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 12,
+    marginTop: 2,
+    alignItems:"center",
+    justifyContent:"center"
+  },
+  innerDot:{
+  width: 10.5,
+    height: 10.5,
+    borderRadius: 20,
+    backgroundColor:appColors.white
+  },
+  dotCompleted: {
+    backgroundColor: "#1CA75A",
+    
+  },
+  dotCurrent: {
+    backgroundColor: "#4361ee",
+    borderWidth: 3,
+    borderColor: "#4361ee" + '40',
+  },
+  dotUpcoming: {
+    backgroundColor: "#CF3131",
+  },
+  timelineConnector: {
+    width: 2,
     height: 20,
-    borderLeftWidth: 1,
-    borderColor: "#ccc",
-    marginLeft: 4,
+    backgroundColor: appColors.border,
+    marginLeft: 7,
+    marginTop:-12
   },
-
+ 
+  timelineLabel: {
+    fontSize: 13,
+    fontFamily: fonts.InterSemiBold,
+    color: appColors.font,
+    marginBottom: 2,
+  },
+  timelineValue: {
+    fontSize: 12,
+    fontFamily: fonts.InterMedium,
+    color: "#6c757d",
+  },
+  timelineTime: {
+    fontSize: 11,
+    fontFamily: fonts.InterRegular,
+    color: "#adb5bd",
+  },
+  addressSection: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  addressText: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  addressLabel: {
+    fontSize: 12,
+    fontFamily: fonts.InterSemiBold,
+    color: appColors.subTitle,
+    marginBottom: 2,
+  },
+  addressValue: {
+    fontSize: 13,
+    fontFamily: fonts.InterMedium,
+    color: appColors.font,
+    lineHeight: 18,
+  },
   actionRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
   },
-  rejectBtn: {
+  actionButton: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  rejectButton: {
+    backgroundColor: appColors.white,
     borderWidth: 1,
-    borderColor: "red",
-    borderRadius: 8,
-    paddingVertical: 10,
-    marginRight: 6,
-    alignItems: "center",
+    borderColor: "#f72585",
   },
-  rejectText: { color: "red", fontWeight: "600" },
-  acceptBtn: {
+  rejectButtonText: {
+    color: "#f72585",
+    fontFamily: fonts.InterSemiBold,
+    fontSize: 14,
+      fontWeight:"800"
+  },
+  acceptButton: {
+    backgroundColor: "#10C761",
+  },
+  acceptButtonText: {
+    color: appColors.white,
+    fontFamily: fonts.InterSemiBold,
+    fontSize: 14,
+    fontWeight:"800"
+  },
+  readyButton: {
+    backgroundColor: "#f8961e",
+  },
+  readyButtonText: {
+    color: appColors.white,
+    fontFamily: fonts.InterSemiBold,
+    fontSize: 14,
+     fontWeight:"800"
+  },
+  deliveryButton: {
+    backgroundColor: appColors.secondary,
+  },
+  deliveryButtonText: {
+    color: appColors.white,
+    fontFamily: fonts.InterSemiBold,
+    fontSize: 14,
+  },
+  completeButton: {
+    backgroundColor: "#4cc9f0",
+  },
+  completeButtonText: {
+    color: appColors.white,
+    fontFamily: fonts.InterSemiBold,
+    fontSize: 14,
+  },
+  progressActions: {
     flex: 1,
-    backgroundColor: "#1ec971",
-    borderRadius: 8,
-    paddingVertical: 10,
-    marginLeft: 6,
-    alignItems: "center",
   },
-  acceptText: { color: appColors.white, fontWeight: "600" },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    paddingTop: 100,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontFamily: fonts.InterBold,
+    color: "#6c757d",
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  emptyStateSubtitle: {
+    fontSize: 14,
+    fontFamily: fonts.InterRegular,
+    color: "#adb5bd",
+    marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  // Add these styles to your existing styles
+paymentBadge: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  alignSelf: 'flex-start',
+  paddingHorizontal: 10,
+  paddingVertical: 6,
+  borderRadius: 8,
+  marginBottom: 8,
+  borderWidth: 1,
+  borderColor: '#FF9800',
+},
+paymentBadgeText: {
+  fontSize: 12,
+  fontFamily: fonts.InterSemiBold,
+  marginLeft: 6,
+},
+paymentButton: {
+  backgroundColor: '#FF9800', // Orange color for payment
+},
+paymentButtonText: {
+  color: appColors.white,
+  fontFamily: fonts.InterSemiBold,
+  fontSize: 14,
+  marginLeft: 8,
+},
+totalAmount: {
+  fontSize: 16,
+  fontFamily: fonts.InterBold,
+  color: appColors.primary,
+  marginTop: 4,
+},
 });
