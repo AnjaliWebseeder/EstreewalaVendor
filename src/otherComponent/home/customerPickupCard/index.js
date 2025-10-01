@@ -12,25 +12,28 @@ import { useNavigation } from '@react-navigation/native';
 import { VendorContext } from "../../../utils/context/vendorContext";
 import { styles } from "./styles";
 import appColors from "../../../theme/appColors";
-import CustomPickupIcon from "../../../assets/Icons/pickup"
-import DeliveryIcon from "../../../assets/Icons/deliveryIcon"
+import CustomPickupIcon from "../../../assets/Icons/pickup";
+import DeliveryIcon from "../../../assets/Icons/deliveryIcon";
 import { useToast } from "../../../utils/context/toastContext";
 
-const CustomerPickupCard = ({ item, showButtons = true }) => {
+const CustomerPickupCard = ({ 
+  item, 
+  showButtons // true for new pickups, false for accepted orders
+}) => {
   const navigation = useNavigation();
-  const { acceptOrder, rejectOrder, updateOrderStage, completeOrder, updatePaymentStatus } = useContext(VendorContext);
+  const { acceptOrder, rejectOrder, completePayment } = useContext(VendorContext);
   const [fadeAnim] = useState(new Animated.Value(1));
   const { showToast } = useToast();
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   const handleAccept = (id) => {
-   
-      acceptOrder(id);
-      showToast('Order accepted successfully!', 'success');
-      navigation.navigate("Main", { 
-        screen: "Order",
-        params: { openTab: "inProgress" }
-      });
-   
+    acceptOrder(id);
+    showToast('Order accepted successfully!', 'success');
+    // Automatically navigate to In Progress tab
+    navigation.navigate("Main", { 
+      screen: "Order",
+      params: { openTab: "inProgress" }
+    });
   };
 
   const handleReject = (id) => {
@@ -44,92 +47,41 @@ const CustomerPickupCard = ({ item, showButtons = true }) => {
     });
   };
 
-  const handleStageUpdate = (orderId, newStage) => {
-    updateOrderStage(orderId, newStage);
-    
-    let message = '';
-    let type = 'info';
-    
-    switch(newStage) {
-      case 'ready':
-        message = 'Order marked as ready! ✅';
-        type = 'success';
-        break;
-      default:
-        message = 'Status updated';
-    }
-    
-    showToast(message, type);
-  };
+  const handleMakePayment = async (order) => {
+    setProcessingPayment(true);
 
-  const handleMakePayment = (order) => {
-    // Navigate to Order Details page with the order data
-    navigation.navigate('OrderDetails', { 
-      orderId: order.id,
-      orderData: order
-    });
-  };
+    // Simulate payment processing
+    setTimeout(() => {
+      completePayment(order.id);
+      setProcessingPayment(false);
 
-  const handlePaymentComplete = (orderId) => {
-    updatePaymentStatus(orderId, 'completed');
-    updateOrderStage(orderId, 'out-for-delivery');
-    showToast('Payment received! Order out for delivery 🚚', 'success');
+      // ✅ Directly navigate to ConfirmPayment screen
+      navigation.navigate('ConfirmPayment', { 
+        orderId: order.id,
+        orderData: order,
+        amount: order.totalAmount
+      });
+    }, 1500);
   };
 
   const getDaysLeftText = (daysLeft) => {
+    if (daysLeft === undefined || daysLeft === null || isNaN(daysLeft)) {
+      return { text: "Ready", color: "#4cc9f0", bg: "#e8f5e8" };
+    }
+    
     if (daysLeft === 0) return { text: "Today", color: "#4cc9f0", bg: "#e8f5e8" };
     if (daysLeft === 1) return { text: "Tomorrow", color: '#f8961e', bg: "#fff3cd" };
-    return { text: `${daysLeft} days left`, color: "#4361ee", bg: "#e3f2fd" };
+    if (daysLeft > 1) return { text: `${daysLeft} days left`, color: "#4361ee", bg: "#e3f2fd" };
+    
+    return { text: "Ready", color: "#4cc9f0", bg: "#e8f5e8" };
   };
 
-  const getStageInfo = (stage) => {
-    switch(stage) {
-      case 'processing': 
-        return { 
-          text: 'In Processing', 
-          color: "#f8961e", 
-          icon: 'progress-clock',
-          bg: '#fff3cd'
-        };
-      case 'ready': 
-        return { 
-          text: 'Ready for Delivery', 
-          color: "#4cc9f0", 
-          icon: 'check-circle',
-          bg: '#e8f5e8'
-        };
-      case 'payment-pending':
-        return {
-          text: 'Payment Pending',
-          color: "#FF9800",
-          icon: 'cash-clock',
-          bg: '#FFF3E0'
-        };
-      case 'out-for-delivery': 
-        return { 
-          text: 'Out for Delivery', 
-          color: "#4895ef", 
-          icon: 'truck-delivery',
-          bg: '#e3f2fd'
-        };
-      default: 
-        return { 
-          text: 'Processing', 
-          color: "#f8961e", 
-          icon: 'progress-clock',
-          bg: '#fff3cd'
-        };
-    }
-  };
-
+  const isPaymentPending = item.paymentStatus === 'pending';
   const daysLeftInfo = getDaysLeftText(item.daysLeft);
-  const stageInfo = item.currentStage ? getStageInfo(item.currentStage) : null;
-
-  // Check if payment is pending and order is ready
-  const isPaymentPending = item.currentStage === 'ready' && item.paymentStatus === 'pending';
 
   return (
-    <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
+    <TouchableOpacity onPress={() => navigation.navigate("OrderSummary")}>
+          <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
       {/* Header with Status */}
       <View style={styles.cardHeader}>
         <View style={styles.orderInfo}>
@@ -143,22 +95,22 @@ const CustomerPickupCard = ({ item, showButtons = true }) => {
         </View>
       </View>
 
-      {/* Status Progress for In-Progress Orders */}
-      {stageInfo && (
-        <View style={[styles.stageBadge, { backgroundColor: stageInfo.bg }]}>
-          <Icon name={stageInfo.icon} size={16} color={stageInfo.color} />
-          <Text style={[styles.stageText, { color: stageInfo.color }]}>
-            {stageInfo.text}
-          </Text>
-        </View>
-      )}
-
-      {/* Payment Status Badge */}
-      {isPaymentPending && (
+      {/* Payment Status Badge - Show for accepted orders */}
+      {!showButtons && isPaymentPending && (
         <View style={[styles.paymentBadge, { backgroundColor: '#FFF3E0' }]}>
           <Icon name="cash-remove" size={16} color="#FF9800" />
           <Text style={[styles.paymentBadgeText, { color: "#FF9800" }]}>
             Payment Pending - {item.totalAmount}
+          </Text>
+        </View>
+      )}
+
+      {/* Payment Completed Badge */}
+      {!showButtons && item.paymentStatus === 'completed' && (
+        <View style={[styles.paymentBadge, { backgroundColor: '#E8F5E8' }]}>
+          <Icon name="check-circle" size={16} color="#1CA75A" />
+          <Text style={[styles.paymentBadgeText, { color: "#1CA75A" }]}>
+             Payment Done
           </Text>
         </View>
       )}
@@ -195,10 +147,7 @@ const CustomerPickupCard = ({ item, showButtons = true }) => {
         <View style={styles.timelineConnector} />
         
         <View style={styles.timelineItem}>
-          <View style={[
-            styles.timelineDot, 
-            item.status === 'in-progress' ? styles.dotCurrent : styles.dotUpcoming
-          ]} >
+          <View style={[styles.timelineDot, styles.dotCurrent]} >
             <View style={styles.innerDot} />
           </View>
           <View>
@@ -235,7 +184,7 @@ const CustomerPickupCard = ({ item, showButtons = true }) => {
       {/* Action Buttons */}
       <View style={styles.actionRow}>
         {showButtons ? (
-          // New Order Buttons
+          // New Order Buttons - Accept/Decline
           <>
             <TouchableOpacity 
               style={[styles.actionButton, styles.rejectButton]}
@@ -253,53 +202,39 @@ const CustomerPickupCard = ({ item, showButtons = true }) => {
             </TouchableOpacity>
           </>
         ) : (
-          // In-Progress Order Actions
+          // Accepted Order Actions - Only Payment button
           <View style={styles.progressActions}>
-            {item.currentStage === 'processing' && (
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.readyButton]}
-                onPress={() => handleStageUpdate(item.id, 'ready')}
-              >
-                <Icon name="check" size={18} color={appColors.white} />
-                <Text style={styles.readyButtonText}>Mark Ready</Text>
-              </TouchableOpacity>
-            )}
-            
-            {/* Make Payment Button - Shows when order is ready and payment is pending */}
             {isPaymentPending && (
               <TouchableOpacity 
-                style={[styles.actionButton, styles.paymentButton]}
+                style={[styles.actionButton, styles.paymentButton, processingPayment && styles.disabledButton]}
                 onPress={() => handleMakePayment(item)}
+                disabled={processingPayment}
               >
-                <Icon name="cash" size={18} color={appColors.white} />
-                <Text style={styles.paymentButtonText}>Make Payment</Text>
-              </TouchableOpacity>
-            )}
-            
-            {item.currentStage === 'out-for-delivery' && (
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.deliveryButton]}
-                onPress={() => handleComplete(item.id)}
-              >
-                <Icon name="checkbox-marked-circle" size={18} color={appColors.white} />
-                <Text style={styles.deliveryButtonText}>Mark Delivered</Text>
+                <Text style={styles.paymentButtonText}>
+                  {processingPayment ? 'Processing...' : 'Make Payment'}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
         )}
       </View>
     </Animated.View>
+    </TouchableOpacity>
+   
   );
 };
 
 // Main component that uses FlatList
-const CustomerPickupList = ({ data, showButtons = true }) => {
+const CustomerPickupList = ({ 
+  data, 
+  showButtons = true // true = new pickups, false = accepted orders
+}) => {
   if (data.length === 0) {
     return (
       <View style={styles.emptyState}>
         <Icon name="package-variant" size={60} color={"#adb5bd"} />
         <Text style={styles.emptyStateTitle}>
-          {showButtons ? 'No New Orders' : 'No Orders in Progress'}
+          {showButtons ? 'No New Orders' : 'No Accepted Orders'}
         </Text>
         <Text style={styles.emptyStateSubtitle}>
           {showButtons 
@@ -315,7 +250,10 @@ const CustomerPickupList = ({ data, showButtons = true }) => {
     <FlatList
       data={data}
       renderItem={({ item }) => (
-        <CustomerPickupCard item={item} showButtons={showButtons} />
+        <CustomerPickupCard 
+          item={item} 
+          showButtons={showButtons}
+        />
       )}
       keyExtractor={item => item.id}
       showsVerticalScrollIndicator={false}

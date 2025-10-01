@@ -1,5 +1,5 @@
 import appColors from "../../../theme/appColors";
-import { windowHeight } from "../../../theme/appConstant";
+import { windowHeight, windowWidth } from "../../../theme/appConstant";
 import fonts from "../../../theme/appFonts";
 
 const { StyleSheet } = require("react-native");
@@ -189,18 +189,20 @@ export const styles = StyleSheet.create({
     gap: 10,
   },
   actionButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
-    paddingVertical: 10,
+    paddingVertical: 12,
     gap: 8,
+    width: '100%', // Full width
+    marginBottom: 8,
   },
   rejectButton: {
     backgroundColor: appColors.white,
     borderWidth: 1,
     borderColor: "#f72585",
+    width:"50%"
   },
   rejectButtonText: {
     color: "#f72585",
@@ -210,6 +212,7 @@ export const styles = StyleSheet.create({
   },
   acceptButton: {
     backgroundColor: "#10C761",
+    width:"50%"
   },
   acceptButtonText: {
     color: appColors.white,
@@ -253,14 +256,14 @@ export const styles = StyleSheet.create({
     paddingTop: 100,
   },
   emptyStateTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: fonts.InterBold,
     color: "#6c757d",
     marginTop: 16,
     textAlign: 'center',
   },
   emptyStateSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: fonts.InterRegular,
     color: "#adb5bd",
     marginTop: 8,
@@ -276,8 +279,8 @@ paymentBadge: {
   paddingVertical: 6,
   borderRadius: 8,
   marginBottom: 8,
-  borderWidth: 1,
-  borderColor: '#FF9800',
+
+ 
 },
 paymentBadgeText: {
   fontSize: 12,
@@ -285,7 +288,7 @@ paymentBadgeText: {
   marginLeft: 6,
 },
 paymentButton: {
-  backgroundColor: '#FF9800', // Orange color for payment
+  backgroundColor: appColors.blue, // Orange color for payment
 },
 paymentButtonText: {
   color: appColors.white,
@@ -298,5 +301,8 @@ totalAmount: {
   fontFamily: fonts.InterBold,
   color: appColors.primary,
   marginTop: 4,
+},
+disabledButton: {
+  opacity: 0.6,
 },
 });

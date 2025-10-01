@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState , } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomerPickupList from '../../otherComponent/home/customerPickupCard';
@@ -8,25 +8,40 @@ import { useRoute } from '@react-navigation/native';
 import {styles} from "./styles"
 import Header from "../../components/header"
 
-
 export default function Orders({ navigation }) {
-  const { newPickups, inProgressOrders } = useContext(VendorContext);
+  const { 
+    newPickups, 
+    acceptedOrders, // Changed from inProgressOrders
+    acceptOrder,
+    rejectOrder
+  } = useContext(VendorContext);
+  
   const [activeTab, setActiveTab] = useState('new');
 
   const route = useRoute();
 
-useEffect(() => {
-  if (route.params?.openTab) {
-    setActiveTab(route.params.openTab);
-  }
-}, [route.params?.openTab]);
+  useEffect(() => {
+    if (route.params?.openTab) {
+      setActiveTab(route.params.openTab);
+    }
+  }, [route.params?.openTab]);
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'new':
-        return <CustomerPickupList data={newPickups} showButtons={true} />;
+        return (
+          <CustomerPickupList 
+            data={newPickups} 
+            showButtons={true} // Shows Accept/Decline buttons
+          />
+        );
       case 'inProgress':
-        return <CustomerPickupList data={inProgressOrders} showButtons={false} />;
+        return (
+          <CustomerPickupList 
+            data={acceptedOrders} 
+            showButtons={false} // Shows Make Payment button
+          />
+        );
       default:
         return <CustomerPickupList data={newPickups} showButtons={true} />;
     }
@@ -37,7 +52,7 @@ useEffect(() => {
       <StatusBar barStyle="dark-content" backgroundColor={appColors.primary} />
       <Header title={"Orders"} onBack={() => navigation.goBack()}/>
      <ScrollView contentContainerStyle={styles.contentContainerStyle}>
-       {/* Custom Tabs */}
+       {/* Two Tabs: New Pickups and In Progress */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[
@@ -73,9 +88,9 @@ useEffect(() => {
           ]}>
             In Progress
           </Text>
-          {inProgressOrders.length > 0 && (
+          {acceptedOrders.length > 0 && (
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{inProgressOrders.length}</Text>
+              <Text style={styles.badgeText}>{acceptedOrders.length}</Text>
             </View>
           )}
           {activeTab === 'inProgress' && <View style={styles.activeIndicator} />}
@@ -90,4 +105,3 @@ useEffect(() => {
     </SafeAreaView>
   );
 }
-

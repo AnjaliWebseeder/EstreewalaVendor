@@ -22,7 +22,9 @@ import AboutUs from "../screens/otherSetting/aboutUs"
 import PrivacyPolicy from "../screens/otherSetting/privacyPolicy"
 import FAQS from "../screens/otherSetting/faq"
 import SubscriptionPlans from "../screens/subscriptionPlans"
-
+import ConfirmPayment from "../otherComponent/order/confirmPayment"
+import OrderSummary from "../otherComponent/order/orderSummary"
+import PaymentSuccess from "../otherComponent/order/paymentSuccess"
 
 const Stack = createStackNavigator();
 
@@ -52,6 +54,9 @@ const Navigation = () => {
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
         <Stack.Screen name="Faq" component={FAQS} />
           <Stack.Screen name="SubscriptionPlans" component={SubscriptionPlans} />
+            <Stack.Screen name="ConfirmPayment" component={ConfirmPayment} />
+             <Stack.Screen name="OrderSummary" component={OrderSummary} />
+              <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
     
       </Stack.Navigator>
     </NavigationContainer>

@@ -7,11 +7,9 @@ import fonts from '../../theme/appFonts';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Home from "../../screens/home";
 import Order from "../../screens/order";
-import Payment from '../../screens/payment'
 import Account from "../../screens/account"
 import {HomeIcon} from "../../assets/Icons/home"
 import {OrderIcon} from "../../assets/Icons/order"
-import {PaymentIcon} from "../../assets/Icons/payment"
 import {AccountIcon} from "../../assets/Icons/account"
 
 const Tab = createBottomTabNavigator();
@@ -93,26 +91,6 @@ export default function BottomTab() {
 
 
 />
-        <Tab.Screen 
-          name="Payment" 
-          component={Payment}
-          options={{
-          
-            tabBarIcon: ({ focused }) => (
-              <MinimalTabButton 
-                focused={focused} 
-                icon={PaymentIcon} 
-                label="Payment" 
-                 labelWidth={53}
-                iconStyle={{marginLeft:10}}
-              />
-            ),
-          }}
-        />
-
-       
-
-
       
         <Tab.Screen 
           name="Account" 

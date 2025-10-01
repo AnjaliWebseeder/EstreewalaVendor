@@ -1,6 +1,7 @@
 const { StyleSheet } = require("react-native");
 import appColors from "../../theme/appColors"
 import { windowHeight } from "../../theme/appConstant";
+
 export const styles = StyleSheet.create({
   safe: { 
     flex: 1, 
@@ -15,7 +16,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: appColors.border,
-    paddingTop:windowHeight(3)
+    paddingTop: windowHeight(3)
   },
   tab: {
     flex: 1,
@@ -27,18 +28,18 @@ export const styles = StyleSheet.create({
     backgroundColor: appColors.background,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 12, // Reduced to fit three tabs
     fontWeight: '600',
     color: '#6c757d',
   },
   activeTabText: {
-    color:appColors.secondary,
+    color: appColors.secondary,
     fontWeight: 'bold',
   },
   activeIndicator: {
     position: 'absolute',
     bottom: 0,
-    width: '80%',
+    width: '70%', // Adjusted for three tabs
     height: 3,
     backgroundColor: appColors.secondary,
     borderRadius: 2,
@@ -46,7 +47,7 @@ export const styles = StyleSheet.create({
   badge: {
     position: 'absolute',
     top: 8,
-    right: 20,
+    right: 10, // Adjusted for three tabs
     backgroundColor: appColors.secondary,
     borderRadius: 10,
     minWidth: 18,
@@ -63,10 +64,10 @@ export const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     backgroundColor: appColors.background,
-    marginHorizontal:windowHeight(6),
-    marginTop:windowHeight(10)
+    marginHorizontal: windowHeight(6),
+    marginTop: windowHeight(10)
   },
-  contentContainerStyle:{
-    paddingBottom:windowHeight(80)
+  contentContainerStyle: {
+    paddingBottom: windowHeight(80)
   }
 });
