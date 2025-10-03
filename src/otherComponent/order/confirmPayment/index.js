@@ -2,10 +2,12 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import Header from "../../../components/header"
 import {styles} from "./styles"
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ConfirmPayment({ navigation }) {
   return (
-    <View style={styles.container}>
+   <SafeAreaView style={styles.container}>
+     <View style={styles.container}>
       {/* Custom Header */}
       <Header title={"Confirm Payment"} onBack={() => navigation.goBack()} />
 
@@ -27,6 +29,7 @@ export default function ConfirmPayment({ navigation }) {
         <Text style={styles.confirmButtonText}>Confirm Payment</Text>
       </TouchableOpacity>
     </View>
+   </SafeAreaView>
   );
 }
 

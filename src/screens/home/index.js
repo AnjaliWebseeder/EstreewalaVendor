@@ -15,14 +15,14 @@ import CustomerPickup from "../../otherComponent/home/customerPickupCard"
 import Title from "../../components/title"
 import {VendorContext} from "../../utils/context/vendorContext"
 
-export default function Home() {
+export default function Home({navigation}) {
    const { newPickups } = useContext(VendorContext);
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.contentContainerStyle}>
       <StatusBar barStyle="dark-content" backgroundColor={appColors.secondary} />
     <View style={styles.headerStyle}>
-        <Header/>
+        <Header navigation={navigation}/>
     </View>
          <View style={styles.container}>
       <StatusCard/>   

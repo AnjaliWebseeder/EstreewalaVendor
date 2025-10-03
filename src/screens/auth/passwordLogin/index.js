@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import CustomButton from '../../../components/button';
 import CustomInput from '../../../components/Input';
 import BannerHeader from '../../../otherComponent/bannerHeader';
 import { styles } from './styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { VendorContext } from '../../../utils/context/vendorContext';
 
 const PasswordLoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({}); // error state
-
+  const {  login  } = useContext(VendorContext);
   const validate = () => {
     let valid = true;
     let newErrors = {};
@@ -35,8 +36,9 @@ const PasswordLoginScreen = ({ navigation }) => {
     return valid;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (validate()) {
+        await login('user_token_here');
       navigation.replace('VendorRegistration');
     }
   };

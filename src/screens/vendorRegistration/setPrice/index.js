@@ -18,6 +18,7 @@ import { VendorContext } from "../../../utils/context/vendorContext";
 import Icon from 'react-native-vector-icons/Ionicons';
 import appColors from "../../../theme/appColors";
 import FilterIcon from '../../../assets/Icons/filter';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SetPrice({ onOpenFilter, selectedFilter }) {
   const [editingItemId, setEditingItemId] = useState(null);
@@ -155,7 +156,8 @@ const savePrice = () => {
   const filteredItems = getFilteredItems();
 
   return (
-    <KeyboardAvoidingView
+    <SafeAreaView style={{flex:1}}>
+        <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
@@ -168,7 +170,7 @@ const savePrice = () => {
             horizontal
             keyExtractor={(item) => item.id}
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20 }}
+            contentContainerStyle={{ paddingHorizontal: 14 }}
             renderItem={({ item: service }) => (
               <TouchableOpacity
                 onPress={() => setActiveServiceId(service.id)}
@@ -217,5 +219,6 @@ const savePrice = () => {
         />
       </View>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

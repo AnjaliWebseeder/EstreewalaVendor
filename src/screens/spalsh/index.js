@@ -1,12 +1,10 @@
 import { View, Text, Animated, Easing } from "react-native";
 import React, { useEffect, useRef } from "react";
-import { useNavigation } from "@react-navigation/native";
 import { styles } from "./styles";
 import FastImage from "react-native-fast-image";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Splash() {
-  const navigation = useNavigation();
-
+export default function Splash({navigation}) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const bounceAnim = useRef(new Animated.Value(0)).current;
@@ -75,7 +73,8 @@ export default function Splash() {
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
       {/* Bubbles */}
       <Animated.View
         style={[
@@ -182,5 +181,6 @@ export default function Splash() {
         <Text style={styles.appName}>ESTREEWALA</Text>
       </Animated.View>
     </View>
+    </SafeAreaView>
   );
 }

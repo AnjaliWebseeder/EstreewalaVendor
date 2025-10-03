@@ -2,7 +2,7 @@
 import Svg, { Path } from "react-native-svg";
 export function RateUsIcon({ color =  color ? color : "#000" }) {
   return (
-<Svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/Svg">
+<Svg width="22" height="23" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/Svg">
 <Path d="M9.3016 16.8253L12.4516 14.9253L15.6016 16.8503L14.7766 13.2503L17.5516 10.8503L13.9016 10.5253L12.4516 7.1253L11.0016 10.5003L7.3516 10.8253L10.1266 13.2503L9.3016 16.8253ZM7.0266 19.9618L8.45935 13.7925L3.67285 9.64455L9.9881 9.09655L12.4516 3.2793L14.9151 9.09655L21.2304 9.64455L16.4439 13.7925L17.8766 19.9618L12.4516 16.6888L7.0266 19.9618Z" fill="#4C4C4C"/>
 </Svg>
 

@@ -7,7 +7,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import appColors from '../../../theme/appColors'
 import { useEffect, useRef } from 'react'
 
-export default function Header() {
+export default function Header(props) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
@@ -58,14 +58,14 @@ export default function Header() {
           </TouchableOpacity>
 
           <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+            <TouchableOpacity onPress={() => props.navigation.navigate("Notification")} style={styles.iconButton} activeOpacity={0.7}>
               <View style={styles.notificationBadge}>
                 <Text style={styles.badgeText}>3</Text>
               </View>
               <NotificationIcon color={appColors.white} />
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+            <TouchableOpacity onPress={() => props.navigation.navigate("Main", {screen:"Account"})} style={styles.iconButton} activeOpacity={0.7}>
               <View style={styles.profileImage}>
                 <ProfileIcon color={appColors.secondary} />
               </View>

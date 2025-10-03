@@ -10,9 +10,10 @@ export default function InputField({
   placeholder,
   keyboardType = 'default',
   error,
+  rowStyle
 }) {
   return (
-    <View style={styles.row}>
+    <View style={[styles.row,rowStyle]}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
       <TextInput
         style={[

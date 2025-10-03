@@ -6,6 +6,7 @@ import { VendorContext } from '../../../utils/context/vendorContext';
 import { styles } from './styles';
 import CustomButton from '../../../components/button';
 import appColors from '../../../theme/appColors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AddOwner({ navigation, route }) {
   const { addOwner, editOwner } = useContext(VendorContext);
@@ -41,7 +42,8 @@ export default function AddOwner({ navigation, route }) {
   };
 
   return (
-    <View style={styles.mainContainer}>
+   <SafeAreaView style={styles.mainContainer}>
+     <View style={styles.mainContainer}>
       <Header title="Add New Owner" onBack={() => navigation.goBack()} />
       <View style={styles.container}>
        <InputField
@@ -103,5 +105,6 @@ export default function AddOwner({ navigation, route }) {
 
       <CustomButton title={editingOwner ? 'Update' : 'Submit'} onPress={submit} />
     </View>
+   </SafeAreaView>
   );
 }

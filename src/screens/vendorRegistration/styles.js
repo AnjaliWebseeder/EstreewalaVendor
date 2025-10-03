@@ -122,7 +122,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: windowHeight(8),
     borderRadius: 6,
-    marginBottom: windowHeight(12)
+    marginBottom: windowHeight(2)
   },
   buttonmainContainerStyle: {
     backgroundColor: appColors.secondary,
@@ -190,4 +190,10 @@ completedSegment: {
     padding: 10,
     paddingHorizontal: 16,
   },
+  errorStyle:{
+     color:appColors.error,textAlign:"left",marginHorizontal:windowHeight(14),
+     fontSize:fontSizes.FONT14,
+     fontWeight:"500",
+     marginTop:windowHeight(-4)
+  }
 });

@@ -15,6 +15,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from "./styles"
 import appColors from '../../theme/appColors';
+import { setAppLaunched } from '../../utils/context/appLaunchStatus';
+import { BackIcon } from '../../assets/Icons/backIcon';
 
 const { width, height } = Dimensions.get('window');
 
@@ -41,7 +43,7 @@ const COLORS = {
   lightOrange: '#FEEBC8',
 };
 
-const SubscriptionPlansScreen = ({ navigation }) => {
+const SubscriptionPlansScreen = ({ navigation , route }) => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedDuration, setSelectedDuration] = useState('M'); // Default to Monthly
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -49,7 +51,7 @@ const SubscriptionPlansScreen = ({ navigation }) => {
   const [selectedPlanDetails, setSelectedPlanDetails] = useState(null);
   const [showMessage, setShowMessage] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
-  
+  const { params } = route?.params || {}; 
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(height));
   const [scaleAnim] = useState(new Animated.Value(0.9));
@@ -205,33 +207,49 @@ const SubscriptionPlansScreen = ({ navigation }) => {
   const handleSubscribe = () => {
     if (selectedPlan && selectedDuration) {
       setShowPaymentModal(true);
+       
     } else {
       showToast('Please select a plan and duration first!', 'warning');
     }
   };
 
-  const handlePayment = (paymentMethod) => {
-    const amount = prices[selectedPlan][selectedDuration];
-    const planName = plans.find(p => p.code === selectedPlan)?.name;
-    
-    showToast(`Processing ₹${amount} payment via ${paymentMethod.name}...`, 'info');
-    
-    // Simulate payment processing
-    setTimeout(() => {
+ const handlePayment = async (paymentMethod) => {
+  const amount = prices[selectedPlan][selectedDuration];
+  const planName = plans.find(p => p.code === selectedPlan)?.name;
+  
+  showToast(`Processing ₹${amount} payment via ${paymentMethod.name}...`, 'info');
+  
+  // Simulate payment processing
+  setTimeout(async () => {
+    try {
       setShowPaymentModal(false);
       showToast(`Payment successful! ${planName} activated.`, 'success');
       
+      // Mark app as launched (first time flow completed)
+      await setAppLaunched();
+      
       // Navigate to home after successful payment
-      setTimeout(() => {
-        navigation.navigate('Home');
-      }, 2000);
-    }, 3000);
-  };
+       navigation.replace('Main');
+    } catch (error) {
+      console.log('Error completing subscription:', error);
+    }
+  }, 3000);
+};
 
   const handleViewDetails = (plan) => {
     setSelectedPlanDetails(plan);
     setShowDetailsModal(true);
   };
+
+const handleSkip = async () => {
+  try {
+    // Mark app as launched even if skipping subscription
+    await setAppLaunched();
+    navigation.replace('Main');
+  } catch (error) {
+    console.log('Error skipping subscription:', error);
+  }
+};
 
   const PlanCard = ({ plan }) => {
     const isSelected = selectedPlan === plan.code;
@@ -396,7 +414,11 @@ const SubscriptionPlansScreen = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
+      
           <View style={styles.headerTitleRow}>
+         {params &&  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <BackIcon size={13}/>
+                  </TouchableOpacity>}
             <Icon name="diamond" size={24} color={COLORS.gold} />
             <Text style={styles.headerTitle}>Premium Plans</Text>
           </View>
@@ -406,7 +428,7 @@ const SubscriptionPlansScreen = ({ navigation }) => {
         </View>
         <TouchableOpacity 
           style={styles.skipButton}
-          onPress={() => navigation.replace('Main')}
+          onPress={() => params ? navigation.goBack() : handleSkip()}
         >
           <Text style={styles.skipButtonText}>Skip</Text>
         </TouchableOpacity>
@@ -429,7 +451,7 @@ const SubscriptionPlansScreen = ({ navigation }) => {
       <ScrollView 
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{paddingBottom: selectedPlan ? 130 : 20}}
       >
         {/* PLAN CATEGORIES - NOW AT TOP */}
         <View style={styles.plansSection}>
@@ -672,9 +694,13 @@ const SubscriptionPlansScreen = ({ navigation }) => {
 
             <TouchableOpacity 
               style={styles.cancelButton}
-              onPress={() => setShowPaymentModal(false)}
+              onPress={() => { 
+                setShowPaymentModal(false)
+               params ? navigation.goBack() : navigation.replace('Main')
+                setAppLaunched();
+              }}
             >
-              <Text style={styles.cancelButtonText}>Cancel Payment</Text>
+              <Text style={styles.cancelButtonText}>Confirm Payment</Text>
             </TouchableOpacity>
           </View>
         </View>

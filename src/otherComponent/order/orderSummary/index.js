@@ -174,7 +174,7 @@ const OrderSummary = ({ navigation }) => {
         <View style={styles.deliveryCard}>
           <View style={styles.cardHeader}>
             <View style={styles.iconContainer}>
-              <Ionicons name="time" size={15} color={appColors.white}/>
+              <Ionicons name="time" size={13} color={appColors.white}/>
             </View>
             <Text style={styles.cardTitle}>Delivery Timeline</Text>
           </View>
@@ -211,7 +211,7 @@ const OrderSummary = ({ navigation }) => {
         <View style={styles.infoCard}>
           <View style={styles.cardHeader}>
             <View style={styles.iconContainer}>
-              <Ionicons name="person" size={12} color={appColors.white}/>
+              <Ionicons name="person" size={10} color={appColors.white}/>
             </View>
             <Text style={styles.cardTitle}>Customer Details</Text>
           </View>
@@ -233,7 +233,7 @@ const OrderSummary = ({ navigation }) => {
         <View style={styles.itemsCard}>
           <View style={[styles.cardHeader,{marginBottom:0}]}>
             <View style={styles.iconContainer}>
-              <Ionicons name="shirt" size={12} color={appColors.white} />
+              <Ionicons name="shirt" size={10} color={appColors.white} />
             </View>
             <Text style={styles.cardTitle}>Order Items ({items.length})</Text>
           </View>
@@ -281,10 +281,10 @@ const OrderSummary = ({ navigation }) => {
           <TouchableOpacity style={styles.section} onPress={handleAddInstruction}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionIcon}>
-                <Ionicons name="document-text" size={16} color={appColors.white} />
+                <Ionicons name="document-text" size={12} color={appColors.white} />
               </View>
               <Text style={styles.sectionTitle}>Special Instructions</Text>
-              <Ionicons name="chevron-forward" size={16} color={appColors.subTitle} />
+              <Ionicons name="chevron-forward" size={13} color={appColors.subTitle} />
             </View>
             {instructions ? (
               <View style={styles.instructionContainer}>

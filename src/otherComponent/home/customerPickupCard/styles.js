@@ -1,5 +1,5 @@
 import appColors from "../../../theme/appColors";
-import { windowHeight, windowWidth } from "../../../theme/appConstant";
+import { windowHeight } from "../../../theme/appConstant";
 import fonts from "../../../theme/appFonts";
 
 const { StyleSheet } = require("react-native");
@@ -15,7 +15,8 @@ export const styles = StyleSheet.create({
   card: {
     backgroundColor: appColors.white,
     borderRadius: 16,
-    padding: 16,
+    padding: 10,
+    paddingTop:14,
     marginBottom: 0,
     elevation: 1,
     shadowColor: "#000",
@@ -24,12 +25,14 @@ export const styles = StyleSheet.create({
     shadowRadius: 12,
     borderLeftWidth: 4,
     borderLeftColor:appColors.secondary,
+    // borderColor:appColors.secondary,
+    // borderWidth:0.4
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: windowHeight(4),
+    marginBottom: windowHeight(3),
   },
   orderInfo: {
     flex: 1,
@@ -99,15 +102,15 @@ export const styles = StyleSheet.create({
   },
   
   timeline: {
-    marginBottom: windowHeight(11),
+    marginBottom: windowHeight(9),
   },
   timelineItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
   timelineDot: {
-    width: 16,
-    height: 16,
+    width: 14,
+    height: 14,
     borderRadius: 8,
     marginRight: 12,
     marginTop: 2,
@@ -115,8 +118,8 @@ export const styles = StyleSheet.create({
     justifyContent:"center"
   },
   innerDot:{
-  width: 10.5,
-    height: 10.5,
+  width: 8.5,
+    height: 8.5,
     borderRadius: 20,
     backgroundColor:appColors.white
   },
@@ -159,8 +162,8 @@ export const styles = StyleSheet.create({
   addressSection: {
     backgroundColor: "#f8f9fa",
     borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
+    padding: 8,
+    marginBottom: 15,
   },
   addressRow: {
     flexDirection: 'row',
@@ -186,23 +189,23 @@ export const styles = StyleSheet.create({
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 10,
+    gap: 4,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
-    paddingVertical: 12,
+    paddingVertical: 10,
     gap: 8,
-    width: '100%', // Full width
+     width: '100%', // Full width
     marginBottom: 8,
   },
   rejectButton: {
     backgroundColor: appColors.white,
     borderWidth: 1,
     borderColor: "#f72585",
-    width:"50%"
+    width:"49%"
   },
   rejectButtonText: {
     color: "#f72585",
@@ -212,7 +215,7 @@ export const styles = StyleSheet.create({
   },
   acceptButton: {
     backgroundColor: "#10C761",
-    width:"50%"
+    width:"49%"
   },
   acceptButtonText: {
     color: appColors.white,

@@ -1,11 +1,11 @@
 import React from "react";
 import Svg, { Path } from "react-native-svg";
 
-export function BackIcon({ color = "#000" }) {
+export function BackIcon({ color = "#000" , size = size ? size : 17 }) {
   return (
     <Svg
-      width={17}
-      height={17}
+      width={size}
+      height={size}
       viewBox="0 0 512 512"
       fill="none"
     >

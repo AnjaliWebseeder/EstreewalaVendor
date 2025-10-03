@@ -19,7 +19,8 @@ import SetPrice from "./setPrice";
 import FilterCategoryModal from "../../otherComponent/vendorRegistration/filterCategoryModal"
 import PaymentSetup from "./paymentSetup";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { windowHeight } from "../../theme/appConstant";
+import { setAppLaunched } from "../../utils/context/appLaunchStatus";
 // Stepper steps
 const steps = [
   "Business",
@@ -47,16 +48,69 @@ const VendorRegistration = ({route}) => {
     setDeliveryOption,
     owners,
     branches,
+    completeVendorRegistration
   } = useContext(VendorContext);
 
 const { fromScreen } = route?.params || {};
   const [businessName, setBusinessName] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
-    const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const [error, setError] = useState("");
 
-  const nextStep = () =>
-    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+  const nextStep = () => {
+  // Clear previous error
+  setError("");
+
+  // Validation before moving to next step
+  if (currentStep === 0 && !businessName.trim()) {
+    setError("Please enter Business Name");
+    return;
+  }
+
+  if (currentStep === 1 && owners.length === 0) {
+    setError("Please add at least one owner");
+    return;
+  }
+
+  if (currentStep === 2 && branches.length === 0) {
+    setError("Please add at least one branch");
+    return;
+  }
+
+  if (currentStep === 3 && selectedServiceIds.length === 0) {
+    setError("Please select at least one service");
+    return;
+  }
+
+  if (currentStep === 6) {
+    // You can add payment validation here later if needed
+  }
+
+  // If all validations pass
+  setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+};
+
+// In VendorRegistration.js
+const handleSubmit = async () => {
+  try {
+    console.log('Submitting vendor registration...');
+    
+    // Mark vendor registration as completed
+    await completeVendorRegistration();
+    
+    if (fromScreen) {
+      navigation.goBack();
+    } else {
+      // Navigate to SubscriptionPlans
+      console.log('Navigating to SubscriptionPlans');
+      navigation.navigate("SubscriptionPlans");
+    }
+  } catch (error) {
+    console.log('Error in vendor registration submit:', error);
+  }
+}
+
   const prevStep = () =>
     setCurrentStep((prev) => Math.max(prev - 1, 0));
 
@@ -113,8 +167,12 @@ const renderStepSlider = () => {
               <InputField
                 label="Business Name*"
                 value={businessName}
-                onChangeText={setBusinessName}
+                onChangeText={(text) => {
+    setBusinessName(text);
+    if (error) setError(""); // Clear error as user types
+  }}
                 placeholder="Enter Business Name"
+                rowStyle={{marginBottom:windowHeight(0)}}
               />
                </View>
           )}
@@ -137,7 +195,10 @@ const renderStepSlider = () => {
                   />
                 ))}
               <TouchableOpacity
-                onPress={() => navigation.navigate("AddOwner")}
+               onPress={() => {
+    if (error) setError(""); // Clear any previous error
+    navigation.navigate("AddOwner");
+  }}
                 style={styles.buttonStyle}
               >
                 <Text style={styles.buttonTextStyle}>+ Add Owner</Text>
@@ -160,10 +221,13 @@ const renderStepSlider = () => {
                     branch={branch}
                   />
                 ))}
-              <TouchableOpacity
-                onPress={() => navigation.navigate("AddBranch")}
-                style={styles.buttonStyle}
-              >
+             <TouchableOpacity
+  onPress={() => {
+    if (error) setError("");
+    navigation.navigate("AddBranch");
+  }}
+  style={styles.buttonStyle}
+>
                 <Text style={styles.buttonTextStyle}>+ Add Branch</Text>
               </TouchableOpacity>
             </View>
@@ -206,8 +270,8 @@ const renderStepSlider = () => {
       <TitleSubtitle
       title="Set Pricing"
       subtitle="Add prices for the services you provide."
+      style={{marginBottom:10}}
     />
-
   </View>
     {/* Directly render SetPrice component instead of button */}
     <SetPrice 
@@ -264,6 +328,12 @@ const renderStepSlider = () => {
 </View>
           )}
         </View>
+
+        {error ? (
+  <Text style={styles.errorStyle}>
+    {error}
+  </Text>
+) : null}
       </ScrollView>
 
       {/* Navigation Buttons */}
@@ -278,7 +348,7 @@ const renderStepSlider = () => {
             <Text style={styles.buttonText}>Next</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={styles.buttonmainContainerStyle} onPress={() => fromScreen ? navigation.goBack() : navigation.navigate("SubscriptionPlans")}>
+          <TouchableOpacity style={styles.buttonmainContainerStyle} onPress={(() => handleSubmit())}>
             <Text style={styles.buttonText}>Submit</Text>
           </TouchableOpacity>
         )}

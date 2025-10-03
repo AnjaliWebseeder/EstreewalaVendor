@@ -62,6 +62,19 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
    
   },
+   backButton: {
+    backgroundColor: appColors.white,
+    borderRadius: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    height: windowHeight(19),
+    width: windowHeight(19),
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight:12
+  },
   plansSection: {
   paddingTop: 10,
 
@@ -177,6 +190,7 @@ export const styles = StyleSheet.create({
       },
     }),
   },
+  
   selectedDurationCard: {
     borderColor: appColors.secondary,
     backgroundColor: "#e9edf1ff",

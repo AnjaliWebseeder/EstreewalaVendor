@@ -6,6 +6,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { styles } from './styles';
 import { VendorContext } from '../../../utils/context/vendorContext';
 import Header from '../../../components/header';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PaymentSetup({navigation,route}) {
  const { qrImage, setQrImage } = useContext(VendorContext);
@@ -22,7 +23,8 @@ export default function PaymentSetup({navigation,route}) {
   };
 
   return (
-    <View style={styles.mainContainer}>
+    <SafeAreaView style={styles.mainContainer}>
+      <View style={styles.mainContainer}>
       <View style={[styles.container,{padding : showHeaderBar ? 0 : 20}]}>
      {showHeaderBar &&   <Header title={"Payment Setup"}  onBack={() => navigation.goBack() }/>}
         <View style={showHeaderBar && styles.centerView}>
@@ -53,5 +55,6 @@ export default function PaymentSetup({navigation,route}) {
 
      
     </View>
+    </SafeAreaView>
   );
 }

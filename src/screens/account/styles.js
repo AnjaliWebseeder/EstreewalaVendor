@@ -24,7 +24,7 @@ profileSection:{
   menuCard: {
     backgroundColor: appColors.menuCard,
     borderRadius: 16,
-    marginBottom: 14,
+    marginBottom: 12,
     overflow: "hidden",
     borderColor:appColors.border,
     borderWidth:0.2,
@@ -42,7 +42,7 @@ profileSection:{
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12.3,
+    paddingVertical: 8,
     paddingHorizontal: 16,
     borderBottomWidth: 0.5,
     borderBottomColor:appColors.border,
@@ -86,13 +86,31 @@ userName: {
   color: appColors.white,
   textAlign: "center",
 },
-
 userEmail: {
   fontSize: 14,
   color: "#888",
   textAlign: "center",
   marginBottom:windowHeight(18)
 },
+logoutContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 15,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+      logOutText:{
+             color: appColors.white, fontSize: 16, fontWeight: '600',
+             fontFamily:fonts.InterSemiBold
+
+      }
+
+
 
 
   // ===== SIGN OUT =====

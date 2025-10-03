@@ -26,7 +26,7 @@ filter:{
     backgroundColor: appColors.white,
     borderBottomWidth: 1,
     borderBottomColor: appColors.borderLight,
-   paddingBottom:20,
+   paddingBottom:windowHeight(12),
     
   },
   serviceTab: {
@@ -60,7 +60,7 @@ filter:{
 
   // Price Cards
   listContainer: {
-    paddingBottom: 120,
+    // paddingBottom: 120,
     paddingVertical:windowHeight(7)
   },
   priceCard: {
@@ -250,8 +250,8 @@ summaryValue:{
 },
 containerStyle:{
   flexDirection:"row",justifyContent:"space-between",paddingBottom:0,  alignItems:"center",
-  paddingTop:10,
-  paddingBottom:10,
+  paddingTop:windowHeight(7),
+  paddingBottom:windowHeight(6),
   marginHorizontal:windowHeight(10)
 } 
 

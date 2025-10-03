@@ -6,6 +6,7 @@ import { VendorContext } from '../../../utils/context/vendorContext';
 import { styles } from './styles';
 import CustomButton from '../../../components/button';
 import appColors from '../../../theme/appColors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AddBranch({ navigation, route }) {
   const { addBranch, editBranch, deleteBranch } = useContext(VendorContext);
@@ -86,7 +87,8 @@ export default function AddBranch({ navigation, route }) {
   };
 
   return (
-    <View style={styles.mainContainer}>
+  <SafeAreaView style={styles.mainContainer}>
+      <View style={styles.mainContainer}>
       <Header title={editingBranch ? "Edit Branch" : "Add New Branch Details"} onBack={() => navigation.goBack()} />
       <ScrollView>
         <View style={styles.container}>
@@ -190,5 +192,6 @@ export default function AddBranch({ navigation, route }) {
 
       
     </View>
+  </SafeAreaView>
   );
 }

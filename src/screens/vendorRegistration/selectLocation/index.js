@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import Header from '../../../components/header'
 import { VendorContext } from '../../../utils/context/vendorContext';
 import {styles} from './styles'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SelectLocation({ navigation }) {
 const { setLocation } = useContext(VendorContext);
@@ -17,7 +18,8 @@ navigation.goBack();
 
 
 return (
-<View style={{ flex: 1 }}>
+<SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
 <Header title="Select Location" onBack={() => navigation.goBack()} />
 <View style={styles.container}>
 <View style={styles.mapPlaceholder}>
@@ -33,6 +35,7 @@ return (
 </TouchableOpacity>
 </View>
 </View>
+</SafeAreaView>
 );
 }
 

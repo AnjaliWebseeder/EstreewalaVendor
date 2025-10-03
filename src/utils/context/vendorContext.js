@@ -1,8 +1,14 @@
-import React, { createContext, useState } from 'react';
-
+import React, { createContext, useState,useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getAppLaunchStatus} from "../context/appLaunchStatus"
 export const VendorContext = createContext();
 
 export const VendorProvider = ({ children }) => {
+  const [userToken, setUserToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+ const [isFirstLaunch, setIsFirstLaunch] = useState(true); // Default to true
+  const [hasCompletedVendorRegistration, setHasCompletedVendorRegistration] = useState(false);
+
   const initialServices = [
     { id: 1, name: "Dry Wash" },
     { id: 2, name: "Wash" },
@@ -21,6 +27,72 @@ export const VendorProvider = ({ children }) => {
   const [pricingSet, setPricingSet] = useState(false);
   const [servicePrices, setServicePrices] = useState({});
   const [qrImage, setQrImage] = useState(null);
+
+
+  useEffect(() => {
+    const loadStorageData = async () => {
+      try {
+        // Check if app is launched for the first time
+        const appLaunched = await getAppLaunchStatus();
+        setIsFirstLaunch(!appLaunched);
+
+        // Check if vendor registration was completed
+        const registrationCompleted = await AsyncStorage.getItem('vendorRegistrationCompleted');
+        setHasCompletedVendorRegistration(registrationCompleted === 'true');
+
+        const token = await AsyncStorage.getItem('userToken');
+        setUserToken(token);
+      } catch (error) {
+        console.log('Error loading storage data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadStorageData();
+  }, []);
+
+  const login = async (token) => {
+    try {
+      await AsyncStorage.setItem('userToken', token);
+      setUserToken(token);
+    } catch (error) {
+      console.log('Login error:', error);
+      throw error;
+    }
+  };
+
+
+  // FIXED LOGOUT - Clear specific data only
+  const logout = async () => {
+    try {
+      console.log('Logging out...');
+      await Promise.all([
+        AsyncStorage.removeItem('userToken'),
+        AsyncStorage.removeItem('userLocation'),
+        AsyncStorage.removeItem('vendorRegistrationCompleted')
+        // DON'T remove appLaunched - we want to remember it's not first launch
+      ]);
+      setUserToken(null);
+      setHasCompletedVendorRegistration(false);
+      console.log('Logout successful');
+    } catch (error) {
+      console.log('Logout error:', error);
+      throw error;
+    }
+  };
+
+ const completeVendorRegistration = async () => {
+    try {
+      console.log('Completing vendor registration...');
+      await AsyncStorage.setItem('vendorRegistrationCompleted', 'true');
+      setHasCompletedVendorRegistration(true);
+      console.log('Vendor registration completed');
+    } catch (error) {
+      console.log('Error completing vendor registration:', error);
+      throw error;
+    }
+  };
   
   // New pickups - orders waiting for acceptance
   const [newPickups, setNewPickups] = useState([
@@ -196,6 +268,13 @@ export const VendorProvider = ({ children }) => {
   return (
     <VendorContext.Provider
       value={{
+         userToken,
+        isFirstLaunch,
+        hasCompletedVendorRegistration,
+        login,
+        logout,
+        completeVendorRegistration,
+        isLoading,
         owners,
         addOwner,
         editOwner,

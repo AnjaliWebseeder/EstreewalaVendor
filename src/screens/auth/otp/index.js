@@ -1,16 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import CustomButton from '../../../components/button';
 import OtpInput from '../../../otherComponent/otpInput';
 import { styles } from './styles';
 import { BackIcon } from '../../../assets/Icons/backIcon';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import {VendorContext}  from '../../../utils/context/vendorContext';
 
 const OtpScreen = ({ navigation }) => {
   const [otp, setOtp] = useState(['', '', '', '']);
   const [error, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false); // track if user clicked verify
-
+     const {  login  } = useContext(VendorContext);
   // ✅ Clear error automatically when user types a valid OTP
   useEffect(() => {
     if (!isSubmitted) return; // don't validate until user clicks verify
@@ -21,7 +22,7 @@ const OtpScreen = ({ navigation }) => {
     }
   }, [otp, isSubmitted]);
 
-  const handleVerify = () => {
+  const handleVerify = async() => {
     setIsSubmitted(true); // user clicked verify
     const otpValue = otp.join('');
 
@@ -40,6 +41,7 @@ const OtpScreen = ({ navigation }) => {
 
     // ✅ Passed all validations
     setError('');
+       await login('user_token_here');
     navigation.replace('VendorRegistration');
   };
 

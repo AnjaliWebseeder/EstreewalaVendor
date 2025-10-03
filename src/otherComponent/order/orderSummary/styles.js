@@ -99,8 +99,8 @@ export const styles = StyleSheet.create({
     marginBottom: 7,
   },
   iconContainer: {
-    width: 24,
-    height: 24,
+    width: 22,
+    height: 22,
     borderRadius: 8,
     backgroundColor: appColors.blue,
     alignItems: 'center',
@@ -108,7 +108,7 @@ export const styles = StyleSheet.create({
     marginRight: 12,
   },
   cardTitle: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '600',
     color: appColors.font,
     fontFamily: fonts.InterSemiBold
@@ -238,7 +238,7 @@ export const styles = StyleSheet.create({
     marginLeft: 16,
   },
   itemName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: appColors.font,
     marginBottom: 2,
@@ -307,8 +307,8 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
   },
   sectionIcon: {
-    width: 32,
-    height: 32,
+    width: 22,
+    height: 22,
     borderRadius: 8,
     backgroundColor: appColors.blue,
     alignItems: 'center',
@@ -447,6 +447,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: appColors.white,
     padding: 16,
+    paddingVertical:10,
     borderTopWidth: 1,
     borderTopColor: appColors.border,
     shadowColor: '#000',
@@ -463,7 +464,7 @@ export const styles = StyleSheet.create({
     backgroundColor: appColors.white,
     borderWidth: 2,
     borderColor: '#ff6b6b',
-    paddingVertical: 14,
+    paddingVertical: 10,
     borderRadius: 12,
     marginRight: 12,
   },
@@ -696,9 +697,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: appColors.background,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: appColors.border,
+     paddingVertical:10,
   },
   cancelBtnText: {
     fontSize: 16,
@@ -726,10 +728,11 @@ export const styles = StyleSheet.create({
   saveBtn: {
     flex: 2,
     padding: 16,
+    paddingVertical:10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#51cf66',
-    borderRadius: 12,
+    backgroundColor: appColors.blue,
+  borderRadius: 8,
   },
   saveBtnText: {
     fontSize: 16,
