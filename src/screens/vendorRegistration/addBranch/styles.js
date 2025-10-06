@@ -1,5 +1,7 @@
 import { StyleSheet } from "react-native";
 import appColors from "../../../theme/appColors";
+import fonts from "../../../theme/appFonts";
+import { windowHeight } from "../../../theme/appConstant";
 
 export const styles = StyleSheet.create({
   mainContainer: {
@@ -17,10 +19,12 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 10,
+  marginBottom:windowHeight(5)
   },
   switchLabel: {
-    fontWeight: '500',
+    fontWeight: fonts.PoppinsSemiBold,
     color: appColors.text,
+    fontWeight:"500"
+
   },
 });

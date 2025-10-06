@@ -1,7 +1,6 @@
-// Navigation.js - COMPLETELY REPLACE your current file
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useRef, useEffect, useState } from 'react';
 import { VendorContext } from '../utils/context/vendorContext';
 
 // Import all your screens...
@@ -37,45 +36,51 @@ const Stack = createStackNavigator();
 const Navigation = () => {
   const { userToken, isLoading, isFirstLaunch, hasCompletedVendorRegistration } = useContext(VendorContext);
   const navigationRef = useRef();
+  const [initialRoute, setInitialRoute] = useState(null);
 
-  // Show splash while context is loading
-  if (isLoading) {
+  useEffect(() => {
+    if (!isLoading) {
+      const getInitialRoute = () => {
+        console.log('Navigation State:', {
+          userToken: !!userToken,
+          isFirstLaunch,
+          hasCompletedVendorRegistration
+        });
+
+        if (!userToken) {
+          return "Welcome";
+        }
+
+        // User is logged in - check if we need to show onboarding
+        if (isFirstLaunch) {
+          // First time app launch - show onboarding flow
+          if (!hasCompletedVendorRegistration) {
+            return "VendorRegistration";
+          } else {
+            return "SubscriptionPlans";
+          }
+        } else {
+          // Not first launch - user logged out and logging back in
+          // OR app restart after first launch completed
+          return "Main";
+        }
+      };
+
+      const route = getInitialRoute();
+      console.log('Setting Initial Route:', route);
+      setInitialRoute(route);
+    }
+  }, [isLoading, userToken, isFirstLaunch, hasCompletedVendorRegistration]);
+
+  // Show splash while determining initial route
+  if (isLoading || initialRoute === null) {
     return <Spalsh />;
   }
-
-  // SIMPLIFIED Navigation Logic
-  const getInitialRoute = () => {
-    console.log('Navigation State:', {
-      userToken: !!userToken,
-      isFirstLaunch,
-      hasCompletedVendorRegistration
-    });
-
-    if (!userToken) {
-      return "Welcome"; // or "Splash" depending on your preference
-    }
-
-    // User is logged in
-    if (isFirstLaunch) {
-      // First time app launch
-      if (!hasCompletedVendorRegistration) {
-        return "VendorRegistration";
-      } else {
-        return "SubscriptionPlans";
-      }
-    } else {
-      // Not first launch - go directly to main app
-      return "Main";
-    }
-  };
-
-  const initialRouteName = getInitialRoute();
-  console.log('Initial Route:', initialRouteName);
 
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
-        initialRouteName={initialRouteName}
+        initialRouteName={initialRoute}
         screenOptions={{ headerShown: false }}
       >
         {/* ===== Auth Flow ===== */}

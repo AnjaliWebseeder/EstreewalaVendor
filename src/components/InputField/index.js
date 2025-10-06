@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     borderColor: appColors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
-  
+    color:appColors.font, 
     backgroundColor: appColors.inputField,
     fontSize: fontSizes.FONT16,
   },

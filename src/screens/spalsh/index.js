@@ -3,12 +3,14 @@ import React, { useEffect, useRef } from "react";
 import { styles } from "./styles";
 import FastImage from "react-native-fast-image";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {usePermissions} from "../../utils/hooks/permission"
 
 export default function Splash({navigation}) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const bubbleAnim = useRef(new Animated.Value(0)).current;
+  const { requestLocationPermission, requestNotificationPermission } = usePermissions();
 
   // Animations
   useEffect(() => {
@@ -49,6 +51,13 @@ export default function Splash({navigation}) {
 
     return () => clearTimeout(timer);
   }, [fadeAnim, scaleAnim, bounceAnim, navigation]);
+
+    useEffect(() => {
+    requestLocationPermission();
+    requestNotificationPermission();
+  }, []);
+
+ 
 
   // Bubble animation
   useEffect(() => {

@@ -1,6 +1,6 @@
 import React, { createContext, useState,useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getAppLaunchStatus} from "../context/appLaunchStatus"
+import {getAppLaunchStatus , setAppLaunched} from "../context/appLaunchStatus"
 export const VendorContext = createContext();
 
 export const VendorProvider = ({ children }) => {
@@ -8,7 +8,7 @@ export const VendorProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
  const [isFirstLaunch, setIsFirstLaunch] = useState(true); // Default to true
   const [hasCompletedVendorRegistration, setHasCompletedVendorRegistration] = useState(false);
-
+  const [hasCompletedSubscription, setHasCompletedSubscription] = useState(false); 
   const initialServices = [
     { id: 1, name: "Dry Wash" },
     { id: 2, name: "Wash" },
@@ -27,20 +27,29 @@ export const VendorProvider = ({ children }) => {
   const [pricingSet, setPricingSet] = useState(false);
   const [servicePrices, setServicePrices] = useState({});
   const [qrImage, setQrImage] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
 
 
-  useEffect(() => {
+useEffect(() => {
     const loadStorageData = async () => {
       try {
         // Check if app is launched for the first time
         const appLaunched = await getAppLaunchStatus();
+        console.log('App launched status:', appLaunched);
         setIsFirstLaunch(!appLaunched);
 
         // Check if vendor registration was completed
         const registrationCompleted = await AsyncStorage.getItem('vendorRegistrationCompleted');
+        console.log('Vendor registration status:', registrationCompleted);
         setHasCompletedVendorRegistration(registrationCompleted === 'true');
 
+        // Check if subscription was completed
+        const subscriptionCompleted = await AsyncStorage.getItem('subscriptionCompleted');
+        console.log('Subscription status:', subscriptionCompleted);
+        setHasCompletedSubscription(subscriptionCompleted === 'true');
+
         const token = await AsyncStorage.getItem('userToken');
+        console.log('User token:', !!token);
         setUserToken(token);
       } catch (error) {
         console.log('Error loading storage data:', error);
@@ -64,18 +73,17 @@ export const VendorProvider = ({ children }) => {
 
 
   // FIXED LOGOUT - Clear specific data only
-  const logout = async () => {
+ const logout = async () => {
     try {
       console.log('Logging out...');
+      // ONLY remove user-specific data, keep app launch status
       await Promise.all([
         AsyncStorage.removeItem('userToken'),
         AsyncStorage.removeItem('userLocation'),
-        AsyncStorage.removeItem('vendorRegistrationCompleted')
-        // DON'T remove appLaunched - we want to remember it's not first launch
+        // DON'T remove: appLaunched, vendorRegistrationCompleted, subscriptionCompleted
       ]);
       setUserToken(null);
-      setHasCompletedVendorRegistration(false);
-      console.log('Logout successful');
+      console.log('Logout successful - app launch status preserved');
     } catch (error) {
       console.log('Logout error:', error);
       throw error;
@@ -93,6 +101,20 @@ export const VendorProvider = ({ children }) => {
       throw error;
     }
   };
+
+   const completeSubscription = async () => {
+    try {
+      console.log('Completing subscription...');
+      await AsyncStorage.setItem('subscriptionCompleted', 'true');
+      await setAppLaunched(); // Mark app as launched after subscription
+      setHasCompletedSubscription(true);
+      console.log('Subscription completed and app marked as launched');
+    } catch (error) {
+      console.log('Error completing subscription:', error);
+      throw error;
+    }
+  };
+
   
   // New pickups - orders waiting for acceptance
   const [newPickups, setNewPickups] = useState([
@@ -265,6 +287,56 @@ export const VendorProvider = ({ children }) => {
 
   const addCoupon = (coupon) => setCoupons((p) => [...p, coupon]);
 
+  const saveLocation = async (location) => {
+    try {
+      if (!location?.address) {
+        console.log("⚠️ No address found in location object:", location);
+        return;
+      }
+
+      // Extract city if not present
+      let cityName = location.city;
+      if (!cityName && location.address) {
+        const parts = location.address.split(',').map(p => p.trim());
+        cityName = parts[parts.length - 3] || ''; // fallback city
+      }
+
+      const shortAddress = getShortAddress(location.address, cityName);
+      const cleanedLocation = {
+        ...location,
+        city: cityName || location.city || '',
+        address: shortAddress || location.address,
+      };
+
+      await AsyncStorage.setItem('userLocation', JSON.stringify(cleanedLocation));
+      console.log("📍 Saved Cleaned Location:", cleanedLocation);
+      setUserLocation(cleanedLocation);
+    } catch (error) {
+      console.log('❌ Save location error:', error);
+    }
+  };
+
+  const getShortAddress = (fullAddress, cityName) => {
+    if (!fullAddress) return '';
+
+    const addressParts = fullAddress
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    const street = addressParts.find(
+      (part) =>
+        !/taluka|district|india/i.test(part) &&
+        !part.toLowerCase().includes(cityName?.toLowerCase() || '')
+    );
+
+    if (!street && cityName) return cityName;
+    if (street && !cityName) return street;
+    if (!street && !cityName) return '';
+
+    return `${street}, ${cityName}`.trim();
+  };
+
   return (
     <VendorContext.Provider
       value={{
@@ -310,6 +382,11 @@ export const VendorProvider = ({ children }) => {
         rejectOrder,
         completeOrder,
         completePayment,
+        saveLocation,
+        setUserLocation,
+        userLocation,
+        hasCompletedSubscription,
+        completeSubscription,
       }}
     >
       {children}

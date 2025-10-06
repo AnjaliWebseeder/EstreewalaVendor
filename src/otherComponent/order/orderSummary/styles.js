@@ -1,7 +1,7 @@
 import { Dimensions } from "react-native";
 import appColors from "../../../theme/appColors";
 import fonts from "../../../theme/appFonts";
-import { windowHeight } from "../../../theme/appConstant";
+import { fontSizes, windowHeight } from "../../../theme/appConstant";
 
 const { StyleSheet } = require("react-native");
 const { width } = Dimensions.get('window');
@@ -55,6 +55,7 @@ export const styles = StyleSheet.create({
     backgroundColor: appColors.white,
     borderRadius: 16,
     padding: 16,
+    paddingVertical:12,
     marginBottom: 16,
     borderColor: appColors.secondary,
     borderWidth: 1,
@@ -82,6 +83,7 @@ export const styles = StyleSheet.create({
     backgroundColor: appColors.white,
     borderRadius: 16,
     padding: 16,
+    paddingVertical:12,
     marginBottom: 16,
     borderColor: appColors.secondary,
     borderWidth: 1,
@@ -97,6 +99,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 7,
+    marginTop:0.7
   },
   iconContainer: {
     width: 22,
@@ -215,11 +218,12 @@ export const styles = StyleSheet.create({
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: windowHeight(8),
   },
   itemBorder: {
     borderBottomWidth: 1,
     borderBottomColor: appColors.border,
+    
   },
   itemThumb: {
     width: 40,
@@ -238,14 +242,14 @@ export const styles = StyleSheet.create({
     marginLeft: 16,
   },
   itemName: {
-    fontSize: 14,
+    fontSize: fontSizes.FONT17,
     fontWeight: '600',
     color: appColors.font,
     marginBottom: 2,
     fontFamily: fonts.InterSemiBold
   },
   itemService: {
-    fontSize: 14,
+    fontSize: fontSizes.FONT15,
     color: appColors.subTitle,
     marginBottom: 4,
     fontFamily: fonts.InterMedium
@@ -254,53 +258,14 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: appColors.blue,
     fontWeight: '600',
-    fontFamily: fonts.InterSemiBold
-  },
-  itemActions: {
-    alignItems: 'flex-end',
-  },
-  quantityControl: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: appColors.background,
-    borderRadius: 20,
-    padding: 4,
-    marginBottom: 8,
-  },
-  qtyBtn: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: appColors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  quantity: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: appColors.font,
-    marginHorizontal: 12,
-    fontFamily: fonts.InterSemiBold
-  },
-  itemTotal: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: appColors.font,
-    fontFamily: fonts.InterBold
-  },
-  
+    fontFamily: fonts.InterSemiBold,
+    
+  },  
   // Enhanced Special Sections
   section: {
     marginBottom: 10,
   },
-  couponSection: {
-    marginBottom: 0,
-  },
+  
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -315,9 +280,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 12,
   },
-  couponIcon: {
-    backgroundColor: '#16a34a',
-  },
+
   sectionTitle: {
     flex: 1,
     fontSize: 16,
@@ -328,12 +291,14 @@ export const styles = StyleSheet.create({
   instructionContainer: {
     backgroundColor: appColors.background,
     padding: 12,
+    paddingVertical:9,
     borderRadius: 8,
     borderLeftWidth: 3,
     borderLeftColor: appColors.blue,
+    marginTop:windowHeight(4)
   },
   instructionText: {
-    fontSize: 14,
+    fontSize: fontSizes.FONT16,
     color: appColors.font,
     lineHeight: 20,
     fontFamily: fonts.InterRegular
@@ -360,32 +325,8 @@ export const styles = StyleSheet.create({
   couponInfo: {
     flex: 1,
   },
-  couponDetails: {
-    marginTop: 2,
-  },
-  couponBadge: {
-    backgroundColor: '#16a34a',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-    marginBottom:6
-  },
-  couponCode: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: appColors.title,
-    fontFamily: fonts.InterBold
-  },
-  couponDescription: {
-    fontSize: 14,
-    color: '#4b5563',
-    marginTop: 4,
-    fontFamily: fonts.InterRegular
-  },
-  removeBtn: {
-    padding: 8,
-  },
+ 
+  
   
   // Enhanced Summary
   summaryRows: {
@@ -464,9 +405,10 @@ export const styles = StyleSheet.create({
     backgroundColor: appColors.white,
     borderWidth: 2,
     borderColor: '#ff6b6b',
-    paddingVertical: 10,
+    height:windowHeight(34),
     borderRadius: 12,
     marginRight: 12,
+    marginTop:3
   },
   rejectText: {
     fontSize: 16,
@@ -484,6 +426,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
+    height:windowHeight(39)
   },
   payContent: {
     flexDirection: 'row',
@@ -492,7 +435,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   payText: {
-    fontSize: 16,
+    fontSize: fontSizes.FONT17,
     fontWeight: '600',
     color: appColors.white,
     marginLeft: 8,
@@ -502,12 +445,14 @@ export const styles = StyleSheet.create({
   // Status Indicators
   statusContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: windowHeight(4),
+    paddingBottom:windowHeight(8)
   },
   statusIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
+    paddingVertical:11,
     borderRadius: 12,
     justifyContent: 'center',
     shadowColor: '#000',
@@ -570,127 +515,11 @@ export const styles = StyleSheet.create({
   closeButton: {
     padding: 4,
   },
+ 
   
-  // Enhanced Coupon Cards
-  couponList: {
-    paddingHorizontal: 20,
-    maxHeight: 400,
-  },
-  couponCard: {
-    backgroundColor: appColors.white,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: appColors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    overflow: 'hidden',
-  },
-  couponCardSelected: {
-    borderColor: appColors.blue,
-    backgroundColor: appColors.background,
-    transform: [{ scale: 1.02 }],
-  },
-  couponCardDisabled: {
-    opacity: 0.6,
-  },
-  couponColorStrip: {
-    height: 4,
-    width: '100%',
-  },
-  couponContent: {
-    paddingHorizontal: 16,
-    paddingVertical:7
-  },
-  couponHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  
-  couponDiscount: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: appColors.blue,
-    marginTop: 2,
-    fontFamily: fonts.InterSemiBold
-  },
-  couponDescription: {
-    fontSize: 14,
-    color: appColors.subTitle,
-    marginBottom: 4,
-    lineHeight: 18,
-    fontFamily: fonts.InterRegular
-  },
-  couponDescriptionDisabled: {
-    color: appColors.subTitle,
-  },
-  couponMinAmount: {
-    fontSize: 12,
-    color: appColors.subTitle,
-    fontFamily: fonts.InterMedium
-  },
-  eligibilityWarning: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  notEligibleText: {
-    fontSize: 12,
-    color: '#ff6b6b',
-    fontWeight: '500',
-    marginLeft: 4,
-    fontFamily: fonts.InterMedium
-  },
-  
-  // Enhanced Radio Button
-  radio: {
-    width: 15,
-    height: 15,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: appColors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioSelected: {
-    borderColor: appColors.blue,
-  },
-  radioInner: {
-    width: 6,
-    height: 6,
-    borderRadius: 5,
-    backgroundColor: appColors.blue,
-  },
-  
-  // Enhanced Instruction Input
-  instructionInput: {
-    borderWidth: 1,
-    borderColor: appColors.border,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    marginHorizontal: 20,
-    marginBottom: 20,
-    minHeight: 120,
-    textAlignVertical: 'top',
-    backgroundColor: appColors.background,
-    fontFamily: fonts.InterRegular,
-    lineHeight: 20,
-  },
   
   // Enhanced Modal Actions
-  modalActions: {
-    flexDirection: 'row',
-    padding: 20,
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: appColors.border,
-  },
+
   cancelBtn: {
     flex: 1,
     padding: 16,
@@ -702,29 +531,7 @@ export const styles = StyleSheet.create({
     borderColor: appColors.border,
      paddingVertical:10,
   },
-  cancelBtnText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: appColors.subTitle,
-    fontFamily: fonts.InterSemiBold
-  },
-  applyBtn: {
-    flex: 2,
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: appColors.blue,
-    borderRadius: 12,
-  },
-  applyBtnDisabled: {
-    opacity: 0.5,
-  },
-  applyBtnText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: appColors.white,
-    fontFamily: fonts.InterSemiBold
-  },
+ 
   saveBtn: {
     flex: 2,
     padding: 16,

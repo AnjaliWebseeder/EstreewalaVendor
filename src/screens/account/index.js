@@ -70,7 +70,7 @@ export default function Account({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-         <StatusBar backgroundColor={appColors.secondary} barStyle="dark-content" />
+         <StatusBar backgroundColor="transparent"  />
       <View style={styles.main}>
         <Header  onBack={() => navigation.goBack()}  title="My Account" />
         <View style={styles.profileSection}>
@@ -92,9 +92,11 @@ export default function Account({ navigation }) {
    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
   
   {/* ==== Subscription Section ==== */}
-  <View style={[styles.menuCard, { marginBottom: 10 }]}>
-   
-   <MenuItem
+  
+
+  {/* ==== First Group ==== */}
+  <View style={styles.menuCard}>
+     <MenuItem
          icon={<Icon name="person-outline" size={15} color={appColors.font} />}
     label="Personal Information"
       onPress={() => navigation.navigate("LoginSecurityScreen")}
@@ -106,11 +108,6 @@ export default function Account({ navigation }) {
       onPress={() => navigation.navigate("SubscriptionPlans", {params:"accountScreen"})}
       
     />
-    
-  </View>
-
-  {/* ==== First Group ==== */}
-  <View style={styles.menuCard}>
     <MenuItem
       icon={<VendorIcon />}
       label="Vendor Details"

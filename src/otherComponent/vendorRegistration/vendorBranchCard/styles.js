@@ -104,9 +104,9 @@ infoText: {
   marginBottom:2
 },
 detail:{
-   fontSize: 11,
-     color: appColors.font,
-
+   
+    color: appColors.font,
+   lineHeight:19,
   fontSize:fontSizes.FONT17,
   fontFamily:fonts.InterRegular
 }

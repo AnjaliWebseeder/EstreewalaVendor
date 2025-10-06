@@ -49,7 +49,7 @@ export default function Orders({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={appColors.primary} />
+      <StatusBar  backgroundColor="transparent" />
       <Header title={"Orders"} onBack={() => navigation.goBack()}/>
      <ScrollView contentContainerStyle={styles.contentContainerStyle}>
        {/* Two Tabs: New Pickups and In Progress */}

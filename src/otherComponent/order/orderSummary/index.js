@@ -21,10 +21,7 @@ import Header from '../../../components/header';
 const OrderSummary = ({ navigation }) => {
   const [isCouponApplied, setIsCouponApplied] = useState(true);
   const [couponCode, setCouponCode] = useState('WELCOME10');
-  const [showCouponInput, setShowCouponInput] = useState(false);
   const [instructions, setInstructions] = useState('Please use mild detergent only.');
-  const [showInstructionModal, setShowInstructionModal] = useState(false);
-  const [tempInstruction, setTempInstruction] = useState('');
   const [selectedCoupon, setSelectedCoupon] = useState('WELCOME10');
   const [orderStatus, setOrderStatus] = useState('pending');
 
@@ -74,52 +71,6 @@ const OrderSummary = ({ navigation }) => {
     };
   }, [items, isCouponApplied, couponCode]);
 
-  const updateQty = (id, delta) => {
-    setItems((prev) =>
-      prev.map((it) =>
-        it.id === id
-          ? { ...it, qty: Math.max(1, it.qty + delta) }
-          : it
-      )
-    );
-  };
-
-  const handleApplyCoupon = () => {
-    if (!selectedCoupon) return;
-
-    const coupon = availableCoupons.find(c => c.code === selectedCoupon);
-    const subtotal = items.reduce((sum, it) => sum + it.qty * it.price, 0);
-    
-    if (coupon && subtotal >= coupon.minAmount) {
-      setIsCouponApplied(true);
-      setCouponCode(selectedCoupon);
-      setShowCouponInput(false);
-    }
-  };
-
-  const handleRemoveCoupon = () => {
-    setIsCouponApplied(false);
-    setCouponCode('');
-  };
-
-  const handleSelectCoupon = (couponCode) => {
-    setSelectedCoupon(couponCode);
-  };
-
-  const handleAddInstruction = () => {
-    setTempInstruction(instructions);
-    setShowInstructionModal(true);
-  };
-
-  const handleSaveInstruction = () => {
-    setInstructions(tempInstruction);
-    setShowInstructionModal(false);
-  };
-
-  const handleCancelInstruction = () => {
-    setShowInstructionModal(false);
-  };
-
   const onReject = () => {
     setOrderStatus('rejected');
   };
@@ -135,15 +86,6 @@ const OrderSummary = ({ navigation }) => {
     });
   };
 
-  const getCurrentCoupon = () => {
-    return availableCoupons.find(c => c.code === couponCode);
-  };
-
-  const isCouponEligible = (coupon) => {
-    const subtotal = items.reduce((sum, it) => sum + it.qty * it.price, 0);
-    return subtotal >= coupon.minAmount;
-  };
-
   // Status-based rendering
   const renderStatusIndicator = () => {
     if (orderStatus === 'rejected') {
@@ -151,18 +93,17 @@ const OrderSummary = ({ navigation }) => {
         <View style={styles.statusContainer}>
           <View style={[styles.statusIndicator, styles.rejectedStatus]}>
             <Ionicons name="close-circle" size={20} color="#fff" />
-            <Text style={styles.statusText}>Order Rejected</Text>
+            <Text style={styles.statusText}>Order Decline</Text>
           </View>
         </View>
       );
     }
-    
     return null;
   };
 
   return (
     <SafeAreaView style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor={appColors.secondary} />
+      <StatusBar  backgroundColor="transparent" />
       <Header title={"Order Summary"} onBack={() => navigation.goBack()} />
       
       <ScrollView
@@ -252,25 +193,6 @@ const OrderSummary = ({ navigation }) => {
                 <Text style={styles.itemService}>{item.service}</Text>
                 <Text style={styles.itemPrice}>₹{item.price.toFixed(2)} each</Text>
               </View>
-              
-              <View style={styles.itemActions}>
-                <View style={styles.quantityControl}>
-                  <TouchableOpacity 
-                    style={styles.qtyBtn}
-                    onPress={() => updateQty(item.id, -1)}
-                  >
-                    <Ionicons name="remove" size={14} color={appColors.blue} />
-                  </TouchableOpacity>
-                  <Text style={styles.quantity}>{item.qty}</Text>
-                  <TouchableOpacity 
-                    style={styles.qtyBtn}
-                    onPress={() => updateQty(item.id, 1)}
-                  >
-                    <Ionicons name="add" size={14} color={appColors.blue} />
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.itemTotal}>₹{(item.qty * item.price).toFixed(2)}</Text>
-              </View>
             </View>
           ))}
         </View>
@@ -278,7 +200,7 @@ const OrderSummary = ({ navigation }) => {
         {/* Instructions & Coupon */}
         <View style={styles.specialCard}>
           {/* Instructions Section */}
-          <TouchableOpacity style={styles.section} onPress={handleAddInstruction}>
+          <TouchableOpacity activeOpacity={0.9} style={styles.section}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionIcon}>
                 <Ionicons name="document-text" size={12} color={appColors.white} />
@@ -294,47 +216,6 @@ const OrderSummary = ({ navigation }) => {
               <Text style={styles.placeholder}>Tap to add instructions for this order...</Text>
             )}
           </TouchableOpacity>
-
-          {/* Coupon Section */}
-          <View style={[styles.section, styles.couponSection]}>
-            {!isCouponApplied ? (
-              <TouchableOpacity 
-                style={styles.sectionHeader}
-                onPress={() => setShowCouponInput(true)}
-              >
-                <View style={styles.sectionIcon}>
-                  <Ionicons name="pricetag" size={16} color={appColors.white} />
-                </View>
-                <Text style={styles.sectionTitle}>Apply Coupon</Text>
-                <Ionicons name="chevron-forward" size={16} color={appColors.subTitle} />
-              </TouchableOpacity>
-            ) : (
-              <View style={styles.appliedCoupon}>
-                <View style={styles.couponInfo}>
-                  <View style={styles.sectionHeader}>
-                    <View style={[styles.sectionIcon, styles.couponIcon]}>
-                      <Ionicons name="pricetag" size={16} color={appColors.white} />
-                    </View>
-                    <Text style={styles.sectionTitle}>Applied Coupon</Text>
-                  </View>
-                  <View style={styles.couponDetails}>
-                    <View style={styles.couponBadge}>
-                      <Text style={styles.couponCode}>{couponCode}</Text>
-                    </View>
-                    <Text style={styles.couponDescription}>
-                      {getCurrentCoupon()?.description}
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity 
-                  style={styles.removeBtn}
-                  onPress={handleRemoveCoupon}
-                >
-                  <Ionicons name="close" size={18} color="#ff6b6b" />
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
         </View>
 
         {/* Order Summary */}
@@ -398,7 +279,7 @@ const OrderSummary = ({ navigation }) => {
         <View style={styles.actionBar}>
           <TouchableOpacity style={styles.rejectButton} onPress={onReject}>
             <Ionicons name="close-circle" size={18} color="#ff6b6b" />
-            <Text style={styles.rejectText}>Reject</Text>
+            <Text style={styles.rejectText}>Decline</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.payButton} onPress={onPay}>
@@ -409,168 +290,6 @@ const OrderSummary = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       )}
-
-      {/* Enhanced Coupon Modal */}
-      <Modal
-        visible={showCouponInput}
-        transparent={true}
-        animationType="none"
-        onRequestClose={() => setShowCouponInput(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Apply Coupon</Text>
-              <TouchableOpacity 
-                style={styles.closeButton}
-                onPress={() => setShowCouponInput(false)}
-              >
-                <Ionicons name="close" size={24} color={appColors.font} />
-              </TouchableOpacity>
-            </View>
-            
-            <Text style={styles.modalSubtitle}>Choose a coupon to save on your order</Text>
-            
-            <ScrollView style={styles.couponList} showsVerticalScrollIndicator={false}>
-              {availableCoupons.map((coupon, index) => {
-                const isEligible = isCouponEligible(coupon);
-                const isSelected = selectedCoupon === coupon.code;
-                
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.couponCard,
-                      isSelected && styles.couponCardSelected,
-                      !isEligible && styles.couponCardDisabled
-                    ]}
-                    onPress={() => isEligible && handleSelectCoupon(coupon.code)}
-                    disabled={!isEligible}
-                  >
-                    <View style={[styles.couponColorStrip, { backgroundColor: coupon.color }]} />
-                    <View style={styles.couponContent}>
-                      <View style={styles.couponHeader}>
-                        <View>
-                          <Text style={[
-                            styles.couponCode,
-                            isSelected && styles.couponCodeSelected,
-                          ]}>
-                            {coupon.code}
-                          </Text>
-                          <Text style={styles.couponDiscount}>
-                            {coupon.deliveryFree ? 'FREE DELIVERY' : `${coupon.discount * 100}% OFF`}
-                          </Text>
-                        </View>
-                        <View style={[
-                          styles.radio,
-                          isSelected && styles.radioSelected
-                        ]}>
-                          {isSelected && <View style={styles.radioInner} />}
-                        </View>
-                      </View>
-                      
-                      <Text style={[
-                        styles.couponDescription,
-                        !isEligible && styles.couponDescriptionDisabled
-                      ]}>
-                        {coupon.description}
-                      </Text>
-                      
-                      {coupon.minAmount > 0 && (
-                        <Text style={styles.couponMinAmount}>
-                          Min. order: ₹{coupon.minAmount}
-                        </Text>
-                      )}
-                      
-                      {!isEligible && (
-                        <View style={styles.eligibilityWarning}>
-                          <Ionicons name="warning" size={14} color="#ff6b6b" />
-                          <Text style={styles.notEligibleText}>
-                            Add ₹{(coupon.minAmount - pricing.subtotal).toFixed(2)} more to apply
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-            
-            <View style={styles.modalActions}>
-              <TouchableOpacity 
-                style={styles.cancelBtn}
-                onPress={() => setShowCouponInput(false)}
-              >
-                <Text style={styles.cancelBtnText}>Cancel</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.applyBtn, !selectedCoupon && styles.applyBtnDisabled]}
-                onPress={handleApplyCoupon}
-                disabled={!selectedCoupon}
-              >
-                <Text style={styles.applyBtnText}>Apply Coupon</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Enhanced Instruction Modal */}
-      <Modal
-        visible={showInstructionModal}
-        transparent={true}
-        animationType="none"
-        onRequestClose={handleCancelInstruction}
-      >
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.modalOverlay}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Special Instructions</Text>
-              <TouchableOpacity 
-                style={styles.closeButton}
-                onPress={handleCancelInstruction}
-              >
-                <Ionicons name="close" size={24} color={appColors.font} />
-              </TouchableOpacity>
-            </View>
-            
-            <Text style={styles.modalSubtitle}>
-              Add any special instructions for your laundry order
-            </Text>
-            
-            <TextInput
-              style={styles.instructionInput}
-              placeholder="Example: Use mild detergent, handle with care, specific folding instructions..."
-              value={tempInstruction}
-              onChangeText={setTempInstruction}
-              multiline={true}
-              numberOfLines={6}
-              textAlignVertical="top"
-              placeholderTextColor={appColors.subTitle}
-            />
-            
-            <View style={styles.modalActions}>
-              <TouchableOpacity 
-                style={styles.cancelBtn}
-                onPress={handleCancelInstruction}
-              >
-                <Text style={styles.cancelBtnText}>Cancel</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={styles.saveBtn}
-                onPress={handleSaveInstruction}
-              >
-                <Text style={styles.saveBtnText}>Save Instructions</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
     </SafeAreaView>
   );
 };

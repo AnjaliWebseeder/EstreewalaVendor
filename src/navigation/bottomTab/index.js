@@ -53,7 +53,7 @@ export default function BottomTab() {
           tabBarShowLabel: false,
           headerShown: false,
           tabBarStyle: [styles.minimalTabBar,{
-             height: 65+ insets.bottom, 
+             height: 55+ insets.bottom, 
           }],
         }}
       >

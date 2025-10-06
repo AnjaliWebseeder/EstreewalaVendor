@@ -1,5 +1,5 @@
 // SubscriptionPlansScreen.js
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -17,8 +17,9 @@ import { styles } from "./styles"
 import appColors from '../../theme/appColors';
 import { setAppLaunched } from '../../utils/context/appLaunchStatus';
 import { BackIcon } from '../../assets/Icons/backIcon';
+import { VendorContext } from '../../utils/context/vendorContext';
 
-const { width, height } = Dimensions.get('window');
+const {  height } = Dimensions.get('window');
 
 // Static Colors
 const COLORS = {
@@ -55,6 +56,7 @@ const SubscriptionPlansScreen = ({ navigation , route }) => {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(height));
   const [scaleAnim] = useState(new Animated.Value(0.9));
+   const { completeSubscription } = useContext(VendorContext);
 
   React.useEffect(() => {
     Animated.parallel([
@@ -213,43 +215,46 @@ const SubscriptionPlansScreen = ({ navigation , route }) => {
     }
   };
 
- const handlePayment = async (paymentMethod) => {
-  const amount = prices[selectedPlan][selectedDuration];
-  const planName = plans.find(p => p.code === selectedPlan)?.name;
-  
-  showToast(`Processing ₹${amount} payment via ${paymentMethod.name}...`, 'info');
-  
-  // Simulate payment processing
-  setTimeout(async () => {
+const handlePayment = async (paymentMethod) => {
+    const amount = prices[selectedPlan][selectedDuration];
+    const planName = plans.find(p => p.code === selectedPlan)?.name;
+    
+    showToast(`Processing ₹${amount} payment via ${paymentMethod.name}...`, 'info');
+    
+    // Simulate payment processing
+    setTimeout(async () => {
+      try {
+        setShowPaymentModal(false);
+        showToast(`Payment successful! ${planName} activated.`, 'success');
+        
+        // Use the context function instead of direct setAppLaunched
+        await completeSubscription();
+        
+        // Navigate to home after successful payment
+        navigation.replace('Main');
+      } catch (error) {
+        console.log('Error completing subscription:', error);
+        showToast('Payment failed! Please try again.', 'error');
+      }
+    }, 3000);
+  };
+
+  const handleSkip = async () => {
     try {
-      setShowPaymentModal(false);
-      showToast(`Payment successful! ${planName} activated.`, 'success');
-      
-      // Mark app as launched (first time flow completed)
-      await setAppLaunched();
-      
-      // Navigate to home after successful payment
-       navigation.replace('Main');
+      // Use the context function for consistency
+      await completeSubscription();
+      navigation.replace('Main');
     } catch (error) {
-      console.log('Error completing subscription:', error);
+      console.log('Error skipping subscription:', error);
     }
-  }, 3000);
-};
+  };
 
   const handleViewDetails = (plan) => {
     setSelectedPlanDetails(plan);
     setShowDetailsModal(true);
   };
 
-const handleSkip = async () => {
-  try {
-    // Mark app as launched even if skipping subscription
-    await setAppLaunched();
-    navigation.replace('Main');
-  } catch (error) {
-    console.log('Error skipping subscription:', error);
-  }
-};
+
 
   const PlanCard = ({ plan }) => {
     const isSelected = selectedPlan === plan.code;
@@ -293,7 +298,6 @@ const handleSkip = async () => {
             <Text style={styles.durationLabel}>{durationInfo.label}</Text>
           </View>
           <View style={styles.priceInfo}>
-            <Text style={styles.monthlyEquivalent}>₹{monthlyEquivalent}/month</Text>
             <Text style={styles.durationDays}>{durationInfo.days}</Text>
           </View>
         </View>
@@ -409,7 +413,7 @@ const handleSkip = async () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={appColors.secondary} barStyle="light-content" />
+      <StatusBar  backgroundColor="transparent" />
       
       {/* Header */}
       <View style={styles.header}>

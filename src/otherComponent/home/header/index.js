@@ -3,14 +3,15 @@ import { styles } from "./styles"
 import { LocationIcon } from "../../../assets/Icons/location"
 import { NotificationIcon } from "../../../assets/Icons/notification"
 import { ProfileIcon } from "../../../assets/Icons/profile"
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import appColors from '../../../theme/appColors'
 import { useEffect, useRef } from 'react'
+import { VendorContext } from '../../../utils/context/vendorContext'
+import { useContext } from 'react'
 
 export default function Header(props) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
-
+  const {userLocation} = useContext(VendorContext)
   useEffect(() => {
     // Animate header elements on mount
     Animated.parallel([
@@ -48,13 +49,12 @@ export default function Header(props) {
             <View style={styles.locationIconWrapper}>
               <LocationIcon color={appColors.white} />
             </View>
-            <View style={styles.locationTextContainer}>
-           
+               {userLocation?.address &&  <View style={styles.locationTextContainer}>
               <View style={styles.locationRow}>
-                <Text style={styles.locationText}>Chinchwad, India</Text>
-                <MaterialIcons name="keyboard-arrow-down" size={20} color={appColors.white} />
+                <Text style={styles.locationText}>{userLocation.address}</Text>
               </View>
-            </View>
+            </View> }
+           
           </TouchableOpacity>
 
           <View style={styles.headerIcons}>

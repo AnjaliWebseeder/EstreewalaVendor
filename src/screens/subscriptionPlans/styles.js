@@ -110,6 +110,7 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.promo,
     borderRadius: 12,
     padding: 16,
+    paddingHorizontal:10,
     paddingVertical:12,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -128,19 +129,18 @@ export const styles = StyleSheet.create({
   },
   promoContent: {
     flexDirection: 'row',
-    alignItems: 'center',
     flex: 1,
   },
   promoText: {
     color: COLORS.white,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     marginLeft: 4,
   },
   promoBadge: {
     backgroundColor: COLORS.gold,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   promoBadgeText: {
@@ -344,6 +344,7 @@ export const styles = StyleSheet.create({
   priceMain: {
     flexDirection: 'row',
     alignItems: 'baseline',
+    marginTop:windowHeight(5)
   },
   price: {
     fontSize: 24,

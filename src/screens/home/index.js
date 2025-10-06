@@ -20,7 +20,7 @@ export default function Home({navigation}) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.contentContainerStyle}>
-      <StatusBar barStyle="dark-content" backgroundColor={appColors.secondary} />
+      <StatusBar  backgroundColor="transparent"  />
     <View style={styles.headerStyle}>
         <Header navigation={navigation}/>
     </View>
