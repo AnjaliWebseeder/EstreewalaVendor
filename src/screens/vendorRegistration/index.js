@@ -279,6 +279,7 @@ const VendorRegistration = ({route}) => {
                   subtitle="Add prices for the services you provide."
                   titleStyle={styles.largeTitle}
                   subtitleStyle={styles.largeSubtitle}
+                  style={{marginBottom:1}}
                 />
               </View>
               <SetPrice 
@@ -354,7 +355,7 @@ const VendorRegistration = ({route}) => {
             style={styles.backButtonContainer} 
             onPress={() => prevStep()}
           >
-            <Icon style={{paddingLeft:7}}  name="chevron-back" size={15} color={appColors.secondary} />
+            <Icon style={{paddingLeft:7,marginTop:2}}  name="chevron-back" size={15} color={appColors.secondary} />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
         )}

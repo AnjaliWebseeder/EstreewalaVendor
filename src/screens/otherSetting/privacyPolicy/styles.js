@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
     backgroundColor: appColors.background,
   },
   content: {
-    paddingTop:windowHeight(20),
+    paddingTop:windowHeight(10),
     paddingBottom: windowHeight(60),
   },
   mainStyle:{

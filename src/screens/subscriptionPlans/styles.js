@@ -80,7 +80,7 @@ export const styles = StyleSheet.create({
 
 },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
     color: COLORS.white,
     marginLeft: 8,
@@ -100,7 +100,7 @@ export const styles = StyleSheet.create({
   },
   skipButtonText: {
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     fontFamily:fonts.InterSemiBold
   },

@@ -14,7 +14,6 @@ import { styles } from './styles';
 import CustomButton from '../../../components/button';
 import appColors from '../../../theme/appColors';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import LocationPermissionModal from "../../../otherComponent/location/locationPermissionModal";
 import AddressSection from "../../../otherComponent/location/addressSection";
 import {useLocationManager} from "../../../utils/hooks/permission/useLocationManager";
 import { windowHeight } from '../../../theme/appConstant';
@@ -360,11 +359,7 @@ const cleanAddressString = (address) => {
 
         <CustomButton buttonContainerStyle={{marginHorizontal:windowHeight(15),marginBottom:10}} title={editingBranch ? 'Update' : 'Submit'} onPress={submit} />
         {/* Permission Modal */}
-        <LocationPermissionModal
-          visible={showPermissionModal}
-          onCancel={() => setShowPermissionModal(false)}
-          onAllow={handleLocationPermission}
-        />
+      
       </View>
     </SafeAreaView>
   );

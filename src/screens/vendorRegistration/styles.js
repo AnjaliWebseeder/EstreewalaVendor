@@ -12,8 +12,8 @@ export const styles = StyleSheet.create({
   mainHeader: {
     backgroundColor: appColors.secondary,
     paddingHorizontal: windowHeight(12),
-    paddingTop: windowHeight(15),
-    paddingBottom: windowHeight(6),
+    paddingTop: windowHeight(17),
+    paddingBottom: windowHeight(3),
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     elevation: 6,
@@ -110,7 +110,7 @@ export const styles = StyleSheet.create({
     backgroundColor: appColors.white,
   },
   stepLabel: {
-    fontSize: fontSizes.FONT10,
+    fontSize: fontSizes.FONT9,
     color: appColors.lightBlue,
     fontWeight: '500',
     textAlign: 'center',
@@ -118,11 +118,12 @@ export const styles = StyleSheet.create({
   activeStepLabel: {
     color: appColors.white,
     fontWeight: '700',
-    fontSize: fontSizes.FONT11,
+    fontSize: fontSizes.FONT9,
   },
   completedStepLabel: {
     color: appColors.white,
     fontWeight: '600',
+      fontSize: fontSizes.FONT9,
   },
 
   // Enhanced Buttons
@@ -242,7 +243,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: windowHeight(4),
       paddingHorizontal:10,
-    paddingLeft:5
+    paddingLeft:5,
   },
   nextButton: {
     flexDirection: 'row',

@@ -7,6 +7,7 @@ import { styles } from './styles';
 import CustomButton from '../../../components/button';
 import appColors from '../../../theme/appColors';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { windowHeight } from '../../../theme/appConstant';
 
 export default function AddOwner({ navigation, route }) {
   const { addOwner, editOwner } = useContext(VendorContext);
@@ -103,7 +104,7 @@ export default function AddOwner({ navigation, route }) {
 )}
       </View>
 
-      <CustomButton title={editingOwner ? 'Update' : 'Submit'} onPress={submit} />
+      <CustomButton buttonContainerStyle={{marginHorizontal:windowHeight(15)}} title={editingOwner ? 'Update' : 'Submit'} onPress={submit} />
     </View>
    </SafeAreaView>
   );

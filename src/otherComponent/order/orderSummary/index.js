@@ -7,16 +7,13 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
-  TextInput,
-  Modal,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from "./styles";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import appColors from '../../../theme/appColors';
 import Header from '../../../components/header';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const OrderSummary = ({ navigation }) => {
   const [isCouponApplied, setIsCouponApplied] = useState(true);
@@ -24,6 +21,7 @@ const OrderSummary = ({ navigation }) => {
   const [instructions, setInstructions] = useState('Please use mild detergent only.');
   const [selectedCoupon, setSelectedCoupon] = useState('WELCOME10');
   const [orderStatus, setOrderStatus] = useState('pending');
+  const insets = useSafeAreaInsets();
 
   const [items, setItems] = useState([
     { id: 1, name: 'Formal Shirt', service: 'Wash & Iron', qty: 2, price: 5, color: '#667eea' },
@@ -276,7 +274,7 @@ const OrderSummary = ({ navigation }) => {
 
       {/* Bottom Action Bar */}
       {orderStatus === 'pending' && (
-        <View style={styles.actionBar}>
+        <View style={[styles.actionBar,{paddingBottom: insets.bottom + 10}]}>
           <TouchableOpacity style={styles.rejectButton} onPress={onReject}>
             <Ionicons name="close-circle" size={18} color="#ff6b6b" />
             <Text style={styles.rejectText}>Decline</Text>

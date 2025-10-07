@@ -83,6 +83,7 @@ const PasswordLoginScreen = ({ navigation }) => {
           bannerImage={require('../../../assets/images/background.png')}
           title="Welcome Back"
           subtitle="Sign in to your account"
+          onBackPress={() => navigation.goBack()}
         />
 
         <View style={styles.mainContainerStyle}>

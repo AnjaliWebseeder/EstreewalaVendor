@@ -18,6 +18,7 @@ import appColors from '../../theme/appColors';
 import { setAppLaunched } from '../../utils/context/appLaunchStatus';
 import { BackIcon } from '../../assets/Icons/backIcon';
 import { VendorContext } from '../../utils/context/vendorContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const {  height } = Dimensions.get('window');
 
@@ -56,7 +57,8 @@ const SubscriptionPlansScreen = ({ navigation , route }) => {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(height));
   const [scaleAnim] = useState(new Animated.Value(0.9));
-   const { completeSubscription } = useContext(VendorContext);
+  const { completeSubscription } = useContext(VendorContext);
+  const insets = useSafeAreaInsets();
 
   React.useEffect(() => {
     Animated.parallel([
@@ -483,7 +485,7 @@ const handlePayment = async (paymentMethod) => {
               </Text>
             </View>
             
-            <View style={styles.faqCard}>
+            <View style={[styles.faqCard,{width:"40%"}]}>
               <Icon name="pause" size={24} color={appColors.secondary} />
               <Text style={styles.faqQuestion}>Inactive after 3 months?</Text>
               <Text style={styles.faqAnswer}>
@@ -499,7 +501,7 @@ const handlePayment = async (paymentMethod) => {
               </Text>
             </View>
             
-            <View style={styles.faqCard}>
+            <View style={[styles.faqCard,{width:"40%"}]}>
               <Icon name="support" size={24} color={appColors.secondary} />
               <Text style={styles.faqQuestion}>Need help with subscription?</Text>
               <Text style={styles.faqAnswer}>
@@ -512,7 +514,7 @@ const handlePayment = async (paymentMethod) => {
 
       {/* Footer */}
       {selectedPlan && (
-        <View style={styles.footer}>
+        <View style={[styles.footer,{paddingBottom:insets.bottom + 10}]}>
           <View style={styles.footerSummary}>
             <View>
               <Text style={styles.selectedPlanText}>

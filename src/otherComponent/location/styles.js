@@ -312,7 +312,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
      fontSize: fontSizes.FONT17,
     backgroundColor: appColors.white,
-    color: appColors.darkGray,
+    color: appColors.font,
   },
   addressInput: {
     minHeight: 100,

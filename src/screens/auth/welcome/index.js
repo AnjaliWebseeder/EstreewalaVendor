@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, StatusBar } from 'react-native';
 import { styles } from './styles';
 import appColors from '../../../theme/appColors';
 import ArrowRightIcon from '../../../assets/Icons/back-btn';
@@ -40,6 +40,7 @@ const WelcomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+        <StatusBar backgroundColor="#fff" barStyle="dark-content" />
       <View style={styles.container}>
         {/* Banner Image */}
         <Image source={require('../../../assets/images/login.png')} style={styles.banner} />

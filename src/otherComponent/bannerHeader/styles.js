@@ -29,14 +29,11 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
- 
   // Overlay content on banner
   mainStyle: {
     alignItems: "center",
-    marginTop:windowHeight(20)
+    marginTop:windowHeight(6)
   },
-
   // Banner text
   title: {
     fontSize: 20,

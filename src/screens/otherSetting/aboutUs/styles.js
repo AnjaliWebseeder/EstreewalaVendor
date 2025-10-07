@@ -16,8 +16,8 @@ export const styles = StyleSheet.create({
     elevation: 0,
   },
   content: {
-    paddingBottom: 40,
-    paddingTop:windowHeight(20)
+    paddingBottom: 20,
+    paddingTop:windowHeight(10)
   },
   // Section Styles
   section: {
@@ -42,16 +42,16 @@ export const styles = StyleSheet.create({
   // Stats Section
   statsSection: {
     backgroundColor:appColors.menuCard,
-    paddingVertical: 22,
+    paddingVertical: 20,
     paddingHorizontal: 16,
-    marginBottom: windowHeight(10),
+    marginBottom: windowHeight(6),
     paddingBottom:14,
   
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   statItem: {
     width: '48%',

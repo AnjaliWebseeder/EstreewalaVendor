@@ -9,6 +9,7 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: appColors.white,
+    marginTop:windowHeight(7)
   },
 filter:{
     height:30,
@@ -61,7 +62,7 @@ filter:{
   // Price Cards
   listContainer: {
     // paddingBottom: 120,
-    paddingVertical:windowHeight(7)
+    paddingVertical:windowHeight(0)
   },
   priceCard: {
     backgroundColor: appColors.white,
@@ -251,7 +252,7 @@ summaryValue:{
 containerStyle:{
   flexDirection:"row",justifyContent:"space-between",paddingBottom:0,  alignItems:"center",
   paddingTop:windowHeight(7),
-  paddingBottom:windowHeight(6),
+  paddingBottom:windowHeight(10),
   marginHorizontal:windowHeight(10)
 } 
 

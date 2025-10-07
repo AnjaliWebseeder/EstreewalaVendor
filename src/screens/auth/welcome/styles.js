@@ -4,7 +4,7 @@ import {windowHeight , fontSizes} from '../../../theme/appConstant'
 import fonts from '../../../theme/appFonts'
 
 export const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: appColors.white},
+  container: { flex: 1,backgroundColor:appColors.background},
   banner:
    { width: "100%", height:'45%', resizeMode:'cover' },
   title: { fontSize: 20,marginTop:windowHeight(14),fontFamily:fonts.InterSemiBold,textAlign:"center",fontWeight:"700" },
