@@ -1,29 +1,31 @@
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet ,ActivityIndicator} from 'react-native';
 import { windowHeight } from '../../theme/appConstant';
 import appColors from '../../theme/appColors';
 import fonts from '../../theme/appFonts';
 
-const CustomButton = ({ title, onPress, type = 'primary', buttonContainerStyle, disabled }) => {
+const CustomButton = ({ title, onPress, type = 'primary', buttonContainerStyle, disabled,loading }) => {
   return (
     <TouchableOpacity
-      onPress={!disabled ? onPress : null} // disable press if true
+      onPress={!loading ? onPress : null} // disable press if true
       style={[
         styles.button,
         type === 'secondary' && styles.secondary,
-        disabled && styles.disabledButton, // extra style when disabled
+        loading && styles.disabledButton, // extra style when disabled
         {...buttonContainerStyle},
       ]}
-      activeOpacity={disabled ? 1 : 0.7} // no click effect if disabled
+      activeOpacity={loading ? 1 : 0.7} // no click effect if disabled
     >
-      <Text
+      {loading ? <ActivityIndicator size="small" color={appColors.white}/>
+:  <Text
         style={[
           styles.text,
           type === 'secondary' && styles.secondaryText,
-          disabled && styles.disabledText,
+          loading && styles.disabledText,
         ]}
       >
         {title}
-      </Text>
+      </Text> }
+      
     </TouchableOpacity>
   );
 };
