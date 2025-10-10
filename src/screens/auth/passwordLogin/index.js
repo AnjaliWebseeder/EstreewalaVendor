@@ -1,17 +1,46 @@
-import React, { useContext, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import CustomButton from '../../../components/button';
 import CustomInput from '../../../components/Input';
 import BannerHeader from '../../../otherComponent/bannerHeader';
 import { styles } from './styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { VendorContext } from '../../../utils/context/vendorContext';
+import { useToast } from '../../../utils/context/toastContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginVendor,resetVendorState } from '../../../redux/slices/loginSlice';
 
 const PasswordLoginScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({}); // error state
-  const {  login  } = useContext(VendorContext);
+  const { showToast } = useToast();
+    const { loading, success, error } = useSelector((state) => state.login);
+
+       // 🧹 Clear previous login status on mount
+      useEffect(() => {
+        dispatch(resetVendorState());
+      }, [dispatch]);
+    
+
+    // Handle success toast
+    useEffect(() => {
+      if (success) {
+        showToast('Sign In successfully!', 'success');
+        // Navigate after a delay to show the toast
+        setTimeout(() => {
+         navigation.replace('VendorRegistration');
+        }, 1500);
+      }
+    }, [success, showToast, navigation]);
+  
+    // Handle error toast
+    useEffect(() => {
+      if (error) {
+        showToast(error || "Signup failed, please try again", 'error');
+      }
+    }, [error, showToast]);
+
   const validate = () => {
     let valid = true;
     let newErrors = {};
@@ -38,8 +67,11 @@ const PasswordLoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (validate()) {
-        await login('user_token_here');
-      navigation.replace('VendorRegistration');
+       const payload = {
+        email: email?.trim(),
+        password: password,
+      };
+      dispatch(loginVendor(payload));
     }
   };
 
@@ -68,13 +100,6 @@ const PasswordLoginScreen = ({ navigation }) => {
       setErrors(prev => ({ ...prev, password: '' }));
     }
   };
-
-  // ✅ Button disable condition
-  const isDisabled =
-    !email ||
-    !password ||
-    errors.email ||
-    errors.password;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -116,9 +141,9 @@ const PasswordLoginScreen = ({ navigation }) => {
 
         {/* ✅ Disabled if wrong details */}
         <CustomButton
+          loading={loading} 
           title="Sign In"
           onPress={handleLogin}
-          disabled={isDisabled}
         />
       </View>
     </SafeAreaView>

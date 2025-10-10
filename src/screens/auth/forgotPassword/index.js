@@ -6,12 +6,48 @@ import CustomInput from '../../../components/Input';
 import CustomButton from '../../../components/button';
 import appColors from '../../../theme/appColors';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+import { forgotPassword, clearError,resetForgotPasswordState } from "../../../redux/slices/forgotPasswordSlice";
+import { useToast } from '../../../utils/context/toastContext';
 
 export default function ForgotPassword({ navigation }) {
-  const [vendorImage, setVendorImage] = useState(null);
   const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  const [errorMsg, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const dispatch = useDispatch();
+  const { loading, success, error } = useSelector((state) => state.forgotPassword);
+  const { showToast } = useToast();
+
+    // 🧹 Clear previous login status on mount
+        useEffect(() => {
+          dispatch(resetForgotPasswordState());
+        }, [dispatch]);
+      
+
+   // Handle success
+  useEffect(() => {
+    if (success) {
+      console.log('Reset email sent successfully!');
+      showToast('Forgot Password email sent successfully!', 'success');
+          
+      // Navigate to reset password screen or show success message
+      setTimeout(() => {
+           navigation.navigate('VerifyEmail', { email: email });
+      }, 1000);
+    }
+  }, [success, showToast, navigation]);
+
+  // Handle error
+  useEffect(() => {
+    if (error) {
+      showToast(error || "Forgot Password failed, please try again", 'error');
+      setError(error);
+      setTimeout(() => {
+        dispatch(clearError());
+        setError('');
+      }, 5000);
+    }
+  }, [error, dispatch]);
 
   // ✅ Live validation
   useEffect(() => {
@@ -26,7 +62,7 @@ export default function ForgotPassword({ navigation }) {
     }
   }, [email, isSubmitted]);
 
-  const handleNext = () => {
+   const handleNext = () => {
     setIsSubmitted(true);
 
     if (!email.trim()) {
@@ -39,11 +75,13 @@ export default function ForgotPassword({ navigation }) {
 
     // ✅ Passed validation
     setError('');
-    navigation.navigate('VerifyEmail');
-  };
+    const payload = {
+      email: email.trim()
+    };
 
-  // ✅ Disable button if email invalid or empty
-  const isDisabled = !email || !!error;
+    console.log("Sending reset email to:", payload.email);
+    dispatch(forgotPassword(payload));
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -52,8 +90,6 @@ export default function ForgotPassword({ navigation }) {
           bannerImage={require('../../../assets/images/background.png')}
           title="Forgot Password"
           subtitle="Enter your email to receive reset instructions"
-          defaultAvatar={require('../../../assets/images/avtar.jpg')}
-          onImagePick={uri => setVendorImage(uri)}
           onBackPress={() => navigation.goBack()}
         />
 
@@ -64,7 +100,7 @@ export default function ForgotPassword({ navigation }) {
             placeholder="e.g. patel@123"
             value={email}
             onChangeText={setEmail}
-            error={error}
+            errorMsg={errorMsg}
           />
 
           <Text style={styles.footerText}>
@@ -73,7 +109,7 @@ export default function ForgotPassword({ navigation }) {
         </View>
 
         {/* ✅ Disabled until valid email */}
-        <CustomButton disabled={isDisabled} title="Next" onPress={handleNext} />
+        <CustomButton loading={loading}  title="Next" onPress={handleNext} />
 
         <TouchableOpacity
           style={styles.button}

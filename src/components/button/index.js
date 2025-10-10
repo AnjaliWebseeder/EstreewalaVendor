@@ -3,7 +3,7 @@ import { windowHeight } from '../../theme/appConstant';
 import appColors from '../../theme/appColors';
 import fonts from '../../theme/appFonts';
 
-const CustomButton = ({ title, onPress, type = 'primary', buttonContainerStyle, disabled,loading }) => {
+const CustomButton = ({ title, onPress, type = 'primary', buttonContainerStyle,loading }) => {
   return (
     <TouchableOpacity
       onPress={!loading ? onPress : null} // disable press if true

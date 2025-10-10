@@ -1,13 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { SIGNUP } from "../../api";
+import { LOGIN } from "../../api";
 
-
-export const signupVendor = createAsyncThunk(
-  "vendor/signupVendor",
+export const loginVendor = createAsyncThunk(
+  "vendor/loginVendor",
   async (vendorData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(SIGNUP,
+      const response = await axios.post(LOGIN,
         vendorData,
         {
           headers: {
@@ -17,12 +16,12 @@ export const signupVendor = createAsyncThunk(
         }
       );
 
-      console.log("✅ Signup API Response:", response.data);
+      console.log("✅ Login API Response:", response.data);
       return response.data;
     } catch (error) {
-      console.log("❌ Signup API Error:", error.response?.data || error.message);
+      console.log("❌ Login API Error:", error.response?.data || error.message);
       return rejectWithValue(
-        error.response?.data || { message: "Signup failed, please try again" }
+        error.response?.data || { message: "Login failed, please try again" }
       );
     }
   }
@@ -47,19 +46,19 @@ const vendorSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(signupVendor.pending, (state) => {
+      .addCase(loginVendor.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.success = false;
       })
-      .addCase(signupVendor.fulfilled, (state, action) => {
+      .addCase(loginVendor.fulfilled, (state, action) => {
         state.loading = false;
         state.vendor = action.payload;
         state.success = true;
 
-        console.log("SIGNUP VENDOR IS => ",action.payload)
+        console.log("LOGIN VENDOR IS => ",action.payload)
       })
-      .addCase(signupVendor.rejected, (state, action) => {
+      .addCase(loginVendor.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "Something went wrong";
         console.log("FAILED",action.payload)

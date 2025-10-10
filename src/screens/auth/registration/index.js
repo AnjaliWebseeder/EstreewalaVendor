@@ -7,11 +7,13 @@ import CustomInput from "../../../components/Input";
 import BannerHeader from "../../../otherComponent/bannerHeader";
 import { styles } from "./styles";
 import { windowHeight } from "../../../theme/appConstant";
-import { signupVendor, resetVendorState } from "../../../redux/slices/signupSlice"
-
+import { signupVendor } from "../../../redux/slices/signupSlice";
+import { useToast } from "../../../utils/context/toastContext";
+import { resetVendorState } from "../../../redux/slices/signupSlice";
 const RegisterScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { loading, success } = useSelector((state) => state.signup);
+  const { loading, success, error } = useSelector((state) => state.signup);
+  const { showToast } = useToast();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -20,29 +22,28 @@ const RegisterScreen = ({ navigation }) => {
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+   // 🧹 Clear previous login status on mount
   useEffect(() => {
-    if (!isSubmitted) return;
+    dispatch(resetVendorState());
+  }, [dispatch]);
 
-    setErrors((prev) => {
-      const newErrors = { ...prev };
-
-      if (firstName.trim()) newErrors.firstName = "";
-      if (lastName.trim()) newErrors.lastName = "";
-      if (email.trim() && /\S+@\S+\.\S+/.test(email)) newErrors.email = "";
-      if (password && password.length >= 6) newErrors.password = "";
-      if (confirmPassword && confirmPassword === password)
-        newErrors.confirmPassword = "";
-
-      return newErrors;
-    });
-  }, [firstName, lastName, email, password, confirmPassword, isSubmitted]);
-
+  // Handle success toast
   useEffect(() => {
     if (success) {
-      dispatch(resetVendorState());
-      navigation.replace("VendorRegistration"); 
+      showToast('Account created successfully!', 'success');
+      // Navigate after a delay to show the toast
+      setTimeout(() => {
+        navigation.replace("VendorRegistration");
+      }, 1500);
     }
-  }, [success]);
+  }, [success, showToast, navigation]);
+
+  // Handle error toast
+  useEffect(() => {
+    if (error) {
+      showToast(error || "Signup failed, please try again", 'error');
+    }
+  }, [error, showToast]);
 
   const handleCreateAccount = () => {
     setIsSubmitted(true);
@@ -63,19 +64,18 @@ const RegisterScreen = ({ navigation }) => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-   const payload = {
-  firstName: firstName?.trim(),
-  lastName: lastName?.trim(),
-  name: `${firstName?.trim()} ${lastName?.trim()}`,
-  email: email?.trim(),
-  password: password,
-};
+      const payload = {
+        firstName: firstName?.trim(),
+        lastName: lastName?.trim(),
+        name: `${firstName?.trim()} ${lastName?.trim()}`,
+        email: email?.trim(),
+        password: password,
+      };
 
-console.log("Payload sent to API:", JSON.stringify(payload));
+      console.log("Payload sent to API:", JSON.stringify(payload));
       dispatch(signupVendor(payload));
-    }
+    } 
   };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>

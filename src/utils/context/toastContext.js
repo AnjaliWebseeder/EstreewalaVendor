@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import CustomToast from "../../components/customToast"
 
 const ToastContext = createContext();
@@ -14,9 +14,9 @@ export const useToast = () => {
 export const ToastProvider = ({ children }) => {
   const [toast, setToast] = useState(null);
 
-  const showToast = (message, type = 'success', duration = 3000) => {
-    setToast({ message, type, duration });
-  };
+   const showToast = useCallback((message, type = 'success') => {
+    setToast({ visible: true, message, type });
+  }, []);
 
   const hideToast = () => {
     setToast(null);
