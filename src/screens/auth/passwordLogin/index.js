@@ -15,7 +15,7 @@ const PasswordLoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({}); // error state
   const { showToast } = useToast();
-    const { loading, success, error } = useSelector((state) => state.login);
+    const { loading } = useSelector((state) => state.login);
 
        // 🧹 Clear previous login status on mount
       useEffect(() => {
@@ -23,57 +23,48 @@ const PasswordLoginScreen = ({ navigation }) => {
       }, [dispatch]);
     
 
-    // Handle success toast
-    useEffect(() => {
-      if (success) {
-        showToast('Sign In successfully!', 'success');
-        // Navigate after a delay to show the toast
-        setTimeout(() => {
-         navigation.replace('VendorRegistration');
-        }, 1500);
-      }
-    }, [success, showToast, navigation]);
-  
-    // Handle error toast
-    useEffect(() => {
-      if (error) {
-        showToast(error || "Signup failed, please try again", 'error');
-      }
-    }, [error, showToast]);
-
-  const validate = () => {
-    let valid = true;
-    let newErrors = {};
-
-    if (!email) {
-      newErrors.email = "Email is required";
-      valid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Enter a valid email";
-      valid = false;
-    }
-
-    if (!password) {
-      newErrors.password = "Password is required";
-      valid = false;
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-      valid = false;
-    }
-
-    setErrors(newErrors);
-    return valid;
-  };
 
   const handleLogin = async () => {
-    if (validate()) {
-       const payload = {
-        email: email?.trim(),
-        password: password,
-      };
-      dispatch(loginVendor(payload));
-    }
+  // Validate fields
+  const newErrors = {};
+  if (!email.trim()) newErrors.email = 'Email is required';
+  else if (!/\S+@\S+\.\S+/.test(email))
+    newErrors.email = 'Enter a valid email address';
+
+  if (!password.trim()) newErrors.password = 'Password is required';
+
+  setErrors(newErrors);
+  if (Object.keys(newErrors).length > 0) return;
+
+  const payload = {
+    email: email.trim(),
+    password,
   };
+
+  console.log('Login Payload:', JSON.stringify(payload));
+
+  try {
+  
+    const resultAction = await dispatch(loginVendor(payload));
+
+    if (loginVendor.fulfilled.match(resultAction)) {
+          showToast('Sign In successfully!', 'success');
+     
+      // Wait a moment to show the toast, then navigate
+      setTimeout(() => {
+         navigation.replace('VendorRegistration');
+       
+      }, 1500);
+    } else if (loginVendor.rejected.match(resultAction)) {
+       showToast(resultAction?.payload?.message || 'Sign In Failed', "error");
+
+    }
+  } catch (err) {
+    console.error('Sign In Failed:', err);
+       showToast(err || 'Sign In Failed', "error");
+   
+  } 
+};
 
   // Live validation for email
   const handleEmailChange = text => {

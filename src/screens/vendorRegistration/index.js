@@ -19,7 +19,6 @@ import SetPrice from "./setPrice";
 import FilterCategoryModal from "../../otherComponent/vendorRegistration/filterCategoryModal"
 import PaymentSetup from "./paymentSetup";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { windowHeight } from "../../theme/appConstant";
 
 // Stepper steps
 const steps = [

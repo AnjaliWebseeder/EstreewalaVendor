@@ -7,75 +7,124 @@ import CustomInput from "../../../components/Input";
 import BannerHeader from "../../../otherComponent/bannerHeader";
 import { styles } from "./styles";
 import { windowHeight } from "../../../theme/appConstant";
-import { signupVendor } from "../../../redux/slices/signupSlice";
+import { signupVendor, resetVendorState } from "../../../redux/slices/signupSlice";
 import { useToast } from "../../../utils/context/toastContext";
-import { resetVendorState } from "../../../redux/slices/signupSlice";
+
 const RegisterScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { loading, success, error } = useSelector((state) => state.signup);
+  const { loading } = useSelector((state) => state.signup);
   const { showToast } = useToast();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-   // 🧹 Clear previous login status on mount
   useEffect(() => {
     dispatch(resetVendorState());
   }, [dispatch]);
 
-  // Handle success toast
-  useEffect(() => {
-    if (success) {
-      showToast('Account created successfully!', 'success');
-      // Navigate after a delay to show the toast
-      setTimeout(() => {
-        navigation.replace("VendorRegistration");
-      }, 1500);
-    }
-  }, [success, showToast, navigation]);
+  const handleCreateAccount = async () => {
+  setIsSubmitted(true);
+  const newErrors = {};
 
-  // Handle error toast
-  useEffect(() => {
-    if (error) {
-      showToast(error || "Signup failed, please try again", 'error');
-    }
-  }, [error, showToast]);
+  if (!firstName.trim()) newErrors.firstName = 'First name is required';
+  if (!lastName.trim()) newErrors.lastName = 'Last name is required';
 
-  const handleCreateAccount = () => {
-    setIsSubmitted(true);
-    const newErrors = {};
-    if (!firstName.trim()) newErrors.firstName = "First name is required";
-    if (!lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!email.trim()) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(email))
-      newErrors.email = "Enter a valid email";
-    if (!password) newErrors.password = "Password is required";
-    else if (password.length < 6)
-      newErrors.password = "Password must be at least 6 characters";
-    if (!confirmPassword)
-      newErrors.confirmPassword = "Please confirm your password";
-    else if (confirmPassword !== password)
-      newErrors.confirmPassword = "Passwords do not match";
+  if (!mobileNumber.trim()) newErrors.mobileNumber = 'Mobile number is required';
+  else if (!/^[0-9]{10}$/.test(mobileNumber))
+    newErrors.mobileNumber = 'Enter a valid 10-digit number';
 
-    setErrors(newErrors);
+  if (!email.trim()) newErrors.email = 'Email is required';
+  else if (!/\S+@\S+\.\S+/.test(email))
+    newErrors.email = 'Enter a valid email address';
 
-    if (Object.keys(newErrors).length === 0) {
-      const payload = {
-        firstName: firstName?.trim(),
-        lastName: lastName?.trim(),
-        name: `${firstName?.trim()} ${lastName?.trim()}`,
-        email: email?.trim(),
-        password: password,
-      };
+  if (!password) newErrors.password = 'Password is required';
+  else if (password.length < 6)
+    newErrors.password = 'Password must be at least 6 characters';
 
-      console.log("Payload sent to API:", JSON.stringify(payload));
-      dispatch(signupVendor(payload));
-    } 
+  if (!confirmPassword)
+    newErrors.confirmPassword = 'Please confirm your password';
+  else if (confirmPassword !== password)
+    newErrors.confirmPassword = 'Passwords do not match';
+
+  setErrors(newErrors);
+
+  // Stop if any validation error exists
+  if (Object.keys(newErrors).length > 0) return;
+
+  // ✅ Construct payload
+  const payload = {
+    firstName: firstName.trim(),
+    lastName: lastName.trim(),
+    email: email.trim(),
+    password,
+    phone: mobileNumber.trim(),
+    role: 'vendor',
   };
+  
+  try {
+    const resultAction = await dispatch(signupVendor(payload));
+    if (signupVendor.fulfilled.match(resultAction)) {
+      showToast( 'Account created successfully!', "success");
+
+      setTimeout(() => {
+        navigation.replace('PasswordLogin');
+      }, 1500);
+    } else if (signupVendor.rejected.match(resultAction)) {
+        showToast(resultAction?.payload?.message || 'Signup Failed', "error");
+    }
+  } catch (err) {
+    console.error('Signup error:', err);
+      showToast(err || 'Signup Failed', "error");
+  } finally {
+  
+  }
+};
+  // ✅ Real-time validation: clears error if field becomes valid
+  const handleInputChange = (field, value) => {
+    // update value
+    switch (field) {
+      case "firstName":
+        setFirstName(value);
+        if (value.trim()) removeError(field);
+        break;
+      case "lastName":
+        setLastName(value);
+        if (value.trim()) removeError(field);
+        break;
+      case "mobileNumber":
+        setMobileNumber(value);
+        if (/^[0-9]{10}$/.test(value)) removeError(field);
+        break;
+      case "email":
+        setEmail(value);
+        if (/\S+@\S+\.\S+/.test(value)) removeError(field);
+        break;
+      case "password":
+        setPassword(value);
+        if (value.length >= 6) removeError(field);
+        break;
+      case "confirmPassword":
+        setConfirmPassword(value);
+        if (value === password) removeError(field);
+        break;
+    }
+  };
+
+  // helper to remove error dynamically
+  const removeError = (field) => {
+    setErrors((prev) => {
+      const updated = { ...prev };
+      delete updated[field];
+      return updated;
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>
@@ -93,28 +142,37 @@ const RegisterScreen = ({ navigation }) => {
               label="First Name *"
               placeholder="e.g. Nick"
               value={firstName}
-              onChangeText={setFirstName}
+              onChangeText={(val) => handleInputChange("firstName", val)}
               error={errors.firstName}
             />
             <CustomInput
               label="Last Name *"
               placeholder="e.g. Rao"
               value={lastName}
-              onChangeText={setLastName}
+              onChangeText={(val) => handleInputChange("lastName", val)}
               error={errors.lastName}
+            />
+            <CustomInput
+              label="Mobile Number *"
+              placeholder="e.g. 9876543210"
+              keyboardType="number-pad"
+              value={mobileNumber}
+              onChangeText={(val) => handleInputChange("mobileNumber", val)}
+              error={errors.mobileNumber}
+              maxLength={10}
             />
             <CustomInput
               label="Email Address *"
               placeholder="e.g. nick123@gmail.com"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(val) => handleInputChange("email", val)}
               error={errors.email}
             />
             <CustomInput
               label="Password *"
               placeholder="Enter password"
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(val) => handleInputChange("password", val)}
               secureTextEntry
               error={errors.password}
             />
@@ -122,12 +180,18 @@ const RegisterScreen = ({ navigation }) => {
               label="Confirm Password *"
               placeholder="Confirm password"
               value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              onChangeText={(val) => handleInputChange("confirmPassword", val)}
               secureTextEntry
               error={errors.confirmPassword}
             />
           </View>
-            <CustomButton loading={loading} title="Create Account" onPress={handleCreateAccount} />
+
+          <CustomButton
+            loading={loading}
+            title="Create Account"
+            onPress={handleCreateAccount}
+          />
+
           <View style={styles.row}>
             <Text style={styles.footerText}>Already have an account ? </Text>
             <TouchableOpacity onPress={() => navigation.navigate("PasswordLogin")}>

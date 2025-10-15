@@ -15,39 +15,13 @@ export default function ForgotPassword({ navigation }) {
   const [errorMsg, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const dispatch = useDispatch();
-  const { loading, success, error } = useSelector((state) => state.forgotPassword);
+  const { loading } = useSelector((state) => state.forgotPassword);
   const { showToast } = useToast();
 
-    // 🧹 Clear previous login status on mount
         useEffect(() => {
           dispatch(resetForgotPasswordState());
         }, [dispatch]);
       
-
-   // Handle success
-  useEffect(() => {
-    if (success) {
-      console.log('Reset email sent successfully!');
-      showToast('Forgot Password email sent successfully!', 'success');
-          
-      // Navigate to reset password screen or show success message
-      setTimeout(() => {
-           navigation.navigate('VerifyEmail', { email: email });
-      }, 1000);
-    }
-  }, [success, showToast, navigation]);
-
-  // Handle error
-  useEffect(() => {
-    if (error) {
-      showToast(error || "Forgot Password failed, please try again", 'error');
-      setError(error);
-      setTimeout(() => {
-        dispatch(clearError());
-        setError('');
-      }, 5000);
-    }
-  }, [error, dispatch]);
 
   // ✅ Live validation
   useEffect(() => {
@@ -62,7 +36,7 @@ export default function ForgotPassword({ navigation }) {
     }
   }, [email, isSubmitted]);
 
-   const handleNext = () => {
+   const handleNext = async () => {
     setIsSubmitted(true);
 
     if (!email.trim()) {
@@ -81,6 +55,29 @@ export default function ForgotPassword({ navigation }) {
 
     console.log("Sending reset email to:", payload.email);
     dispatch(forgotPassword(payload));
+
+     try {
+       
+         const resultAction = await dispatch(forgotPassword(payload));
+     
+         if (forgotPassword.fulfilled.match(resultAction)) {
+               showToast('OTP sent for password reset!', 'success');
+          
+           // Wait a moment to show the toast, then navigate
+           setTimeout(() => {
+             navigation.navigate('VerifyEmail', { email: email });
+            
+           }, 1500);
+         } else if (forgotPassword.rejected.match(resultAction)) {
+            showToast(resultAction?.payload?.message || 'User not found', "error");
+     
+         }
+       } catch (err) {
+         console.error('User not found', err);
+            showToast(err || 'User not found', "error");
+        
+       } 
+
   };
 
   return (

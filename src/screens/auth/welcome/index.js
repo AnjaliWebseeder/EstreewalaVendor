@@ -10,7 +10,7 @@ import { useToast } from '../../../utils/context/toastContext';
 
 const WelcomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { loading, success, error } = useSelector((state) => state.otp);
+  const { loading , error} = useSelector((state) => state.otp);
   const [phone, setPhone] = useState('');
   const [localError, setLocalError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -25,32 +25,6 @@ const WelcomeScreen = ({ navigation }) => {
     }
   }, [phone, isSubmitted]);
 
-  // Handle success from Redux
-  useEffect(() => {
-    if (success) {
-        showToast('OTP sent successfully!', 'success');
-      // Navigate to OTP screen
-      setTimeout(() => {
-        navigation.navigate('Otp', { phone: `+91${phone}` });
-      }, 500);
-    }
-  }, [success, navigation, phone]);
-
-  // Handle error from Redux
-  useEffect(() => {
-    if (error) {
-     showToast(error, 'error');
-      setLocalError(error);
-      
-      // Auto-clear error after 5 seconds
-      const timer = setTimeout(() => {
-        dispatch(clearError());
-        setLocalError('');
-      }, 5000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [error, dispatch]);
 
   const handleRequestOtp = async () => {
     setIsSubmitted(true);
@@ -72,28 +46,26 @@ const WelcomeScreen = ({ navigation }) => {
 
     // Prepare payload for API
     const payload = {
-      phone: `+91${phoneDigits}`
+      phone: phoneDigits
     };
 
-    console.log("Dispatching OTP request for:", payload.phone);
-    
-    try {
-      // Dispatch Redux action to send OTP
-      const result = await dispatch(sendOtp(payload));
-      
-      // Check if the action was successful
-      if (sendOtp.fulfilled.match(result)) {
-        console.log('OTP dispatch successful');
-        // Store phone in Redux for use in OTP screen
-        dispatch(setPhone(phoneDigits));
-      } else {
-        console.log('OTP dispatch failed:', result.error);
-      }
-      
-    } catch (dispatchError) {
-      console.log('Dispatch error:', dispatchError);
-      setLocalError('Failed to send OTP. Please try again.');
+     try {
+    const result = await dispatch(sendOtp(payload));
+    if (sendOtp.fulfilled.match(result)) {
+       showToast('OTP sent to mobile for login!', 'success');
+     setPhone(phoneDigits);
+      setTimeout(() => {
+        navigation.navigate('Otp', { phone: phoneDigits });
+      }, 1000);
+    } else if (sendOtp.rejected.match(result)) {
+       showToast(result?.payload || 'Failed to Send OTP', "error");
     }
+  } catch (err) {
+    console.error('Error dispatching OTP:', err);
+       showToast(err || 'Failed to Send OTP', "error");
+  }
+    
+   
   };
 
   // Format phone number as user types

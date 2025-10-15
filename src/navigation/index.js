@@ -5,7 +5,7 @@ import { VendorContext } from '../utils/context/vendorContext';
 
 // Import all your screens...
 import WelcomeScreen from '../screens/auth/welcome'
-import OtpScreen from '../screens/auth/otp'
+import OtpScreen from '../screens/auth/verifyphoneOtp'
 import PasswordLoginScreen from '../screens/auth/passwordLogin'
 import RegisterScreen from '../screens/auth/registration'
 import ForgotPassword from '../screens/auth/forgotPassword'
@@ -80,7 +80,7 @@ const Navigation = () => {
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
-        initialRouteName={initialRoute}
+        initialRouteName={"ResetPassword"}
         screenOptions={{ headerShown: false }}
       >
         {/* ===== Auth Flow ===== */}

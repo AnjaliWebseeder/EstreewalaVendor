@@ -15,26 +15,8 @@ const OtpScreen = ({ navigation , route }) => {
   const [errorMsg, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false); // track if user clicked verify
   const phone = route.params?.phone;
-  const { loading, success, error } = useSelector((state) => state.otpVerify);
+  const { loading, error } = useSelector((state) => state.otpVerify);
   const { showToast } = useToast(); 
-
-    // 🧹 Clear previous login status on mount
-        useEffect(() => {
-          dispatch(resetOtpVerifyState());
-        }, [dispatch]);
-      
-    // Handle success
-  useEffect(() => {
-    if (success) {
-      console.log('OTP verified successfully!');
-      showToast('OTP sent successfully!', 'success');
-      // Navigate to dashboard or next screen
-      setTimeout(() => {
-       navigation.replace('VendorRegistration');
-      }, 1000);
-    }
-  }, [success, navigation]);
-
   // Handle error
   useEffect(() => {
     if (error) {
@@ -84,7 +66,22 @@ const OtpScreen = ({ navigation , route }) => {
     };
 
     console.log("Verifying OTP:", payload);
-    dispatch(verifyOtp(payload));
+    
+    
+         try {
+        const result = await dispatch(verifyOtp(payload));
+        if (verifyOtp.fulfilled.match(result)) {
+           showToast('Login successful!', 'success');
+          setTimeout(() => {
+            navigation.replace('VendorRegistration');
+          }, 1000);
+        } else if (verifyOtp.rejected.match(result)) {
+           showToast(result?.payload || 'Wrong Otp, pls try again!', "error");
+        }
+      } catch (err) {
+        console.error('Error dispatching OTP:', err);
+           showToast(err || 'Wrong Otp, pls try again!', "error");
+      }
   
   };
 
@@ -105,9 +102,6 @@ const OtpScreen = ({ navigation , route }) => {
         <Text style={styles.subText}>We have sent the code verification to your Mobile Number</Text>
 
         <OtpInput otp={otp} setOtp={setOtp} />
-
-        {/* 👇 Error message */}
-        {errorMsg ? <Text style={styles.errorMsg}>{errorMsg}</Text> : null}
 
         <View style={styles.main}>
           <Text style={styles.resend}>Resend OTP in 0:45</Text>

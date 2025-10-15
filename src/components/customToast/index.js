@@ -43,7 +43,7 @@ const CustomToast = ({ message, type = 'success', duration = 3000, onHide }) => 
 
   const getBackgroundColor = () => {
     switch (type) {
-      case 'success': return '#4CAF50';
+    case 'success': return "#2ECC71";
       case 'error': return '#F44336';
       case 'warning': return '#FF9800';
       case 'info': return '#2196F3';
@@ -81,24 +81,24 @@ const CustomToast = ({ message, type = 'success', duration = 3000, onHide }) => 
 const styles = StyleSheet.create({
   toast: {
     position: 'absolute',
-    bottom: 80, // Position above bottom navigation
+    bottom: 30, // Position above bottom navigation
     left: 20,
     right: 20,
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 0,
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     borderRadius: 12,
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    minHeight: 45,
+    minHeight: 40,
   },
   toastText: {
     color: '#FFF',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     marginLeft: 10,
     flex: 1,

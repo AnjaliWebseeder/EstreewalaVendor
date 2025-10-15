@@ -5,13 +5,19 @@ import BannerHeader from '../../../otherComponent/bannerHeader';
 import OtpInput from '../../../otherComponent/otpInput';
 import CustomButton from '../../../components/button';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { verifyOtpReset } from '../../../redux/slices/verifyOtpSlice';
+import { useToast } from '../../../utils/context/toastContext';
+import { useDispatch, useSelector } from 'react-redux';
 
-export default function VerifyEmail({ navigation }) {
+export default function VerifyEmail({ navigation , route }) {
   const [otp, setOtp] = useState(['', '', '', '']);
   const [error, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [timer, setTimer] = useState(30); // 30 seconds countdown
-
+  const email = route.params?.email
+   const { loading } = useSelector((state) => state.verifyOtpReset);
+   const { showToast } = useToast();
+  const dispatch = useDispatch();
   // Countdown timer
   useEffect(() => {
     let interval;
@@ -51,12 +57,22 @@ export default function VerifyEmail({ navigation }) {
 
     // ✅ Passed validation
     setError('');
-    try {
-     navigation.navigate('ResetPassword')
-    } catch (err) {
-      console.error(err);
-      Alert.alert('Error', 'Invalid or expired OTP. Please try again.');
+     const payload = {
+  email: email.trim(),
+  otp: "1234"
+}
+      try {
+    const result = await dispatch(verifyOtpReset(payload));
+    if (verifyOtpReset.fulfilled.match(result)) {
+      showToast("OTP verified successfully!", "success");
+      navigation.navigate('ResetPassword',{payload:payload})
+    } else if (verifyOtpReset.rejected.match(result)) {
+      showToast( result?.payload?.message || "OTP verification failed", "error");
     }
+  } catch (err) {
+    console.error("Dispatch error:", err);
+    showToast("Something went wrong", "error");
+  }
   };
 
   const handleResend = async () => {
@@ -94,7 +110,7 @@ export default function VerifyEmail({ navigation }) {
         <View style={styles.blankView} />
 
         {/* ✅ Disabled until OTP valid */}
-        <CustomButton title="Next" onPress={handleVerify} disabled={isDisabled} />
+        <CustomButton loading={loading} title="Next" onPress={handleVerify} disabled={isDisabled} />
 
         <TouchableOpacity
           style={styles.button}
