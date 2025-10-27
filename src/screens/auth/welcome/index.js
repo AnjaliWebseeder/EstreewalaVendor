@@ -15,6 +15,7 @@ const WelcomeScreen = ({ navigation }) => {
   const [localError, setLocalError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
    const { showToast } = useToast(); 
+
   // Clear error automatically when user types a valid phone number
   useEffect(() => {
     if (!isSubmitted) return;

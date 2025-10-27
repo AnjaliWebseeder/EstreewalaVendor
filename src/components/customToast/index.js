@@ -46,7 +46,7 @@ const CustomToast = ({ message, type = 'success', duration = 3000, onHide }) => 
     case 'success': return "#2ECC71";
       case 'error': return '#F44336';
       case 'warning': return '#FF9800';
-      case 'info': return '#2196F3';
+      case 'info': return '#232425ff';
       default: return '#4CAF50';
     }
   };

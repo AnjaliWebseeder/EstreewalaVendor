@@ -235,7 +235,7 @@ export const styles = StyleSheet.create({
     
   },
   freeDaysText: {
-    color: COLORS.white,
+    color: COLORS.black,
     fontSize: 10,
     fontWeight: '600',
     fontFamily:fonts.InterRegular
@@ -799,5 +799,166 @@ cancelButtonText: {
   fontSize: 14,
   fontWeight: '600',
   fontFamily:fonts.InterSemiBold
+},
+// Add these styles to your existing styles.js
+
+paymentModalContent: {
+  maxHeight: '80%',
+  width: '100%',
+},
+
+paymentPlanInfo: {
+  alignItems: 'center',
+  paddingVertical: 0,
+  borderBottomWidth: 1,
+  borderBottomColor: '#E5E7EB',
+  paddingBottom:10
+},
+
+paymentPlanName: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  color: '#1F2937',
+  marginTop: 10,
+},
+
+paymentDuration: {
+  fontSize: 16,
+  color: '#6B7280',
+  marginTop: 4,
+},
+
+paymentValidity: {
+  fontSize: 14,
+  color: '#9CA3AF',
+  marginTop: 2,
+},
+// Add to your styles.js
+paymentPriceBreakdown: {
+  fontSize: 12,
+  color: '#6B7280',
+  marginTop: 4,
+  textAlign: 'center',
+},
+
+paymentFeatures: {
+  paddingVertical: 10,
+  borderBottomWidth: 1,
+  borderBottomColor: '#E5E7EB',
+},
+
+paymentFeature: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 8,
+},
+
+paymentFeatureText: {
+  fontSize: 14,
+  color: '#374151',
+  marginLeft: 8,
+},
+
+razorpayButton: {
+  backgroundColor: appColors.secondary,
+  padding: 16,
+  borderRadius: 12,
+  marginVertical: 20,
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  shadowColor: '#000',
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 5,
+},
+
+razorpayButtonContent: {
+  flexDirection: 'row',
+  alignItems: 'center',
+},
+
+razorpayButtonText: {
+  color: '#FFFFFF',
+  fontSize: 16,
+  fontWeight: 'bold',
+  marginLeft: 8,
+},
+
+securityText: {
+  textAlign: 'center',
+  fontSize: 12,
+  color: '#6B7280',
+  marginTop: 10,
+},
+
+// For View Details Modal
+modalTitleContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: 1,
+},
+
+pricingTable: {
+  marginBottom: 20,
+},
+
+pricingRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingVertical: 12,
+  borderBottomWidth: 1,
+  borderBottomColor: '#F3F4F6',
+},
+
+pricingLeft: {
+  flex: 1,
+},
+
+pricingRight: {
+  alignItems: 'flex-end',
+},
+
+pricingDuration: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: '#1F2937',
+},
+
+pricingDays: {
+  fontSize: 14,
+  color: '#6B7280',
+  marginTop: 2,
+},
+
+pricingAmount: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  color: appColors.secondary,
+},
+
+featuresSection: {
+  marginBottom: 20,
+},
+
+benefitsSection: {
+  marginBottom: 20,
+},
+
+benefitItem: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 12,
+},
+
+benefitText: {
+  fontSize: 14,
+  color: '#374151',
+  marginLeft: 8,
 },
 });

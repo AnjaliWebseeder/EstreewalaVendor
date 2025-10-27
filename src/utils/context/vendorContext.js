@@ -1,6 +1,7 @@
-import React, { createContext, useState,useEffect } from 'react';
+import React, { createContext, useState,useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getAppLaunchStatus , setAppLaunched} from "../context/appLaunchStatus"
+import { mockData } from '../data';
 export const VendorContext = createContext();
 
 export const VendorProvider = ({ children }) => {
@@ -11,7 +12,7 @@ export const VendorProvider = ({ children }) => {
   const [hasCompletedSubscription, setHasCompletedSubscription] = useState(false); 
   const initialServices = [
     { id: 1, name: "Dry Wash" },
-    { id: 2, name: "Wash" },
+    { id: 2, name: "Washing" },
     { id: 3, name: "Ironing" },
     { id: 4, name: "Wash & Iron" },
   ];
@@ -28,6 +29,7 @@ export const VendorProvider = ({ children }) => {
   const [servicePrices, setServicePrices] = useState({});
   const [qrImage, setQrImage] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+
 
 
 useEffect(() => {
@@ -115,6 +117,41 @@ useEffect(() => {
     }
   };
 
+// In VendorContext.js - update getAllPricingData function
+const getAllPricingData = useCallback(() => {
+  const itemPricing = {
+    "Dry Wash": [],
+    "Washing": [],
+    "Ironing": [],
+    "Wash & Iron": []
+  };
+  
+  // Get selected services
+  const selectedServices = services.filter(service => 
+    selectedServiceIds.includes(service.id)
+  ).map(service => service.name);
+
+  // For each selected service, add items with their prices
+  selectedServices.forEach(serviceName => {
+    Object.keys(mockData).forEach(category => {
+      mockData[category].forEach(item => {
+        const currentPrice = priceMap[item.id] !== undefined ? priceMap[item.id] : item.price;
+        const priceValue = Math.max(1, Math.round(parseFloat(currentPrice) || 0));
+        
+        // Add item to the corresponding service array
+        if (itemPricing[serviceName]) {
+          itemPricing[serviceName].push({
+            item: item.name,
+            price: priceValue
+          });
+        }
+      });
+    });
+  });
+  
+  console.log("✅ Final Pricing Data Structure:", itemPricing);
+  return itemPricing;
+}, [priceMap, services, selectedServiceIds]);
   
   // New pickups - orders waiting for acceptance
   const [newPickups, setNewPickups] = useState([
@@ -387,6 +424,7 @@ useEffect(() => {
         userLocation,
         hasCompletedSubscription,
         completeSubscription,
+        getAllPricingData
       }}
     >
       {children}

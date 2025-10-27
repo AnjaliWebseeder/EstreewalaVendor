@@ -5,7 +5,7 @@ import BannerHeader from '../../../otherComponent/bannerHeader';
 import OtpInput from '../../../otherComponent/otpInput';
 import CustomButton from '../../../components/button';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { verifyOtpReset } from '../../../redux/slices/verifyOtpSlice';
+import { verifyOtp } from '../../../redux/slices/verifyOtpSlice';
 import { useToast } from '../../../utils/context/toastContext';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -62,11 +62,11 @@ export default function VerifyEmail({ navigation , route }) {
   otp: "1234"
 }
       try {
-    const result = await dispatch(verifyOtpReset(payload));
-    if (verifyOtpReset.fulfilled.match(result)) {
+    const result = await dispatch(verifyOtp(payload));
+    if (verifyOtp.fulfilled.match(result)) {
       showToast("OTP verified successfully!", "success");
       navigation.navigate('ResetPassword',{payload:payload})
-    } else if (verifyOtpReset.rejected.match(result)) {
+    } else if (verifyOtp.rejected.match(result)) {
       showToast( result?.payload?.message || "OTP verification failed", "error");
     }
   } catch (err) {

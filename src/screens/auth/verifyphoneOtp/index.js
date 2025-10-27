@@ -17,18 +17,6 @@ const OtpScreen = ({ navigation , route }) => {
   const phone = route.params?.phone;
   const { loading, error } = useSelector((state) => state.otpVerify);
   const { showToast } = useToast(); 
-  // Handle error
-  useEffect(() => {
-    if (error) {
-      setError(error);
-      showToast(error, 'error');
-      setTimeout(() => {
-        dispatch(clearError());
-        setError('');
-      }, 5000);
-    }
-  }, [error, dispatch]);
-
 
   // ✅ Clear errorMsg automatically when user types a valid OTP
   useEffect(() => {
@@ -65,13 +53,10 @@ const OtpScreen = ({ navigation , route }) => {
       otp: "1234"
     };
 
-    console.log("Verifying OTP:", payload);
-    
-    
          try {
         const result = await dispatch(verifyOtp(payload));
         if (verifyOtp.fulfilled.match(result)) {
-           showToast('Login successful!', 'success');
+          //  showToast('Login successful!', 'success');
           setTimeout(() => {
             navigation.replace('VendorRegistration');
           }, 1000);

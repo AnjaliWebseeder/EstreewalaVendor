@@ -15,8 +15,6 @@ export const loginVendor = createAsyncThunk(
           timeout: 10000, 
         }
       );
-
-      console.log("✅ Login API Response:", response.data);
       return response.data;
     } catch (error) {
       console.log("❌ Login API Error:", error.response?.data || error.message);
@@ -35,6 +33,7 @@ const vendorSlice = createSlice({
     loading: false,
     error: null,
     success: false,
+    token: null,
   },
   reducers: {
     resetVendorState: (state) => {
@@ -42,6 +41,7 @@ const vendorSlice = createSlice({
       state.loading = false;
       state.error = null;
       state.success = false;
+      state.token = null;
     },
   },
   extraReducers: (builder) => {
@@ -55,13 +55,14 @@ const vendorSlice = createSlice({
         state.loading = false;
         state.vendor = action.payload;
         state.success = true;
+        state.token = action.payload.token || action.payload.accessToken;
 
-        console.log("LOGIN VENDOR IS => ",action.payload)
+        console.log("LOGIN VENDOR IS => ",action.payload.token)
       })
       .addCase(loginVendor.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "Something went wrong";
-        console.log("FAILED",action.payload)
+        state.token = null;
       });
   },
 });

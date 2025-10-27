@@ -6,6 +6,8 @@ import otpVerifyReducer from "./slices/otpVerifySlice"
 import forgotPasswordReducer from "./slices/forgotPasswordSlice"
 import verifyOtpResetReducer from "./slices/verifyOtpSlice"
 import resetPasswordReducer from "./slices/resetPasswordSlice"
+import vendorOnboardingReducer from "./slices/vendorOnboardingSlice"
+import subscriptionReducer from "./slices/subscriptionSlice"
 
 const store = configureStore({
   reducer: {
@@ -15,7 +17,9 @@ const store = configureStore({
     otpVerify: otpVerifyReducer,
     forgotPassword: forgotPasswordReducer,
     verifyOtpReset:verifyOtpResetReducer,
-    resetPassword: resetPasswordReducer
+    resetPassword: resetPasswordReducer,
+    vendorOnboarding: vendorOnboardingReducer,
+    subscription: subscriptionReducer,
   },
 });
 

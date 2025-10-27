@@ -2,8 +2,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useContext, useRef, useEffect, useState } from 'react';
 import { VendorContext } from '../utils/context/vendorContext';
-
-// Import all your screens...
 import WelcomeScreen from '../screens/auth/welcome'
 import OtpScreen from '../screens/auth/verifyphoneOtp'
 import PasswordLoginScreen from '../screens/auth/passwordLogin'
@@ -72,7 +70,6 @@ const Navigation = () => {
     }
   }, [isLoading, userToken, isFirstLaunch, hasCompletedVendorRegistration]);
 
-  // Show splash while determining initial route
   if (isLoading || initialRoute === null) {
     return <Spalsh />;
   }
@@ -80,10 +77,10 @@ const Navigation = () => {
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
-        initialRouteName={"ResetPassword"}
         screenOptions={{ headerShown: false }}
       >
         {/* ===== Auth Flow ===== */}
+        <Stack.Screen name="Splash" component={Spalsh} />
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Otp" component={OtpScreen} />
         <Stack.Screen name="PasswordLogin" component={PasswordLoginScreen} />
@@ -92,7 +89,6 @@ const Navigation = () => {
         <Stack.Screen name="VerifyEmail" component={VerifyEmail} />
         <Stack.Screen name="ResetPassword" component={ResetPassword} />
         <Stack.Screen name="StatusScreen" component={StatusScreen} />
-        <Stack.Screen name="Splash" component={Spalsh} />
 
         {/* ===== Onboarding Flow ===== */}
         <Stack.Screen name="VendorRegistration" component={VendorRegistration} />

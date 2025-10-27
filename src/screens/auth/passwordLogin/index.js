@@ -11,7 +11,7 @@ import { loginVendor,resetVendorState } from '../../../redux/slices/loginSlice';
 
 const PasswordLoginScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({}); // error state
   const { showToast } = useToast();
@@ -40,25 +40,20 @@ const PasswordLoginScreen = ({ navigation }) => {
     email: email.trim(),
     password,
   };
-
-  console.log('Login Payload:', JSON.stringify(payload));
-
   try {
   
     const resultAction = await dispatch(loginVendor(payload));
 
-    if (loginVendor.fulfilled.match(resultAction)) {
-          showToast('Sign In successfully!', 'success');
-     
-      // Wait a moment to show the toast, then navigate
-      setTimeout(() => {
-         navigation.replace('VendorRegistration');
-       
-      }, 1500);
-    } else if (loginVendor.rejected.match(resultAction)) {
-       showToast(resultAction?.payload?.message || 'Sign In Failed', "error");
+   if (loginVendor.fulfilled.match(resultAction)) {
+  showToast('Sign In successfully!', 'success');
 
-    }
+  setTimeout(() => {
+    navigation.replace('VendorRegistration');
+  }, 1500);
+} else if (loginVendor.rejected.match(resultAction)) {
+  showToast(resultAction?.payload?.message || 'Sign In Failed', "error");
+}
+
   } catch (err) {
     console.error('Sign In Failed:', err);
        showToast(err || 'Sign In Failed', "error");

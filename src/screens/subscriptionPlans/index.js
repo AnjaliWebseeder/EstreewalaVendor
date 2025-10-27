@@ -1,5 +1,5 @@
 // SubscriptionPlansScreen.js
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,44 +10,39 @@ import {
   Modal,
   Animated,
   Easing,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+import RazorpayCheckout from 'react-native-razorpay';
 import { styles } from "./styles"
 import appColors from '../../theme/appColors';
-import { setAppLaunched } from '../../utils/context/appLaunchStatus';
 import { BackIcon } from '../../assets/Icons/backIcon';
 import { VendorContext } from '../../utils/context/vendorContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { 
+  getSubscriptionPlans, 
+  createSubscription, 
+  verifySubscription,
+  clearSubscriptionError 
+} from "../../redux/slices/subscriptionSlice"
 
-const {  height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
-// Static Colors
-const COLORS = {
-  primary: '#2563EB',
-  secondary: '#1E40AF',
-  white: '#FFFFFF',
-  black: '#000000',
-  background: '#F8FAFD',
-  textPrimary: '#1F2937',
-  textSecondary: '#6B7280',
-  textLight: '#9CA3AF',
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  border: '#E5E7EB',
-  cardBackground: '#FFFFFF',
-  promo: '#2D3748',
-  gold: '#FFD700',
-  green: '#48BB78',
-  orange: '#ED8936',
-  lightBlue: '#F0F7FF',
-  lightOrange: '#FEEBC8',
-};
-
-const SubscriptionPlansScreen = ({ navigation , route }) => {
+const SubscriptionPlansScreen = ({ navigation, route }) => {
+  const dispatch = useDispatch();
+  const { 
+    plans, 
+    loading, 
+    creating, 
+    verifying, 
+    error,
+    currentOrder 
+  } = useSelector((state) => state.subscription);
+  
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [selectedDuration, setSelectedDuration] = useState('M'); // Default to Monthly
+  const [selectedDuration, setSelectedDuration] = useState('monthly');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPlanDetails, setSelectedPlanDetails] = useState(null);
@@ -60,7 +55,21 @@ const SubscriptionPlansScreen = ({ navigation , route }) => {
   const { completeSubscription } = useContext(VendorContext);
   const insets = useSafeAreaInsets();
 
-  React.useEffect(() => {
+  // Load subscription plans on component mount
+  useEffect(() => {
+    dispatch(getSubscriptionPlans());
+  }, [dispatch]);
+
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      showToast(error, 'error');
+      dispatch(clearSubscriptionError());
+    }
+  }, [error]);
+
+  // Animation effects
+  useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -76,6 +85,86 @@ const SubscriptionPlansScreen = ({ navigation , route }) => {
       })
     ]).start();
   }, []);
+
+  // Transform API plans to UI format
+  const transformPlans = () => {
+    if (!plans) return [];
+
+    return Object.keys(plans).map(planKey => {
+      const plan = plans[planKey];
+      const icons = {
+        'A': 'iron',
+        'B': 'local-laundry-service', 
+        'C': 'dry-cleaning',
+        'D': 'star',
+        'E': 'layers'
+      };
+      
+      const colors = {
+        'A': '#4A90E2',
+        'B': '#50C878',
+        'C': '#FF6B6B',
+        'D': '#FFA500',
+        'E': '#9B59B6'
+      };
+
+      return {
+        code: planKey,
+        name: plan.name,
+        description: `Includes: ${plan.services.join(', ')}`,
+        features: plan.services,
+        color: colors[planKey] || '#4A90E2',
+        icon: icons[planKey] || 'star',
+        popular: planKey === 'B' || planKey === 'D',
+        apiData: plan
+      };
+    });
+  };
+
+  const durations = [
+    { 
+      code: 'monthly', 
+      label: 'Monthly', 
+      days: '30 days', 
+      freeDays: null, 
+      saving: 0,
+      badge: null
+    },
+    { 
+      code: 'quarterly', 
+      label: 'Quarterly', 
+      days: '105 days', 
+      freeDays: '15 days free', 
+      saving: 10,
+      badge: 'Popular'
+    },
+    { 
+      code: 'half-yearly', 
+      label: 'Half Yearly', 
+      days: '210 days', 
+      freeDays: '30 days free', 
+      saving: 15,
+      badge: 'Best Value'
+    },
+    { 
+      code: 'yearly', 
+      label: 'Yearly', 
+      days: '405 days', 
+      freeDays: '45 days free', 
+      saving: 20,
+      badge: 'Smart Saver'
+    },
+  ];
+
+  // Get selected plan price - FIXED: Use the actual selected plan data
+  const getSelectedPlanPrice = () => {
+    if (!selectedPlan || !selectedDuration || !plans) return 0;
+    
+    const plan = plans[selectedPlan];
+    if (!plan || !plan.durations || !plan.durations[selectedDuration]) return 0;
+    
+    return plan.durations[selectedDuration].price;
+  };
 
   const showToast = (text, type = 'info') => {
     setMessage({ text, type });
@@ -103,151 +192,133 @@ const SubscriptionPlansScreen = ({ navigation , route }) => {
     });
   };
 
-  const plans = [
-    {
-      code: 'P',
-      name: 'Basic Press',
-      description: 'Professional Ironing Service',
-      features: ['Professional Ironing', 'Steam Press', 'Wrinkle Removal', 'Same Day Service', 'Free Pickup'],
-      color: '#4A90E2',
-      icon: 'iron',
-      popular: false,
-    },
-    {
-      code: 'W',
-      name: 'Wash Pro',
-      description: 'Complete Washing Solution',
-      features: ['Machine Wash', 'Premium Detergent', 'Fabric Softener', 'Stain Treatment', 'Quick Dry'],
-      color: '#50C878',
-      icon: 'local-laundry-service',
-      popular: true,
-    },
-    {
-      code: 'DC',
-      name: 'Dry Clean Elite',
-      description: 'Premium Dry Cleaning',
-      features: ['Chemical Cleaning', 'Stain Removal', 'Premium Packaging', 'Expert Handling', 'Odor Removal'],
-      color: '#FF6B6B',
-      icon: 'dry-cleaning',
-      popular: false,
-    },
-    {
-      code: 'A+B+C+Others',
-      name: 'Ultimate Bundle',
-      description: 'All-in-One Package',
-      features: ['All Services Included', 'Priority Service', 'Free Pickup & Delivery', 'Dedicated Manager', 'Express Service'],
-      color: '#FFA500',
-      icon: 'star',
-      popular: true,
-    },
-    {
-      code: 'A+B',
-      name: 'Wash & Press',
-      description: 'Most Popular Combo',
-      features: ['Washing + Ironing', 'Quick Service', 'Budget Friendly', 'Quality Assurance', 'Eco-Friendly'],
-      color: '#9B59B6',
-      icon: 'layers',
-      popular: false,
-    },
-  ];
-
-  const durations = [
-    { 
-      code: 'M', 
-      label: 'Monthly', 
-      days: '30 days', 
-      freeDays: null, 
-      saving: 0,
-      badge: null
-    },
-    { 
-      code: 'Q', 
-      label: 'Quarterly', 
-      days: '90 days', 
-      freeDays: '15 days free', 
-      saving: 15,
-      badge: 'Popular'
-    },
-    { 
-      code: 'HY', 
-      label: 'Half Yearly', 
-      days: '180 days', 
-      freeDays: '30 days free', 
-      saving: 25,
-      badge: 'Best Value'
-    },
-    { 
-      code: 'Y', 
-      label: 'Yearly', 
-      days: '365 days', 
-      freeDays: '45 days free', 
-      saving: 35,
-      badge: 'Smart Saver'
-    },
-  ];
-
-  const prices = {
-    'P': { M: 99, Q: 255, HY: 450, Y: 780 },
-    'W': { M: 199, Q: 510, HY: 890, Y: 1550 },
-    'DC': { M: 299, Q: 765, HY: 1340, Y: 2320 },
-    'A+B+C+Others': { M: 499, Q: 1275, HY: 2240, Y: 3880 },
-    'A+B': { M: 249, Q: 637, HY: 1120, Y: 1940 },
-  };
-
-  const paymentMethods = [
-    { id: 1, name: 'Credit Card', icon: 'credit-card', color: appColors.secondary },
-    { id: 2, name: 'Debit Card', icon: 'card-membership', color: appColors.secondary },
-    { id: 3, name: 'UPI', icon: 'smartphone', color: appColors.secondary },
-    { id: 4, name: 'Net Banking', icon: 'account-balance', color: appColors.secondary },
-    { id: 5, name: 'Wallet', icon: 'account-balance-wallet', color: appColors.secondary },
-  ];
-
   const handlePlanSelect = (plan) => {
     setSelectedPlan(plan.code);
     setSelectedPlanDetails(plan);
     showToast(`${plan.name} selected!`, 'success');
   };
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (selectedPlan && selectedDuration) {
-      setShowPaymentModal(true);
-       
+      try {
+        // Create subscription order
+        const result = await dispatch(createSubscription({
+          planType: selectedPlan,
+          duration: selectedDuration
+        })).unwrap();
+
+        if (result.success) {
+          console.log('✅ Subscription order created:', result);
+          setShowPaymentModal(true);
+        }
+      } catch (error) {
+        console.log('❌ Subscription creation failed:', error);
+        showToast('Failed to create subscription order', 'error');
+      }
     } else {
       showToast('Please select a plan and duration first!', 'warning');
     }
   };
 
-const handlePayment = async (paymentMethod) => {
-    const amount = prices[selectedPlan][selectedDuration];
-    const planName = plans.find(p => p.code === selectedPlan)?.name;
+  const initiateRazorpayPayment = async () => {
+    const selectedPrice = getSelectedPlanPrice();
     
-    showToast(`Processing ₹${amount} payment via ${paymentMethod.name}...`, 'info');
-    
-    // Simulate payment processing
-    setTimeout(async () => {
-      try {
+    if (!selectedPrice || selectedPrice === 0) {
+      showToast('Invalid plan price', 'error');
+      return;
+    }
+
+    try {
+      console.log('💰 Razorpay Payment Details:', {
+        selectedPrice: selectedPrice,
+        plan: selectedPlan,
+        duration: selectedDuration
+      });
+
+      const options = {
+        description: `${selectedPlanDetails?.name} - ${selectedDuration}`,
+        image: 'https://your-logo-url.com/logo.png',
+        currency: 'INR',
+        key: 'rzp_test_RWlnXOheEtSTbA', // Use the Razorpay key from your API response or hardcode it
+        amount: selectedPrice * 100, // Convert to paise using selectedPrice
+        name: 'Estreewalla',
+        order_id: `order_${Date.now()}`, // Generate a temporary order ID
+        prefill: {
+          email: 'vendor@estreewalla.com',
+          contact: '+919876543210',
+          name: 'Vendor Name',
+        },
+        theme: { color: appColors.secondary },
+        notes: {
+          planType: selectedPlan,
+          duration: selectedDuration
+        }
+      };
+
+      // If we have a currentOrder from API, use its order_id and key
+      if (currentOrder) {
+        options.order_id = currentOrder.orderId;
+        options.key = currentOrder.key;
+      }
+
+      console.log('🔧 Razorpay Options:', options);
+
+      const razorpayResponse = await RazorpayCheckout.open(options);
+      console.log('✅ Razorpay Response:', razorpayResponse);
+      
+      // Verify payment
+      await handlePaymentVerification(razorpayResponse);
+      
+    } catch (error) {
+      console.log('❌ Razorpay error:', error);
+      if (error.description !== 'Payment Cancelled') {
+        showToast('Payment failed! Please try again.', 'error');
+      } else {
+        showToast('Payment cancelled', 'info');
+      }
+    }
+  };
+
+  const handlePaymentVerification = async (razorpayResponse) => {
+    try {
+      console.log('🔍 Verifying payment...', razorpayResponse);
+      
+      const verificationData = {
+        razorpay_order_id: razorpayResponse.razorpay_order_id,
+        razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+        razorpay_signature: razorpayResponse.razorpay_signature,
+        planType: selectedPlan,
+        duration: selectedDuration
+      };
+
+      console.log('📦 Verification Data:', verificationData);
+
+      const result = await dispatch(verifySubscription(verificationData)).unwrap();
+
+      if (result.success) {
+        console.log('✅ Payment verified successfully!');
         setShowPaymentModal(false);
-        showToast(`Payment successful! ${planName} activated.`, 'success');
+        showToast('Subscription activated successfully!', 'success');
         
-        // Use the context function instead of direct setAppLaunched
+        // Complete subscription in context
         await completeSubscription();
         
-        // Navigate to home after successful payment
+        // Navigate to main screen
         navigation.replace('Main');
-      } catch (error) {
-        console.log('Error completing subscription:', error);
-        showToast('Payment failed! Please try again.', 'error');
       }
-    }, 3000);
+    } catch (error) {
+      console.log('❌ Payment verification failed:', error);
+      showToast('Payment verification failed! Please contact support.', 'error');
+    }
   };
 
   const handleSkip = async () => {
     try {
-      // Use the context function for consistency
       await completeSubscription();
       navigation.replace('Main');
     } catch (error) {
       console.log('Error skipping subscription:', error);
+      showToast('Error completing subscription', 'error');
     }
   };
 
@@ -256,13 +327,10 @@ const handlePayment = async (paymentMethod) => {
     setShowDetailsModal(true);
   };
 
-
-
   const PlanCard = ({ plan }) => {
     const isSelected = selectedPlan === plan.code;
-    const price = prices[plan.code]?.[selectedDuration] || 0;
+    const price = plan.apiData?.durations?.[selectedDuration]?.price || 0;
     const durationInfo = durations.find(d => d.code === selectedDuration);
-    const monthlyEquivalent = Math.round(price / (durationInfo.days.match(/\d+/)[0] / 30));
 
     return (
       <Animated.View 
@@ -301,6 +369,9 @@ const handlePayment = async (paymentMethod) => {
           </View>
           <View style={styles.priceInfo}>
             <Text style={styles.durationDays}>{durationInfo.days}</Text>
+            {durationInfo.freeDays && (
+              <Text style={styles.freeDaysText}>+ {durationInfo.freeDays}</Text>
+            )}
           </View>
         </View>
 
@@ -399,33 +470,40 @@ const handlePayment = async (paymentMethod) => {
     </View>
   );
 
-  const PaymentMethodCard = ({ method }) => (
-    <TouchableOpacity
-      style={styles.paymentMethodCard}
-      onPress={() => handlePayment(method)}
-      activeOpacity={0.7}
-    >
-      <View style={styles.paymentIcon}>
-        <Icon name={method.icon} size={18} color={appColors.secondary} />
-      </View>
-      <Text style={styles.paymentMethodName}>{method.name}</Text>
-      <Icon name="chevron-right" size={20} color={COLORS.textLight} />
-    </TouchableOpacity>
-  );
+  // if (loading && !plans) {
+  //   return (
+  //     <SafeAreaView style={styles.container}>
+  //       <View style={styles.loadingContainer}>
+  //         <Text>Loading plans...</Text>
+  //       </View>
+  //     </SafeAreaView>
+  //   );
+  // }
+
+  const uiPlans = transformPlans();
+  const selectedPrice = getSelectedPlanPrice();
+
+  console.log('💰 Price Debug:', {
+    selectedPlan,
+    selectedDuration,
+    selectedPrice,
+    currentOrderAmount: currentOrder?.amount
+  });
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar  backgroundColor="transparent" />
+      <StatusBar backgroundColor="transparent" />
       
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-      
           <View style={styles.headerTitleRow}>
-         {params &&  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <BackIcon size={13}/>
-                  </TouchableOpacity>}
-            <Icon name="diamond" size={24} color={COLORS.gold} />
+            {params && (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <BackIcon size={13}/>
+              </TouchableOpacity>
+            )}
+            <Icon name="diamond" size={24} color="#FFD700" />
             <Text style={styles.headerTitle}>Premium Plans</Text>
           </View>
           <Text style={styles.headerSubtitle}>
@@ -443,33 +521,31 @@ const handlePayment = async (paymentMethod) => {
       {/* Promo Banner */}
       <View style={styles.promoBanner}>
         <View style={styles.promoContent}>
-          <Icon name="flash-on" size={20} color={COLORS.gold} />
+          <Icon name="flash-on" size={20} color="#FFD700" />
           <Text style={styles.promoText}>
-            Special Offer • Ends Dec 31, 2025
+            Special Launch Offer • Limited Time
           </Text>
         </View>
         <View style={styles.promoBadge}>
-          <Text style={styles.promoBadgeText}>LIMITED TIME</Text>
+          <Text style={styles.promoBadgeText}>EXCLUSIVE</Text>
         </View>
       </View>
 
-      {/* Main Content - CORRECTED ORDER */}
+      {/* Main Content */}
       <ScrollView 
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{paddingBottom: selectedPlan ? 130 : 20}}
       >
-        {/* PLAN CATEGORIES - NOW AT TOP */}
         <View style={styles.plansSection}>
           <Text style={styles.sectionTitle}>Choose Your Plan</Text>
           <View style={styles.plansGrid}>
-            {plans.map((plan, index) => (
+            {uiPlans.map((plan) => (
               <PlanCard key={plan.code} plan={plan} />
             ))}
           </View>
         </View>
 
-        {/* DURATION OPTIONS - NOW BELOW PLANS */}
         <DurationSelector />
 
         {/* FAQ Section */}
@@ -486,26 +562,10 @@ const handlePayment = async (paymentMethod) => {
             </View>
             
             <View style={[styles.faqCard,{width:"40%"}]}>
-              <Icon name="pause" size={24} color={appColors.secondary} />
-              <Text style={styles.faqQuestion}>Inactive after 3 months?</Text>
-              <Text style={styles.faqAnswer}>
-                Accounts are marked inactive after 3 months of no activity. Easy reactivation available.
-              </Text>
-            </View>
-            
-            <View style={styles.faqCard}>
               <Icon name="swap-horiz" size={24} color={appColors.secondary} />
               <Text style={styles.faqQuestion}>Can I change plans later?</Text>
               <Text style={styles.faqAnswer}>
                 Yes! Upgrade or downgrade anytime. Changes apply to the next billing cycle.
-              </Text>
-            </View>
-            
-            <View style={[styles.faqCard,{width:"40%"}]}>
-              <Icon name="support" size={24} color={appColors.secondary} />
-              <Text style={styles.faqQuestion}>Need help with subscription?</Text>
-              <Text style={styles.faqAnswer}>
-                24/7 customer support available for all subscription-related queries.
               </Text>
             </View>
           </View>
@@ -518,61 +578,35 @@ const handlePayment = async (paymentMethod) => {
           <View style={styles.footerSummary}>
             <View>
               <Text style={styles.selectedPlanText}>
-                {plans.find(p => p.code === selectedPlan)?.name}
+                {uiPlans.find(p => p.code === selectedPlan)?.name}
               </Text>
               <Text style={styles.selectedPlanDuration}>
                 {durations.find(d => d.code === selectedDuration)?.label} • 
-                ₹{prices[selectedPlan][selectedDuration]}
+                ₹{selectedPrice}
               </Text>
             </View>
             <Text style={styles.finalPrice}>
-              ₹{prices[selectedPlan][selectedDuration]}
+              ₹{selectedPrice}
             </Text>
           </View>
           
           <TouchableOpacity 
             style={styles.subscribeButton}
             onPress={handleSubscribe}
+            disabled={creating}
           >
-            <Text style={styles.subscribeButtonText}>Subscribe Now</Text>
+            <Text style={styles.subscribeButtonText}>
+              {creating ? 'Creating...' : 'Subscribe Now'}
+            </Text>
             <Icon name="arrow-forward" size={16} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       )}
 
-      {/* Toast Message */}
-      {showMessage && (
-        <Animated.View 
-          style={[
-            styles.toast,
-            { 
-              transform: [{ translateY: slideAnim }],
-              backgroundColor: message.type === 'success' ? COLORS.success : 
-                            message.type === 'warning' ? COLORS.warning : 
-                            message.type === 'error' ? COLORS.error : appColors.secondary
-            }
-          ]}
-        >
-          <Icon 
-            name={
-              message.type === 'success' ? 'check-circle' :
-              message.type === 'warning' ? 'warning' :
-              message.type === 'error' ? 'error' : 'info'
-            } 
-            size={20} 
-            color="#FFFFFF" 
-          />
-          <Text style={styles.toastText}>{message.text}</Text>
-          <TouchableOpacity onPress={hideToast}>
-            <Icon name="close" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-        </Animated.View>
-      )}
-
-      {/* Plan Details Modal */}
+      {/* View Details Modal */}
       <Modal
         visible={showDetailsModal}
-        animationType="fade"
+        animationType="slide"
         transparent={true}
         onRequestClose={() => setShowDetailsModal(false)}
       >
@@ -582,18 +616,24 @@ const handlePayment = async (paymentMethod) => {
               <>
                 <View style={styles.modalHeader}>
                   <View style={styles.modalTitleContainer}>
-                    <Text style={styles.modalTitle}>{selectedPlanDetails.name}</Text>
-                    <Text style={styles.modalDescription}>{selectedPlanDetails.description}</Text>
+                    <View style={[styles.planIcon, { backgroundColor: selectedPlanDetails.color }]}>
+                      <Icon name={selectedPlanDetails.icon} size={24} color="#FFFFFF" />
+                    </View>
+                    <View>
+                      <Text style={styles.modalTitle}>{selectedPlanDetails.name}</Text>
+                      <Text style={styles.modalDescription}>{selectedPlanDetails.description}</Text>
+                    </View>
                   </View>
                   <TouchableOpacity 
                     style={styles.closeButton}
                     onPress={() => setShowDetailsModal(false)}
                   >
-                    <Icon name="close" size={24} color={COLORS.textSecondary} />
+                    <Icon name="close" size={24} color="#6B7280" />
                   </TouchableOpacity>
                 </View>
 
                 <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+                  {/* Pricing Table */}
                   <View style={styles.pricingTable}>
                     <Text style={styles.pricingTitle}>Complete Pricing</Text>
                     {durations.map((duration) => (
@@ -601,29 +641,34 @@ const handlePayment = async (paymentMethod) => {
                         <View style={styles.pricingLeft}>
                           <Text style={styles.pricingDuration}>{duration.label}</Text>
                           <Text style={styles.pricingDays}>{duration.days}</Text>
+                          {duration.freeDays && (
+                            <Text style={styles.freeText}>+ {duration.freeDays}</Text>
+                          )}
                         </View>
                         <View style={styles.pricingRight}>
                           <Text style={styles.pricingAmount}>
-                            ₹{prices[selectedPlanDetails.code][duration.code]}
+                            ₹{selectedPlanDetails.apiData?.durations?.[duration.code]?.price}
                           </Text>
-                          {duration.freeDays && (
-                            <Text style={styles.freeText}>+{duration.freeDays}</Text>
+                          {duration.saving > 0 && (
+                            <Text style={styles.savingText}>Save {duration.saving}%</Text>
                           )}
                         </View>
                       </View>
                     ))}
                   </View>
 
+                  {/* Features Section */}
                   <View style={styles.featuresSection}>
                     <Text style={styles.featuresTitle}>What's Included:</Text>
                     {selectedPlanDetails.features.map((feature, index) => (
                       <View key={index} style={styles.modalFeatureItem}>
-                        <Icon name="check-circle" size={18} color={COLORS.success} />
+                        <Icon name="check-circle" size={18} color="#10B981" />
                         <Text style={styles.modalFeatureText}>{feature}</Text>
                       </View>
                     ))}
                   </View>
 
+                  {/* Benefits Section */}
                   <View style={styles.benefitsSection}>
                     <Text style={styles.benefitsTitle}>Plan Benefits</Text>
                     <View style={styles.benefitItem}>
@@ -664,7 +709,7 @@ const handlePayment = async (paymentMethod) => {
         </View>
       </Modal>
 
-      {/* Payment Methods Modal */}
+      {/* Razorpay Payment Modal */}
       <Modal
         visible={showPaymentModal}
         animationType="fade"
@@ -672,45 +717,104 @@ const handlePayment = async (paymentMethod) => {
         onRequestClose={() => setShowPaymentModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, styles.paymentModalContent]}>
             <View style={styles.modalHeader}>
               <View>
                 <Text style={styles.modalTitle}>Complete Payment</Text>
                 <Text style={styles.paymentAmount}>
-                  ₹{selectedPlan ? prices[selectedPlan][selectedDuration] : 0}
+                  ₹{selectedPrice}
                 </Text>
               </View>
               <TouchableOpacity 
                 onPress={() => setShowPaymentModal(false)}
                 style={styles.closeButton}
               >
-                <Icon name="close" size={24} color={COLORS.textSecondary} />
+                <Icon name="close" size={24} color="#6B7280" />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.paymentPlan}>
-              {selectedPlanDetails?.name} • {durations.find(d => d.code === selectedDuration)?.label}
-            </Text>
+            <View style={styles.paymentPlanInfo}>
+              <Icon name="verified" size={40} color={appColors.secondary} />
+              <Text style={styles.paymentPlanName}>{selectedPlanDetails?.name}</Text>
+              <Text style={styles.paymentDuration}>
+                {durations.find(d => d.code === selectedDuration)?.label} Plan
+              </Text>
+              <Text style={styles.paymentValidity}>
+                {durations.find(d => d.code === selectedDuration)?.days} validity
+              </Text>
+            </View>
 
-            <ScrollView style={styles.paymentMethodsList} showsVerticalScrollIndicator={false}>
-              {paymentMethods.map((method) => (
-                <PaymentMethodCard key={method.id} method={method} />
-              ))}
-            </ScrollView>
+            <View style={styles.paymentFeatures}>
+              <View style={styles.paymentFeature}>
+                <Icon name="check-circle" size={16} color="#10B981" />
+                <Text style={styles.paymentFeatureText}>Instant activation</Text>
+              </View>
+              <View style={styles.paymentFeature}>
+                <Icon name="check-circle" size={16} color="#10B981" />
+                <Text style={styles.paymentFeatureText}>Secure payment</Text>
+              </View>
+              <View style={styles.paymentFeature}>
+                <Icon name="check-circle" size={16} color="#10B981" />
+                <Text style={styles.paymentFeatureText}>24/7 support</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity 
+              style={styles.razorpayButton}
+              onPress={initiateRazorpayPayment}
+              disabled={verifying}
+            >
+              <View style={styles.razorpayButtonContent}>
+                <Icon name="payment" size={24} color="#FFFFFF" />
+                <Text style={styles.razorpayButtonText}>
+                  {verifying ? 'Processing...' : `Pay ₹${selectedPrice}`}
+                </Text>
+              </View>
+              {!verifying && <Icon name="lock" size={16} color="#FFFFFF" />}
+            </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.cancelButton}
-              onPress={() => { 
-                setShowPaymentModal(false)
-               params ? navigation.goBack() : navigation.replace('Main')
-                setAppLaunched();
-              }}
+              onPress={() => setShowPaymentModal(false)}
             >
-              <Text style={styles.cancelButtonText}>Confirm Payment</Text>
+              <Text style={styles.cancelButtonText}>Cancel Payment</Text>
             </TouchableOpacity>
+
+            <Text style={styles.securityText}>
+              🔒 Your payment is secure and encrypted
+            </Text>
           </View>
         </View>
       </Modal>
+
+      {/* Toast Message */}
+      {showMessage && (
+        <Animated.View 
+          style={[
+            styles.toast,
+            { 
+              transform: [{ translateY: slideAnim }],
+              backgroundColor: message.type === 'success' ? '#10B981' : 
+                            message.type === 'warning' ? '#F59E0B' : 
+                            message.type === 'error' ? '#EF4444' : appColors.secondary
+            }
+          ]}
+        >
+          <Icon 
+            name={
+              message.type === 'success' ? 'check-circle' :
+              message.type === 'warning' ? 'warning' :
+              message.type === 'error' ? 'error' : 'info'
+            } 
+            size={20} 
+            color="#FFFFFF" 
+          />
+          <Text style={styles.toastText}>{message.text}</Text>
+          <TouchableOpacity onPress={hideToast}>
+            <Icon name="close" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+        </Animated.View>
+      )}
     </SafeAreaView>
   );
 };

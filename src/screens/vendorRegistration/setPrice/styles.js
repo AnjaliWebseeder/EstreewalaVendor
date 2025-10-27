@@ -9,7 +9,7 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: appColors.white,
-    marginTop:windowHeight(7)
+    marginTop:windowHeight(0)
   },
 filter:{
     height:30,

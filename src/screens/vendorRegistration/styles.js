@@ -68,14 +68,20 @@ export const styles = StyleSheet.create({
     color: appColors.gray,
     marginBottom: windowHeight(16),
   },
+  mainView:{
+    marginHorizontal:18,
+    marginTop:15
+  },
   largeInput: {
     fontSize: fontSizes.FONT16,
     height: windowHeight(48),
   },
   largeLabel: {
-    fontSize: fontSizes.FONT14,
+    color: appColors.title,
+    fontFamily: fonts.InterSemiBold,
     fontWeight: '600',
-    marginBottom: windowHeight(6),
+    fontSize: fontSizes.FONT17,
+    marginTop:2
   },
 
   // Enhanced Stepper
@@ -245,6 +251,14 @@ export const styles = StyleSheet.create({
       paddingHorizontal:10,
     paddingLeft:5,
   },
+  disabledButtonStyle: {
+ 
+  opacity: 0.5,              // Makes it look inactive
+  backgroundColor: appColors.border, // Optional subtle background
+  borderColor: appColors.gray,          // Match your theme
+  borderWidth: 1,
+
+},
   nextButton: {
     flexDirection: 'row',
 
@@ -295,7 +309,7 @@ export const styles = StyleSheet.create({
      color:appColors.error,textAlign:"left",marginHorizontal:windowHeight(14),
      fontSize:fontSizes.FONT14,
      fontWeight:"500",
-     marginTop:windowHeight(-4)
+     marginTop:windowHeight(4)
   },
 
 
