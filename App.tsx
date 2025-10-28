@@ -14,6 +14,6 @@ export default function App() {
     </VendorProvider>
     </ToastProvider>
  </Provider>
-   
+
   )
 }
