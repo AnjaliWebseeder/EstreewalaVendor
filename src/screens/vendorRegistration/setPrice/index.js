@@ -1,4 +1,3 @@
-// SetPrice.js
 import React, { useContext, useState, useEffect, useCallback } from "react";
 import { 
   View, 
@@ -66,28 +65,51 @@ export default function SetPrice({ onOpenFilter, selectedFilter, onPricingUpdate
     }
   }, [priceMap]); // Only depend on priceMap, not onPricingUpdate
 
-  const filters = [
-    { key: "all", label: "All Items", icon: "grid-outline" },
-    { key: "mens", label: "Men's Wear", icon: "man-outline" },
-    { key: "womens", label: "Women's Wear", icon: "woman-outline" },
-    { key: "kids", label: "Kids Wear", icon: "heart-outline" },
-  ];
+const filters = [
+  { key: "all", label: "All Items", icon: "grid-outline" },
+  { key: "mens", label: "Men's Wear", icon: "man-outline" },
+  { key: "womens", label: "Women's Wear", icon: "woman-outline" },
+  { key: "kids", label: "Kids Wear", icon: "heart-outline" },
+];
 
-  const getAllItems = () => {
-    let allItems = [];
-    Object.keys(mockData).forEach(category => {
-      allItems = [...allItems, ...mockData[category].map(item => ({ ...item, category }))];
-    });
-    return allItems;
-  };
+const getAllItems = () => {
+  let allItems = [];
+  
+  // Use the new mockData structure
+  Object.keys(mockData).forEach(category => {
+    const categoryItems = mockData[category].map(item => ({ 
+      ...item, 
+      category: category === 'mens' ? 'man' : 
+                category === 'womens' ? 'woman' : 
+                'kids' 
+    }));
+    allItems = [...allItems, ...categoryItems];
+  });
+  
+  return allItems;
+};
 
-  const getFilteredItems = () => {
-    if (selectedFilter === "all") return getAllItems();
-    if (mockData[selectedFilter]) {
-      return mockData[selectedFilter].map(item => ({ ...item, category: selectedFilter }));
-    }
-    return [];
+const getFilteredItems = () => {
+  if (selectedFilter === "all") return getAllItems();
+  
+  // Map filter keys to mockData keys
+  const filterMap = {
+    "mens": "mens",
+    "womens": "womens", 
+    "kids": "kids"
   };
+  
+  const dataKey = filterMap[selectedFilter];
+  if (mockData[dataKey]) {
+    return mockData[dataKey].map(item => ({ 
+      ...item, 
+      category: selectedFilter === 'mens' ? 'man' : 
+                selectedFilter === 'womens' ? 'woman' : 
+                'kids' 
+    }));
+  }
+  return [];
+};
 
   const startEditing = (item) => {
     Keyboard.dismiss();
@@ -191,33 +213,37 @@ export default function SetPrice({ onOpenFilter, selectedFilter, onPricingUpdate
       >
         <View style={styles.container}>
           {/* Service Tabs */}
-          <View style={styles.serviceTabsContainer}>
-            <FlatList
-              data={selectedServiceIds.length > 0 ? services.filter(s => selectedServiceIds.includes(s.id)) : services}
-              horizontal
-              keyExtractor={(item) => item.id}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 14 }}
-              renderItem={({ item: service }) => (
-                <TouchableOpacity
-                  onPress={() => setActiveServiceId(service.id)}
-                  style={[
-                    styles.serviceTab,
-                    activeServiceId === service.id && styles.serviceTabActive
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.serviceTabText,
-                      activeServiceId === service.id && styles.serviceTabTextActive
-                    ]}
-                  >
-                    {service.name}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
+{/* Service Tabs */}
+<View style={styles.serviceTabsContainer}>
+  <FlatList
+    data={services.filter(s => selectedServiceIds.includes(s.id))} // Only show selected services
+    horizontal
+    keyExtractor={(item) => item.id.toString()}
+    showsHorizontalScrollIndicator={false}
+    contentContainerStyle={{ paddingHorizontal: 14 }}
+    renderItem={({ item: service }) => (
+      <TouchableOpacity
+        onPress={() => setActiveServiceId(service.id)}
+        style={[
+          styles.serviceTab,
+          activeServiceId === service.id && styles.serviceTabActive
+        ]}
+      >
+        <Text
+          style={[
+            styles.serviceTabText,
+            activeServiceId === service.id && styles.serviceTabTextActive
+          ]}
+        >
+          {service.name}
+        </Text>
+      </TouchableOpacity>
+    )}
+    ListEmptyComponent={
+      <Text style={styles.noServicesText}>No services selected</Text>
+    }
+  />
+</View>
 
           {/* Filter Header */}
           <View style={styles.containerStyle}>

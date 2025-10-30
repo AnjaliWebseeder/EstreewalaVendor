@@ -1,29 +1,19 @@
 // redux/slices/subscriptionSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "../../api/axiosConfig";
 import { 
   SUBSCRIPTION_PLANS, 
   CREATE_SUBSCRIPTION, 
   VERIFY_SUBSCRIPTION,
   MY_SUBSCRIPTIONS 
 } from "../../api"
-import {getToken} from "../../utils/hooks/auth"
 
-// Get subscription plans
+// Get subscription plans - NO TOKEN PARAMS NEEDED!
 export const getSubscriptionPlans = createAsyncThunk(
   "subscription/getPlans",
-  async (_, { rejectWithValue, getState }) => {
+  async (_, { rejectWithValue }) => {
     try {
-     const token = getToken(getState);
-
-      const response = await axios.get(SUBSCRIPTION_PLANS, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        timeout: 10000,
-      });
-
+      const response = await axiosInstance.get(SUBSCRIPTION_PLANS);
       console.log("✅ Subscription Plans Response:", response.data);
       return response.data;
     } catch (error) {
@@ -35,21 +25,12 @@ export const getSubscriptionPlans = createAsyncThunk(
   }
 );
 
-// Create subscription order
+// Create subscription order - NO TOKEN PARAMS NEEDED!
 export const createSubscription = createAsyncThunk(
   "subscription/create",
-  async (subscriptionData, { rejectWithValue, getState }) => {
+  async (subscriptionData, { rejectWithValue }) => {
     try {
-       const token = getToken(getState);
-
-      const response = await axios.post(CREATE_SUBSCRIPTION, subscriptionData, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        timeout: 10000,
-      });
-
+      const response = await axiosInstance.post(CREATE_SUBSCRIPTION, subscriptionData);
       console.log("✅ Create Subscription Response:", response.data);
       return response.data;
     } catch (error) {
@@ -61,21 +42,12 @@ export const createSubscription = createAsyncThunk(
   }
 );
 
-// Verify subscription payment
+// Verify subscription payment - NO TOKEN PARAMS NEEDED!
 export const verifySubscription = createAsyncThunk(
   "subscription/verify",
-  async (verificationData, { rejectWithValue, getState }) => {
+  async (verificationData, { rejectWithValue }) => {
     try {
-         const token = getToken(getState);
-
-      const response = await axios.post(VERIFY_SUBSCRIPTION, verificationData, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        timeout: 10000,
-      });
-
+      const response = await axiosInstance.post(VERIFY_SUBSCRIPTION, verificationData);
       console.log("✅ Verify Subscription Response:", response.data);
       return response.data;
     } catch (error) {
@@ -87,21 +59,12 @@ export const verifySubscription = createAsyncThunk(
   }
 );
 
-// Get my subscriptions
+// Get my subscriptions - NO TOKEN PARAMS NEEDED!
 export const getMySubscriptions = createAsyncThunk(
   "subscription/getMySubscriptions",
-  async (_, { rejectWithValue, getState }) => {
+  async (_, { rejectWithValue }) => {
     try {
-     const token = getToken(getState);
-
-      const response = await axios.get(MY_SUBSCRIPTIONS, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        timeout: 10000,
-      });
-
+      const response = await axiosInstance.get(MY_SUBSCRIPTIONS);
       console.log("✅ My Subscriptions Response:", response.data);
       return response.data;
     } catch (error) {
@@ -183,7 +146,6 @@ const subscriptionSlice = createSlice({
         state.verifying = false;
         state.success = true;
         state.currentOrder = null;
-        // Refresh my subscriptions after successful verification
       })
       .addCase(verifySubscription.rejected, (state, action) => {
         state.verifying = false;

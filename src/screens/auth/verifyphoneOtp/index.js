@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect,useContext } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import CustomButton from '../../../components/button';
 import OtpInput from '../../../otherComponent/otpInput';
@@ -8,6 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { verifyOtp, clearError,resetOtpVerifyState } from "../../../redux/slices/otpVerifySlice"
 import { useToast } from '../../../utils/context/toastContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { VendorContext } from '../../../utils/context/vendorContext';
 
 const OtpScreen = ({ navigation , route }) => {
   const dispatch = useDispatch();
@@ -17,6 +19,7 @@ const OtpScreen = ({ navigation , route }) => {
   const phone = route.params?.phone;
   const { loading, error } = useSelector((state) => state.otpVerify);
   const { showToast } = useToast(); 
+  const { login, saveUserDetails } = useContext(VendorContext);
 
   // ✅ Clear errorMsg automatically when user types a valid OTP
   useEffect(() => {
@@ -47,27 +50,41 @@ const OtpScreen = ({ navigation , route }) => {
 
     // ✅ Passed all validations
     setError('');
-    // await login('user_token_here');
-     const payload = {
+    
+    // COMMENTED OUT API CALL
+    const payload = {
       phone: phone,
       otp: "1234"
     };
 
-         try {
-        const result = await dispatch(verifyOtp(payload));
-        if (verifyOtp.fulfilled.match(result)) {
-          //  showToast('Login successful!', 'success');
-          setTimeout(() => {
-            navigation.replace('VendorRegistration');
-          }, 1000);
-        } else if (verifyOtp.rejected.match(result)) {
-           showToast(result?.payload || 'Wrong Otp, pls try again!', "error");
-        }
+    try {
+   
+      const result = await dispatch(verifyOtp(payload));
+
+if (verifyOtp.fulfilled.match(result)) {
+  const { token, vendor } = result.payload;
+  console.log("TOKEN", token, vendor);
+
+  if (token && vendor) {
+    await AsyncStorage.setItem('userToken', token);
+    await AsyncStorage.setItem('userDetails', JSON.stringify(vendor));
+
+    login(token);
+    saveUserDetails(vendor);
+
+    navigation.replace('VendorRegistration');
+  } else {
+    console.warn("⚠️ Missing token or user in OTP verify response");
+  }
+
+} else if (verifyOtp.rejected.match(result)) {
+  showToast(result?.payload || 'Wrong OTP, please try again!', "error");
+}
+
       } catch (err) {
         console.error('Error dispatching OTP:', err);
            showToast(err || 'Wrong Otp, pls try again!', "error");
       }
-  
   };
 
   return (
@@ -92,7 +109,12 @@ const OtpScreen = ({ navigation , route }) => {
           <Text style={styles.resend}>Resend OTP in 0:45</Text>
         </View>
 
-        <CustomButton loading={loading} title="Verify" onPress={handleVerify}   disabled={otp.join('').length !== 4 || !!errorMsg}  />
+        <CustomButton 
+          loading={loading} 
+          title="Verify" 
+          onPress={handleVerify}   
+          disabled={otp.join('').length !== 4 || !!errorMsg}  
+        />
 
         <Text style={styles.textStyle}>
           By continuing, you agree to our <Text style={styles.link}> Terms of Service </Text> and acknowledge that you have read our <Text style={styles.link}>Privacy Policy.</Text>

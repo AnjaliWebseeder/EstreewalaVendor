@@ -34,6 +34,12 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: appColors.white,
   },
+  loadingContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: appColors.background, // optional
+},
   header: {
     paddingHorizontal: 20,
     paddingTop: 15,
@@ -412,7 +418,7 @@ export const styles = StyleSheet.create({
   selectButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: COLORS.border,
+    backgroundColor: COLORS.textPrimary,
     borderRadius: 8,
     flex: 1,
     marginLeft: 8,
@@ -421,7 +427,7 @@ export const styles = StyleSheet.create({
     backgroundColor: appColors.secondary,
   },
   selectButtonText: {
-    color: COLORS.textSecondary,
+    color: COLORS.white,
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',

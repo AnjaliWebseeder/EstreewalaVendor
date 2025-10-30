@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 import appColors from "../../../theme/appColors";
 import fonts from "../../../theme/appFonts";
+import { fontSizes, windowHeight } from "../../../theme/appConstant";
 
 export const styles = StyleSheet.create({
   container: {
@@ -32,11 +33,16 @@ export const styles = StyleSheet.create({
     fontFamily:fonts.InterRegular,
     fontWeight:"700"
   },
+    footerTextStyle: {  margin: 4, fontSize: fontSizes.FONT13,fontFamily:fonts.InterRegular,color:appColors.subTitle,lineHeight:windowHeight(12) },
+  
   link: {
     color: appColors.secondary,
     fontFamily: fonts.PoppinsSemiBold,
      textDecorationLine:"underline"
   },
+  linkStyle:{
+    color: appColors.secondary, fontFamily:fonts.InterRegular,fontWeight:"700"
+  }
 
 
 });

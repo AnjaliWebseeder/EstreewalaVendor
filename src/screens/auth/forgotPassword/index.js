@@ -15,13 +15,12 @@ export default function ForgotPassword({ navigation }) {
   const [errorMsg, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.forgotPassword);
+   const { loading } = useSelector((state) => state.forgotPassword);
   const { showToast } = useToast();
 
-        useEffect(() => {
-          dispatch(resetForgotPasswordState());
-        }, [dispatch]);
-      
+  useEffect(() => {
+    dispatch(resetForgotPasswordState());
+  }, [dispatch]);
 
   // ✅ Live validation
   useEffect(() => {
@@ -36,7 +35,7 @@ export default function ForgotPassword({ navigation }) {
     }
   }, [email, isSubmitted]);
 
-   const handleNext = async () => {
+  const handleNext = async () => {
     setIsSubmitted(true);
 
     if (!email.trim()) {
@@ -56,28 +55,21 @@ export default function ForgotPassword({ navigation }) {
     console.log("Sending reset email to:", payload.email);
     dispatch(forgotPassword(payload));
 
-     try {
-       
-         const resultAction = await dispatch(forgotPassword(payload));
-     
-         if (forgotPassword.fulfilled.match(resultAction)) {
-               showToast('OTP sent for password reset!', 'success');
-          
-           // Wait a moment to show the toast, then navigate
-           setTimeout(() => {
-             navigation.navigate('VerifyEmail', { email: email });
-            
-           }, 1500);
-         } else if (forgotPassword.rejected.match(resultAction)) {
-            showToast(resultAction?.payload?.message || 'User not found', "error");
-     
-         }
-       } catch (err) {
-         console.error('User not found', err);
-            showToast(err || 'User not found', "error");
-        
-       } 
-
+    // COMMENTED OUT API CALL
+    try {
+       const resultAction = await dispatch(forgotPassword(payload));
+       if (forgotPassword.fulfilled.match(resultAction)) {
+             showToast('OTP sent for password reset!', 'success');
+          setTimeout(() => {
+            navigation.navigate('VerifyEmail', { email: email });
+          }, 1500);
+        } else if (forgotPassword.rejected.match(resultAction)) {
+           showToast(resultAction?.payload?.message || 'User not found', "error");
+        }
+      } catch (err) {
+        console.error('User not found', err);
+           showToast(err || 'User not found', "error");
+      }
   };
 
   return (
@@ -101,12 +93,16 @@ export default function ForgotPassword({ navigation }) {
           />
 
           <Text style={styles.footerText}>
-            Enter your registered email address. We’ll send you an OTP for verification.
+            Enter your registered email address. We'll send you an OTP for verification.
           </Text>
         </View>
 
         {/* ✅ Disabled until valid email */}
-        <CustomButton loading={loading}  title="Next" onPress={handleNext} />
+        <CustomButton 
+          loading={loading}  
+          title="Next" 
+          onPress={handleNext} 
+        />
 
         <TouchableOpacity
           style={styles.button}
@@ -118,7 +114,7 @@ export default function ForgotPassword({ navigation }) {
               { textAlign: 'center', color: appColors.black },
             ]}
           >
-            Don’t have an account? <Text style={styles.link}>Register</Text>
+            Don't have an account? <Text style={styles.link}>Register</Text>
           </Text>
         </TouchableOpacity>
       </View>

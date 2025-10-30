@@ -1,15 +1,41 @@
-import React, { createContext, useState,useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getAppLaunchStatus , setAppLaunched} from "../context/appLaunchStatus"
+import { getAppLaunchStatus, setAppLaunched } from "./appLaunchStatus"
 import { mockData } from '../data';
+
 export const VendorContext = createContext();
+
+// Create a global token access function
+let globalToken = null;
+let globalUserDetails = null;
+
+export const setGlobalAuth = (token, userDetails) => {
+  globalToken = token;
+  globalUserDetails = userDetails;
+  console.log('🔐 Global auth updated:', { token: !!token, userDetails: !!userDetails });
+};
+
+export const getGlobalToken = () => {
+  return globalToken;
+};
+
+export const getGlobalUserDetails = () => {
+  return globalUserDetails;
+};
+
+export const clearGlobalAuth = () => {
+  globalToken = null;
+  globalUserDetails = null;
+  console.log('🔐 Global auth cleared');
+};
 
 export const VendorProvider = ({ children }) => {
   const [userToken, setUserToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
- const [isFirstLaunch, setIsFirstLaunch] = useState(true); // Default to true
+  const [isFirstLaunch, setIsFirstLaunch] = useState(true);
   const [hasCompletedVendorRegistration, setHasCompletedVendorRegistration] = useState(false);
-  const [hasCompletedSubscription, setHasCompletedSubscription] = useState(false); 
+  const [hasCompletedSubscription, setHasCompletedSubscription] = useState(false);
+  
   const initialServices = [
     { id: 1, name: "Dry Wash" },
     { id: 2, name: "Washing" },
@@ -29,30 +55,31 @@ export const VendorProvider = ({ children }) => {
   const [servicePrices, setServicePrices] = useState({});
   const [qrImage, setQrImage] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+  const [userDetails, setUserDetails] = useState(null);
 
-
-
-useEffect(() => {
+  useEffect(() => {
     const loadStorageData = async () => {
       try {
-        // Check if app is launched for the first time
         const appLaunched = await getAppLaunchStatus();
-        console.log('App launched status:', appLaunched);
         setIsFirstLaunch(!appLaunched);
 
-        // Check if vendor registration was completed
         const registrationCompleted = await AsyncStorage.getItem('vendorRegistrationCompleted');
-        console.log('Vendor registration status:', registrationCompleted);
         setHasCompletedVendorRegistration(registrationCompleted === 'true');
 
-        // Check if subscription was completed
         const subscriptionCompleted = await AsyncStorage.getItem('subscriptionCompleted');
-        console.log('Subscription status:', subscriptionCompleted);
         setHasCompletedSubscription(subscriptionCompleted === 'true');
 
+        // ✅ Load token and user separately
         const token = await AsyncStorage.getItem('userToken');
-        console.log('User token:', !!token);
-        setUserToken(token);
+        const userData = await AsyncStorage.getItem('userDetails');
+        console.log("TOKEN IS", token);
+        console.log("USERDATA IS", userData);
+
+        if (token) {
+          setUserToken(token);
+          setGlobalAuth(token, userData ? JSON.parse(userData) : null); // Set global auth
+        }
+        if (userData) setUserDetails(JSON.parse(userData));
       } catch (error) {
         console.log('Error loading storage data:', error);
       } finally {
@@ -63,28 +90,39 @@ useEffect(() => {
     loadStorageData();
   }, []);
 
-  const login = async (token) => {
+  const login = async (token, user) => {
     try {
       await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('userDetails', JSON.stringify(user));
       setUserToken(token);
+      setUserDetails(user);
+      setGlobalAuth(token, user); // Update global auth
     } catch (error) {
-      console.log('Login error:', error);
-      throw error;
+      console.log('Error saving auth:', error);
     }
   };
 
-
-  // FIXED LOGOUT - Clear specific data only
- const logout = async () => {
+  const saveUserDetails = async (user) => {
+    try {
+      await AsyncStorage.setItem('userDetails', JSON.stringify(user));
+      setUserDetails(user);
+      setGlobalAuth(userToken, user); // Update global auth with current token
+    } catch (error) {
+      console.log('Error saving user details:', error);
+    }
+  };
+ 
+  const logout = async () => {
     try {
       console.log('Logging out...');
-      // ONLY remove user-specific data, keep app launch status
       await Promise.all([
         AsyncStorage.removeItem('userToken'),
+        AsyncStorage.removeItem('userDetails'),
         AsyncStorage.removeItem('userLocation'),
-        // DON'T remove: appLaunched, vendorRegistrationCompleted, subscriptionCompleted
       ]);
       setUserToken(null);
+      setUserDetails(null);
+      clearGlobalAuth(); // Clear global auth
       console.log('Logout successful - app launch status preserved');
     } catch (error) {
       console.log('Logout error:', error);
@@ -92,7 +130,7 @@ useEffect(() => {
     }
   };
 
- const completeVendorRegistration = async () => {
+  const completeVendorRegistration = async () => {
     try {
       console.log('Completing vendor registration...');
       await AsyncStorage.setItem('vendorRegistrationCompleted', 'true');
@@ -104,11 +142,11 @@ useEffect(() => {
     }
   };
 
-   const completeSubscription = async () => {
+  const completeSubscription = async () => {
     try {
       console.log('Completing subscription...');
       await AsyncStorage.setItem('subscriptionCompleted', 'true');
-      await setAppLaunched(); // Mark app as launched after subscription
+      await setAppLaunched();
       setHasCompletedSubscription(true);
       console.log('Subscription completed and app marked as launched');
     } catch (error) {
@@ -117,48 +155,102 @@ useEffect(() => {
     }
   };
 
-// In VendorContext.js - update getAllPricingData function
-const getAllPricingData = useCallback(() => {
-  const itemPricing = {
-    "Dry Wash": [],
-    "Washing": [],
-    "Ironing": [],
-    "Wash & Iron": []
-  };
-  
-  // Get selected services
-  const selectedServices = services.filter(service => 
-    selectedServiceIds.includes(service.id)
-  ).map(service => service.name);
+  // ... rest of your existing functions remain the same ...
+  // CORRECTED getAllPricingData function - matches API structure exactly
+  const getAllPricingData = useCallback(() => {
+    // Initialize the structure exactly as API expects
+    const itemPricing = {
+      "Dry Wash": { man: [], woman: [], kids: [] },
+      "Washing": { man: [], woman: [], kids: [] },
+      "Ironing": { man: [], woman: [], kids: [] },
+      "Wash & Iron": { man: [], woman: [], kids: [] }
+    };
 
-  // For each selected service, add items with their prices
-  selectedServices.forEach(serviceName => {
-    Object.keys(mockData).forEach(category => {
-      mockData[category].forEach(item => {
-        const currentPrice = priceMap[item.id] !== undefined ? priceMap[item.id] : item.price;
-        const priceValue = Math.max(1, Math.round(parseFloat(currentPrice) || 0));
-        
-        // Add item to the corresponding service array
-        if (itemPricing[serviceName]) {
-          itemPricing[serviceName].push({
-            item: item.name,
-            price: priceValue
+    // Get selected services
+    const selectedServices = services
+      .filter(service => selectedServiceIds.includes(service.id))
+      .map(service => service.name);
+
+    console.log("✅ Selected Services for Pricing:", selectedServices);
+
+    // Define which items belong to which category
+    const categoryItems = {
+      man: [
+        { name: "Formal Shirt", dataKey: "mens" },
+        { name: "T Shirt", dataKey: "kids" }, // T Shirt is in kids category
+        { name: "Jeans", dataKey: "mens" },
+        { name: "Trousers", dataKey: "mens" },
+        { name: "Suit", dataKey: "mens" },
+        { name: "Jacket", dataKey: "mens" },
+        { name: "Joggers", dataKey: "kids" }
+      ],
+      woman: [
+        { name: "Saree", dataKey: "womens" },
+        { name: "Dress", dataKey: "womens" },
+        { name: "Blouse", dataKey: "womens" },
+        { name: "Skirt", dataKey: "womens" },
+        { name: "Kurti", dataKey: "womens" }
+      ],
+      kids: [
+        { name: "School Uniform", dataKey: "kids" },
+        { name: "T Shirt", dataKey: "kids" },
+        { name: "Joggers", dataKey: "kids" }
+      ]
+    };
+
+    // For each selected service, populate the pricing structure
+    selectedServices.forEach(serviceName => {
+      // Only process services that are in our itemPricing structure
+      if (itemPricing[serviceName]) {
+        Object.keys(categoryItems).forEach(category => {
+          categoryItems[category].forEach(itemConfig => {
+            // Find the item in mockData
+            const categoryData = mockData[itemConfig.dataKey];
+            if (categoryData) {
+              const foundItem = categoryData.find(item => item.name === itemConfig.name);
+              
+              if (foundItem) {
+                const currentPrice = priceMap[foundItem.id] !== undefined ? priceMap[foundItem.id] : foundItem.price;
+                const priceValue = Math.max(1, Math.round(parseFloat(currentPrice) || 0));
+                
+                // Add to the appropriate service and category
+                itemPricing[serviceName][category].push({
+                  item: itemConfig.name,
+                  price: priceValue
+                });
+              }
+            }
           });
-        }
-      });
+        });
+      }
     });
-  });
-  
-  console.log("✅ Final Pricing Data Structure:", itemPricing);
-  return itemPricing;
-}, [priceMap, services, selectedServiceIds]);
-  
+
+    // Remove services that weren't selected by user
+    Object.keys(itemPricing).forEach(serviceName => {
+      if (!selectedServices.includes(serviceName)) {
+        delete itemPricing[serviceName];
+      } else {
+        // Also remove empty categories within selected services
+        Object.keys(itemPricing[serviceName]).forEach(category => {
+          if (itemPricing[serviceName][category].length === 0) {
+            // Keep the category but you can delete if you want empty arrays removed
+            // delete itemPricing[serviceName][category];
+          }
+        });
+      }
+    });
+
+    console.log("✅ Final Pricing Data for API:", { itemPricing });
+    return { itemPricing }; // Return as object with itemPricing key
+  }, [priceMap, services, selectedServiceIds]);
+
+
   // New pickups - orders waiting for acceptance
   const [newPickups, setNewPickups] = useState([
     {
       id: "1",
       estimatedDelivery: "2025-09-16   11.00 Am - 01.00 Pm",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      avatar: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
       name: "Niti Patel",
       location: "Maharashtra, India",
       pickupDate: "2025-09-13",
@@ -177,7 +269,7 @@ const getAllPricingData = useCallback(() => {
     {
       id: "2",
       estimatedDelivery: "2025-09-17   02.00 Pm - 04.00 Pm",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+      avatar: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
       name: "Rajesh Kumar",
       location: "Pune, India",
       pickupDate: "2025-09-14",
@@ -199,7 +291,7 @@ const getAllPricingData = useCallback(() => {
     {
       id: "3",
       estimatedDelivery: "2025-09-15   03.00 Pm - 05.00 Pm",
-      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
+      avatar: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
       name: "Priya Sharma",
       location: "Mumbai, India",
       pickupDate: "2025-09-12",
@@ -223,8 +315,8 @@ const getAllPricingData = useCallback(() => {
     const orderToAccept = newPickups.find(order => order.id === orderId);
     if (orderToAccept) {
       setNewPickups(prev => prev.filter(order => order.id !== orderId));
-      setAcceptedOrders(prev => [...prev, { 
-        ...orderToAccept, 
+      setAcceptedOrders(prev => [...prev, {
+        ...orderToAccept,
         status: "accepted",
         acceptedAt: new Date().toISOString(),
         paymentStatus: "pending"
@@ -238,9 +330,9 @@ const getAllPricingData = useCallback(() => {
 
   // Complete payment on accepted orders
   const completePayment = (orderId) => {
-    setAcceptedOrders(prev => 
-      prev.map(order => 
-        order.id === orderId 
+    setAcceptedOrders(prev =>
+      prev.map(order =>
+        order.id === orderId
           ? { ...order, paymentStatus: "completed" }
           : order
       )
@@ -375,9 +467,11 @@ const getAllPricingData = useCallback(() => {
   };
 
   return (
-    <VendorContext.Provider
+     <VendorContext.Provider
       value={{
-         userToken,
+        userToken,
+        userDetails,
+        saveUserDetails,
         isFirstLaunch,
         hasCompletedVendorRegistration,
         login,
@@ -411,10 +505,10 @@ const getAllPricingData = useCallback(() => {
         getPricingSummary,
         clearPricing,
         updateServicePrice,
-        qrImage,    
-        setQrImage,   
+        qrImage,
+        setQrImage,
         newPickups,
-        acceptedOrders, // Changed from inProgressOrders to acceptedOrders
+        acceptedOrders,
         acceptOrder,
         rejectOrder,
         completeOrder,

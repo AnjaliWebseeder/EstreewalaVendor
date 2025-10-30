@@ -74,7 +74,7 @@ const OrderSummary = ({ navigation }) => {
   };
 
   const onPay = () => {
-    navigation.navigate("ConfirmPayment", {
+    navigation.navigate("PaymentSuccess", {
       orderDetails: {
         orderId: `#ORD-${Date.now()}`,
         totalAmount: pricing.total.toFixed(2),
@@ -157,7 +157,7 @@ const OrderSummary = ({ navigation }) => {
           
           <View style={styles.customerInfo}>
             <Image 
-              source={{ uri: 'https://randomuser.me/api/portraits/women/44.jpg' }} 
+              source={{ uri: "https://cdn-icons-png.flaticon.com/512/847/847969.png" }} 
               style={styles.avatar} 
             />
             <View style={styles.customerDetails}>
@@ -276,16 +276,16 @@ const OrderSummary = ({ navigation }) => {
       {orderStatus === 'pending' && (
         <View style={[styles.actionBar,{paddingBottom: insets.bottom + 10}]}>
           <TouchableOpacity style={styles.rejectButton} onPress={onReject}>
-            <Ionicons name="close-circle" size={18} color="#ff6b6b" />
+            <Ionicons name="close-circle" size={18} color="#FF0000" />
             <Text style={styles.rejectText}>Decline</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.payButton} onPress={onPay}>
+          {/* <TouchableOpacity style={styles.payButton} onPress={onPay}>
             <View style={styles.payContent}>
               <Ionicons name="lock-closed" size={16} color={appColors.white} />
               <Text style={styles.payText}>Pay ₹{pricing.total.toFixed(2)}</Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       )}
     </SafeAreaView>

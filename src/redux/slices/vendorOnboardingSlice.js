@@ -1,30 +1,21 @@
 // redux/slices/vendorOnboardingSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { COMPLETIONSTATUS, MULTISTEPONBOARDINGSTEP1, MULTISTEPONBOARDINGSTEP2, MULTISTEPONBOARDINGSTEP3, MULTISTEPONBOARDINGSTEP4, MULTISTEPONBOARDINGSTEP5 } from "../../api"
-import {getToken} from "../../utils/hooks/auth"
+import axiosInstance from "../../api/axiosConfig";
+import { 
+  COMPLETIONSTATUS, 
+  MULTISTEPONBOARDINGSTEP1, 
+  MULTISTEPONBOARDINGSTEP2, 
+  MULTISTEPONBOARDINGSTEP3, 
+  MULTISTEPONBOARDINGSTEP4, 
+  MULTISTEPONBOARDINGSTEP5 
+} from "../../api"
 
-
-// Get completion status
+// Get completion status - NO TOKEN PARAMS NEEDED!
 export const getCompletionStatus = createAsyncThunk(
   "vendorOnboarding/getCompletionStatus",
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const token = getToken(getState);
-      
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-      
-      const response = await axios.get(
-        COMPLETIONSTATUS,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          timeout: 10000,
-        }
-      );
+      const response = await axiosInstance.get(COMPLETIONSTATUS);
       return response.data;
     } catch (error) {
       console.log("❌ Completion Status Error:", error.response?.data || error.message);
@@ -35,27 +26,14 @@ export const getCompletionStatus = createAsyncThunk(
   }
 );
 
-// Step 1: Business Details
+// Step 1: Business Details - NO TOKEN PARAMS NEEDED!
 export const completeStep1 = createAsyncThunk(
   "vendorOnboarding/completeStep1",
-  async (stepData, { getState, rejectWithValue }) => {
+  async (stepData, { rejectWithValue }) => {
     try {
-      const token = getToken(getState);
-      
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-      
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         MULTISTEPONBOARDINGSTEP1,
-        stepData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          timeout: 10000,
-        }
+        stepData
       );
       return response.data;
     } catch (error) {
@@ -67,36 +45,32 @@ export const completeStep1 = createAsyncThunk(
   }
 );
 
-// Step 2: Owner Details (Multipart)
+// Step 2: Owner Details (Multipart) - NO TOKEN PARAMS NEEDED!
 export const completeStep2 = createAsyncThunk(
   "vendorOnboarding/completeStep2",
-  async (stepData, { getState, rejectWithValue }) => {
+  async (stepData, { rejectWithValue }) => {
     try {
-      const token = getToken(getState); // get vendor token
-      if (!token) throw new Error("No authentication token found");
-
       const formData = new FormData();
       formData.append('owners', JSON.stringify(stepData.owners));
 
-      stepData.owners.forEach((owner) => {
+      // Handle file uploads
+      stepData.owners.forEach((owner, index) => {
         if (owner.governmentId) {
           formData.append('governmentId', {
             uri: owner.governmentId.uri,
             type: owner.governmentId.type || 'image/jpeg',
-            name: owner.governmentId.name || `government_id_${Date.now()}.jpg`,
+            name: owner.governmentId.name || `government_id_${Date.now()}_${index}.jpg`,
           });
         }
       });
 
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         MULTISTEPONBOARDINGSTEP2,
         formData,
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
           },
-          timeout: 15000,
         }
       );
 
@@ -111,28 +85,14 @@ export const completeStep2 = createAsyncThunk(
   }
 );
 
-
-// Step 3: Services
+// Step 3: Services - NO TOKEN PARAMS NEEDED!
 export const completeStep3 = createAsyncThunk(
   "vendorOnboarding/completeStep3",
-  async (stepData, { getState, rejectWithValue }) => {
+  async (stepData, { rejectWithValue }) => {
     try {
-      const token = getToken(getState);
-      
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-      
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         MULTISTEPONBOARDINGSTEP3,
-        stepData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          timeout: 10000,
-        }
+        stepData
       );
 
       console.log("✅ Step 3 Completed:", response.data);
@@ -146,27 +106,14 @@ export const completeStep3 = createAsyncThunk(
   }
 );
 
-// Step 4: Pricing
+// Step 4: Pricing - NO TOKEN PARAMS NEEDED!
 export const completeStep4 = createAsyncThunk(
   "vendorOnboarding/completeStep4",
-  async (stepData, { getState, rejectWithValue }) => {
+  async (stepData, { rejectWithValue }) => {
     try {
-      const token = getToken(getState);
-      
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-      
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         MULTISTEPONBOARDINGSTEP4,
-        stepData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          timeout: 10000,
-        }
+        stepData
       );
 
       console.log("✅ Step 4 Completed:", response.data);
@@ -180,27 +127,14 @@ export const completeStep4 = createAsyncThunk(
   }
 );
 
-// Step 5: Delivery Methods
+// Step 5: Delivery Methods - NO TOKEN PARAMS NEEDED!
 export const completeStep5 = createAsyncThunk(
   "vendorOnboarding/completeStep5",
-  async (stepData, { getState, rejectWithValue }) => {
+  async (stepData, { rejectWithValue }) => {
     try {
-      const token = getToken(getState);
-      
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-      
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         MULTISTEPONBOARDINGSTEP5,
-        stepData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          timeout: 10000,
-        }
+        stepData
       );
 
       console.log("✅ Step 5 Completed:", response.data);
@@ -241,9 +175,19 @@ const vendorOnboardingSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Get Completion Status
+      .addCase(getCompletionStatus.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(getCompletionStatus.fulfilled, (state, action) => {
+        state.loading = false;
         state.completionStatus = action.payload;
         state.currentStep = action.payload.completionStep || 0;
+        state.success = true;
+      })
+      .addCase(getCompletionStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Failed to get completion status";
       })
       // Step 1
       .addCase(completeStep1.pending, (state) => {

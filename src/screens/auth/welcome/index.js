@@ -5,7 +5,7 @@ import { styles } from './styles';
 import appColors from '../../../theme/appColors';
 import ArrowRightIcon from '../../../assets/Icons/back-btn';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { sendOtp, clearError } from '../../../redux/slices/otpSlice';
+ import { sendOtp, clearError } from '../../../redux/slices/otpSlice';
 import { useToast } from '../../../utils/context/toastContext'; 
 
 const WelcomeScreen = ({ navigation }) => {
@@ -14,7 +14,7 @@ const WelcomeScreen = ({ navigation }) => {
   const [phone, setPhone] = useState('');
   const [localError, setLocalError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
-   const { showToast } = useToast(); 
+  const { showToast } = useToast(); 
 
   // Clear error automatically when user types a valid phone number
   useEffect(() => {
@@ -50,23 +50,23 @@ const WelcomeScreen = ({ navigation }) => {
       phone: phoneDigits
     };
 
-     try {
-    const result = await dispatch(sendOtp(payload));
-    if (sendOtp.fulfilled.match(result)) {
-       showToast('OTP sent to mobile for login!', 'success');
-     setPhone(phoneDigits);
-      setTimeout(() => {
-        navigation.navigate('Otp', { phone: phoneDigits });
-      }, 1000);
-    } else if (sendOtp.rejected.match(result)) {
-       showToast(result?.payload || 'Failed to Send OTP', "error");
+    // COMMENTED OUT API CALL
+    try {
+      const result = await dispatch(sendOtp(payload));
+      if (sendOtp.fulfilled.match(result)) {
+        //  showToast('OTP sent to mobile for login!', 'success');
+       setPhone(phoneDigits);
+        setTimeout(() => {
+          navigation.navigate('Otp', { phone: phoneDigits });
+        }, 1000);
+      } else if (sendOtp.rejected.match(result)) {
+         showToast(result?.payload || 'Failed to Send OTP', "error");
+      }
+    } catch (err) {
+      console.error('Error dispatching OTP:', err);
+         showToast(err || 'Failed to Send OTP', "error");
     }
-  } catch (err) {
-    console.error('Error dispatching OTP:', err);
-       showToast(err || 'Failed to Send OTP', "error");
-  }
-    
-   
+    setPhone(phoneDigits);
   };
 
   // Format phone number as user types
@@ -84,7 +84,7 @@ const WelcomeScreen = ({ navigation }) => {
       setLocalError('');
     }
     
-    // Clear Redux error when user types
+    //Clear Redux error when user types
     if (error) {
       dispatch(clearError());
     }
@@ -125,31 +125,32 @@ const WelcomeScreen = ({ navigation }) => {
             style={[
               styles.button,
               {
-                backgroundColor: phone.length === 10 && !loading 
+                backgroundColor: phone.length === 10 
                   ? appColors.secondary 
                   : appColors.inActive
               }
             ]} 
             onPress={handleRequestOtp}
-            disabled={phone.length < 10 || loading}
+            disabled={phone.length < 10}
           >
             <Text style={[
               styles.buttonText,
               { 
-                color: phone.length === 10 && !loading 
+                color: phone.length === 10
                   ? appColors.white 
                   : appColors.disableText 
               }
             ]}>
-              {loading ? 'Sending OTP...' : 'Request OTP'}
+               {loading ? 'Sending OTP...' : 'Request OTP'} 
+          
             </Text>
-            {!loading && (
+           {!loading && ( 
               <ArrowRightIcon color={
-                phone.length === 10 && !loading 
+                phone.length === 10
                   ? appColors.white 
                   : appColors.disableText
               } />
-            )}
+         )} 
           </TouchableOpacity>
 
           <View style={styles.divider}>

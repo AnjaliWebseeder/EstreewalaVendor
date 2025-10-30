@@ -388,7 +388,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: appColors.white,
     padding: 16,
-    paddingVertical:10,
+    paddingVertical:14,
     borderTopWidth: 1,
     borderTopColor: appColors.border,
     shadowColor: '#000',
@@ -403,17 +403,18 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: appColors.white,
-    borderWidth: 2,
-    borderColor: '#ff6b6b',
-    height:windowHeight(34),
+    borderWidth: 0.8,
+    borderColor: '#FF0000',
+    height:windowHeight(35),
     borderRadius: 12,
     marginRight: 12,
-    marginTop:3
+    marginTop:3,
+    marginHorizontal:10
   },
   rejectText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#ff6b6b',
+    color: '#FF0000',
     marginLeft: 8,
     fontFamily: fonts.InterSemiBold
   },
@@ -462,7 +463,7 @@ export const styles = StyleSheet.create({
     elevation: 2,
   },
   rejectedStatus: {
-    backgroundColor: '#ff6b6b',
+    backgroundColor: '#ea3c3cff',
   },
   statusText: {
     color: appColors.white,

@@ -1,4 +1,3 @@
-// SubscriptionPlansScreen.js
 import React, { useContext, useState, useEffect } from 'react';
 import {
   View,
@@ -11,6 +10,7 @@ import {
   Animated,
   Easing,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -55,6 +55,8 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
   const { completeSubscription } = useContext(VendorContext);
   const insets = useSafeAreaInsets();
 
+  console.log("sssssssssssssss",selectedPlan,selectedDuration)
+
   // Load subscription plans on component mount
   useEffect(() => {
     dispatch(getSubscriptionPlans());
@@ -67,6 +69,13 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
       dispatch(clearSubscriptionError());
     }
   }, [error]);
+
+  // Handle successful order creation
+  useEffect(() => {
+    if (currentOrder && currentOrder.success) {
+      setShowPaymentModal(true);
+    }
+  }, [currentOrder]);
 
   // Animation effects
   useEffect(() => {
@@ -156,7 +165,7 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
     },
   ];
 
-  // Get selected plan price - FIXED: Use the actual selected plan data
+  // Get selected plan price from actual API data
   const getSelectedPlanPrice = () => {
     if (!selectedPlan || !selectedDuration || !plans) return 0;
     
@@ -164,6 +173,14 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
     if (!plan || !plan.durations || !plan.durations[selectedDuration]) return 0;
     
     return plan.durations[selectedDuration].price;
+  };
+
+  // Get prorated price for display
+  const getProratedPrice = () => {
+    if (currentOrder && currentOrder.planDetails && currentOrder.planDetails.isProrated) {
+      return currentOrder.planDetails.price;
+    }
+    return getSelectedPlanPrice();
   };
 
   const showToast = (text, type = 'info') => {
@@ -195,42 +212,41 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
   const handlePlanSelect = (plan) => {
     setSelectedPlan(plan.code);
     setSelectedPlanDetails(plan);
-    showToast(`${plan.name} selected!`, 'success');
   };
 
   const handleSubscribe = async () => {
-    if (selectedPlan && selectedDuration) {
-      try {
-        // Create subscription order
-        const result = await dispatch(createSubscription({
-          planType: selectedPlan,
-          duration: selectedDuration
-        })).unwrap();
-
-        if (result.success) {
-          console.log('✅ Subscription order created:', result);
-          setShowPaymentModal(true);
-        }
-      } catch (error) {
-        console.log('❌ Subscription creation failed:', error);
-        showToast('Failed to create subscription order', 'error');
-      }
-    } else {
+    if (!selectedPlan || !selectedDuration) {
       showToast('Please select a plan and duration first!', 'warning');
-    }
-  };
-
-  const initiateRazorpayPayment = async () => {
-    const selectedPrice = getSelectedPlanPrice();
-    
-    if (!selectedPrice || selectedPrice === 0) {
-      showToast('Invalid plan price', 'error');
       return;
     }
 
     try {
-      console.log('💰 Razorpay Payment Details:', {
-        selectedPrice: selectedPrice,
+      // Create subscription order via API
+      const result = await dispatch(createSubscription({
+        planType: selectedPlan,
+        duration: selectedDuration
+      })).unwrap();
+
+      if (result.success) {
+        console.log('✅ Subscription order created:', result);
+        // Payment modal will be shown via useEffect
+      }
+    } catch (error) {
+      console.log('❌ Subscription creation failed:', error);
+      showToast('Failed to create subscription order', 'error');
+    }
+  };
+
+  const initiateRazorpayPayment = async () => {
+    if (!currentOrder || !currentOrder.success) {
+      showToast('Order not created properly', 'error');
+      return;
+    }
+
+    try {
+      console.log('💰 Payment Details:', {
+        orderId: currentOrder.orderId,
+        amount: currentOrder.amount,
         plan: selectedPlan,
         duration: selectedDuration
       });
@@ -238,11 +254,11 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
       const options = {
         description: `${selectedPlanDetails?.name} - ${selectedDuration}`,
         image: 'https://your-logo-url.com/logo.png',
-        currency: 'INR',
-        key: 'rzp_test_RWlnXOheEtSTbA', // Use the Razorpay key from your API response or hardcode it
-        amount: selectedPrice * 100, // Convert to paise using selectedPrice
+        currency: currentOrder.currency || 'INR',
+        key: currentOrder.key , // Fallback to your test key
+        amount: Math.round(currentOrder.amount * 100), // Convert to paise
         name: 'Estreewalla',
-        order_id: `order_${Date.now()}`, // Generate a temporary order ID
+        order_id: currentOrder.orderId,
         prefill: {
           email: 'vendor@estreewalla.com',
           contact: '+919876543210',
@@ -255,22 +271,13 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
         }
       };
 
-      // If we have a currentOrder from API, use its order_id and key
-      if (currentOrder) {
-        options.order_id = currentOrder.orderId;
-        options.key = currentOrder.key;
-      }
-
-      console.log('🔧 Razorpay Options:', options);
-
       const razorpayResponse = await RazorpayCheckout.open(options);
       console.log('✅ Razorpay Response:', razorpayResponse);
       
       // Verify payment
       await handlePaymentVerification(razorpayResponse);
-      
     } catch (error) {
-      console.log('❌ Razorpay error:', error);
+      console.log('❌ Payment error:', error);
       if (error.description !== 'Payment Cancelled') {
         showToast('Payment failed! Please try again.', 'error');
       } else {
@@ -291,8 +298,6 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
         duration: selectedDuration
       };
 
-      console.log('📦 Verification Data:', verificationData);
-
       const result = await dispatch(verifySubscription(verificationData)).unwrap();
 
       if (result.success) {
@@ -301,10 +306,16 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
         showToast('Subscription activated successfully!', 'success');
         
         // Complete subscription in context
-        await completeSubscription();
+        if (completeSubscription) {
+          await completeSubscription();
+        }
         
         // Navigate to main screen
-        navigation.replace('Main');
+        if (params) {
+          navigation.goBack();
+        } else {
+          navigation.replace('Main');
+        }
       }
     } catch (error) {
       console.log('❌ Payment verification failed:', error);
@@ -314,8 +325,14 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
 
   const handleSkip = async () => {
     try {
-      await completeSubscription();
-      navigation.replace('Main');
+      if (completeSubscription) {
+        await completeSubscription();
+      }
+      if (params) {
+        navigation.goBack();
+      } else {
+        navigation.replace('Main');
+      }
     } catch (error) {
       console.log('Error skipping subscription:', error);
       showToast('Error completing subscription', 'error');
@@ -470,25 +487,18 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
     </View>
   );
 
-  // if (loading && !plans) {
-  //   return (
-  //     <SafeAreaView style={styles.container}>
-  //       <View style={styles.loadingContainer}>
-  //         <Text>Loading plans...</Text>
-  //       </View>
-  //     </SafeAreaView>
-  //   );
-  // }
-
   const uiPlans = transformPlans();
-  const selectedPrice = getSelectedPlanPrice();
+  const displayPrice = currentOrder ? getProratedPrice() : getSelectedPlanPrice();
 
-  console.log('💰 Price Debug:', {
-    selectedPlan,
-    selectedDuration,
-    selectedPrice,
-    currentOrderAmount: currentOrder?.amount
-  });
+  if (loading && !plans) {
+    return (
+    <SafeAreaView style={styles.container}>
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="small" color={appColors.blue} />
+    </View>
+  </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -582,21 +592,24 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
               </Text>
               <Text style={styles.selectedPlanDuration}>
                 {durations.find(d => d.code === selectedDuration)?.label} • 
-                ₹{selectedPrice}
+                ₹{displayPrice}
+                {currentOrder?.planDetails?.isProrated && (
+                  <Text style={styles.proratedText}> (prorated)</Text>
+                )}
               </Text>
             </View>
             <Text style={styles.finalPrice}>
-              ₹{selectedPrice}
+              ₹{displayPrice}
             </Text>
           </View>
           
           <TouchableOpacity 
             style={styles.subscribeButton}
             onPress={handleSubscribe}
-            disabled={creating}
+            disabled={creating || verifying}
           >
             <Text style={styles.subscribeButtonText}>
-              {creating ? 'Creating...' : 'Subscribe Now'}
+              {creating ? 'Creating...' : 'Subscribe Now'} 
             </Text>
             <Icon name="arrow-forward" size={16} color="#FFFFFF" />
           </TouchableOpacity>
@@ -709,7 +722,7 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
         </View>
       </Modal>
 
-      {/* Razorpay Payment Modal */}
+      {/* Payment Modal */}
       <Modal
         visible={showPaymentModal}
         animationType="fade"
@@ -722,7 +735,10 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
               <View>
                 <Text style={styles.modalTitle}>Complete Payment</Text>
                 <Text style={styles.paymentAmount}>
-                  ₹{selectedPrice}
+                  ₹{displayPrice}
+                  {currentOrder?.planDetails?.isProrated && (
+                    <Text style={styles.proratedText}> (prorated)</Text>
+                  )}
                 </Text>
               </View>
               <TouchableOpacity 
@@ -740,7 +756,7 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
                 {durations.find(d => d.code === selectedDuration)?.label} Plan
               </Text>
               <Text style={styles.paymentValidity}>
-                {durations.find(d => d.code === selectedDuration)?.days} validity
+                {currentOrder?.planDetails?.validityDays || durations.find(d => d.code === selectedDuration)?.days} days validity
               </Text>
             </View>
 
@@ -767,10 +783,10 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
               <View style={styles.razorpayButtonContent}>
                 <Icon name="payment" size={24} color="#FFFFFF" />
                 <Text style={styles.razorpayButtonText}>
-                  {verifying ? 'Processing...' : `Pay ₹${selectedPrice}`}
+                  {verifying ? 'Processing...' : `Pay ₹${displayPrice}`}
                 </Text>
               </View>
-              {!verifying && <Icon name="lock" size={16} color="#FFFFFF" />}
+              <Icon name="lock" size={16} color="#FFFFFF" />
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -788,33 +804,37 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
       </Modal>
 
       {/* Toast Message */}
-      {showMessage && (
-        <Animated.View 
-          style={[
-            styles.toast,
-            { 
-              transform: [{ translateY: slideAnim }],
-              backgroundColor: message.type === 'success' ? '#10B981' : 
-                            message.type === 'warning' ? '#F59E0B' : 
-                            message.type === 'error' ? '#EF4444' : appColors.secondary
-            }
-          ]}
-        >
-          <Icon 
-            name={
-              message.type === 'success' ? 'check-circle' :
-              message.type === 'warning' ? 'warning' :
-              message.type === 'error' ? 'error' : 'info'
-            } 
-            size={20} 
-            color="#FFFFFF" 
-          />
-          <Text style={styles.toastText}>{message.text}</Text>
-          <TouchableOpacity onPress={hideToast}>
-            <Icon name="close" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-        </Animated.View>
-      )}
+ {showMessage && (
+  <Animated.View 
+    style={[
+      styles.toast,
+      { 
+        transform: [{ translateY: slideAnim }],
+        backgroundColor: 
+          message.type === 'success' ? '#10B981' : 
+          message.type === 'warning' ? '#F59E0B' : 
+          message.type === 'error' ? '#EF4444' : 
+          appColors.secondary
+      }
+    ]}
+  >
+    <Icon 
+      name={
+        message.type === 'success' ? 'check-circle' :
+        message.type === 'warning' ? 'warning' :
+        message.type === 'error' ? 'error' : 'info'
+      } 
+      size={20} 
+      color="#FFFFFF" 
+    />
+    <Text style={styles.toastText}>{message.text}</Text>
+    <TouchableOpacity onPress={hideToast}>
+      <Icon name="close" size={20} color="#FFFFFF" />
+    </TouchableOpacity>
+  </Animated.View>
+)}
+
+      
     </SafeAreaView>
   );
 };

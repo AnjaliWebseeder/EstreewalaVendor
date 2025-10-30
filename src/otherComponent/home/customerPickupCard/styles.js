@@ -204,11 +204,11 @@ export const styles = StyleSheet.create({
   rejectButton: {
     backgroundColor: appColors.white,
     borderWidth: 1,
-    borderColor: "#f72585",
+    borderColor: "#FF0000",
     width:"49%"
   },
   rejectButtonText: {
-    color: "#f72585",
+    color: "#FF0000",
     fontFamily: fonts.InterSemiBold,
     fontSize: 14,
       fontWeight:"800"

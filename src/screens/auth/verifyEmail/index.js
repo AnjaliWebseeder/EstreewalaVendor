@@ -15,9 +15,10 @@ export default function VerifyEmail({ navigation , route }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [timer, setTimer] = useState(30); // 30 seconds countdown
   const email = route.params?.email
-   const { loading } = useSelector((state) => state.verifyOtpReset);
-   const { showToast } = useToast();
+  const { loading } = useSelector((state) => state.verifyOtpReset);
+  const { showToast } = useToast();
   const dispatch = useDispatch();
+  
   // Countdown timer
   useEffect(() => {
     let interval;
@@ -57,22 +58,24 @@ export default function VerifyEmail({ navigation , route }) {
 
     // ✅ Passed validation
     setError('');
-     const payload = {
-  email: email.trim(),
-  otp: "1234"
-}
-      try {
-    const result = await dispatch(verifyOtp(payload));
-    if (verifyOtp.fulfilled.match(result)) {
-      showToast("OTP verified successfully!", "success");
-      navigation.navigate('ResetPassword',{payload:payload})
-    } else if (verifyOtp.rejected.match(result)) {
-      showToast( result?.payload?.message || "OTP verification failed", "error");
+    const payload = {
+      email: email.trim(),
+      otp: "1234"
     }
-  } catch (err) {
-    console.error("Dispatch error:", err);
-    showToast("Something went wrong", "error");
-  }
+
+    // COMMENTED OUT API CALL
+    try {
+      const result = await dispatch(verifyOtp(payload));
+      if (verifyOtp.fulfilled.match(result)) {
+        showToast("OTP verified successfully!", "success");
+        navigation.navigate('ResetPassword',{payload:payload})
+      } else if (verifyOtp.rejected.match(result)) {
+        showToast( result?.payload?.message || "OTP verification failed", "error");
+      }
+    } catch (err) {
+      console.error("Dispatch error:", err);
+      showToast("Something went wrong", "error");
+    }
   };
 
   const handleResend = async () => {
@@ -97,7 +100,7 @@ export default function VerifyEmail({ navigation , route }) {
         <BannerHeader
           bannerImage={require('../../../assets/images/background.png')}
           title="Verify Your Email"
-          subtitle="We’ve sent a 4-digit code to your email. Please enter it below to verify your number."
+          subtitle="We've sent a 4-digit code to your email. Please enter it below to verify your number."
           onBackPress={() => navigation.goBack()}
           subTitleStyle={{ marginHorizontal: 20 }}
         />
@@ -110,7 +113,12 @@ export default function VerifyEmail({ navigation , route }) {
         <View style={styles.blankView} />
 
         {/* ✅ Disabled until OTP valid */}
-        <CustomButton loading={loading} title="Next" onPress={handleVerify} disabled={isDisabled} />
+        <CustomButton 
+          loading={loading} 
+          title="Next" 
+          onPress={handleVerify} 
+          disabled={isDisabled} 
+        />
 
         <TouchableOpacity
           style={styles.button}
@@ -118,7 +126,7 @@ export default function VerifyEmail({ navigation , route }) {
           onPress={handleResend}
         >
           <Text style={styles.footerText}>
-            Didn’t receive the code?{' '}
+            Didn't receive the code?{' '}
             {timer > 0 ? (
               <Text style={styles.link}>Resend in {timer}s</Text>
             ) : (

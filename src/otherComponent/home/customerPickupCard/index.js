@@ -56,7 +56,7 @@ const CustomerPickupCard = ({
       setProcessingPayment(false);
 
       // ✅ Directly navigate to ConfirmPayment screen
-      navigation.navigate('ConfirmPayment', { 
+      navigation.navigate('PaymentSuccess', { 
         orderId: order.id,
         orderData: order,
         amount: order.totalAmount
@@ -190,7 +190,7 @@ const CustomerPickupCard = ({
               style={[styles.actionButton, styles.rejectButton]}
               onPress={() => handleReject(item.id)}
             >
-              <Icon name="close-circle" size={18} color={"#f72585"} />
+              <Icon name="close-circle" size={18} color={"#FF0000"} />
               <Text style={styles.rejectButtonText}>Decline</Text>
             </TouchableOpacity>
             
@@ -203,19 +203,20 @@ const CustomerPickupCard = ({
           </>
         ) : (
           // Accepted Order Actions - Only Payment button
-          <View style={styles.progressActions}>
-            {isPaymentPending && (
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.paymentButton, processingPayment && styles.disabledButton]}
-                onPress={() => handleMakePayment(item)}
-                disabled={processingPayment}
-              >
-                <Text style={styles.paymentButtonText}>
-                  {processingPayment ? 'Processing...' : 'Make Payment'}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
+          // <View style={styles.progressActions}>
+          //   {isPaymentPending && (
+          //     <TouchableOpacity 
+          //       style={[styles.actionButton, styles.paymentButton, processingPayment && styles.disabledButton]}
+          //       onPress={() => handleMakePayment(item)}
+          //       disabled={processingPayment}
+          //     >
+          //       <Text style={styles.paymentButtonText}>
+          //         {processingPayment ? 'Processing...' : 'Make Payment'}
+          //       </Text>
+          //     </TouchableOpacity>
+          //   )}
+          // </View>
+          <></>
         )}
       </View>
     </Animated.View>

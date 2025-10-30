@@ -3,14 +3,12 @@ import React, { useEffect, useRef } from "react";
 import { styles } from "./styles";
 import FastImage from "react-native-fast-image";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { usePermissions } from "../../utils/hooks/permission";
 
 export default function Splash({ navigation }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const bubbleAnim = useRef(new Animated.Value(0)).current;
-  const { requestLocationPermission, requestNotificationPermission } = usePermissions();
 
   // Combined useEffect for animations and navigation
   useEffect(() => {
@@ -19,35 +17,37 @@ export default function Splash({ navigation }) {
 
     const initializeApp = async () => {
       try {
-        // Start animations
-        Animated.parallel([
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 1,
-            duration: 800,
-            easing: Easing.elastic(1.2),
-            useNativeDriver: true,
-          }),
-          Animated.loop(
-            Animated.sequence([
-              Animated.timing(bounceAnim, {
-                toValue: 1,
-                duration: 1000,
-                easing: Easing.inOut(Easing.ease),
-                useNativeDriver: true,
-              }),
-              Animated.timing(bounceAnim, {
-                toValue: 0,
-                duration: 1000,
-                easing: Easing.inOut(Easing.ease),
-                useNativeDriver: true,
-              }),
-            ])
-          ),
+        // SEQUENCE ANIMATIONS PROPERLY
+        Animated.sequence([
+          // First: Fade in and scale
+          Animated.parallel([
+            Animated.timing(fadeAnim, {
+              toValue: 1,
+              duration: 800,
+              useNativeDriver: true,
+            }),
+            Animated.timing(scaleAnim, {
+              toValue: 1,
+              duration: 800,
+              easing: Easing.elastic(1),
+              useNativeDriver: true,
+            }),
+          ]),
+          // Then: Single bounce (up and down once)
+          Animated.sequence([
+            Animated.timing(bounceAnim, {
+              toValue: 1,
+              duration: 400,
+              easing: Easing.out(Easing.back(1.2)),
+              useNativeDriver: true,
+            }),
+            Animated.timing(bounceAnim, {
+              toValue: 0,
+              duration: 500,
+              easing: Easing.bounce,
+              useNativeDriver: true,
+            }),
+          ]),
         ]).start();
 
         // Request permissions (non-blocking)
@@ -85,23 +85,31 @@ export default function Splash({ navigation }) {
   // Bubble animation (separate as it's visual only)
   useEffect(() => {
     Animated.loop(
-      Animated.timing(bubbleAnim, {
-        toValue: 1,
-        duration: 3000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
+      Animated.sequence([
+        Animated.timing(bubbleAnim, {
+          toValue: 1,
+          duration: 2000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(bubbleAnim, {
+          toValue: 0,
+          duration: 2000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
     ).start();
   }, [bubbleAnim]);
 
   const bubbleTranslateY = bubbleAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -20],
+    outputRange: [0, -25],
   });
 
   const bubbleOpacity = bubbleAnim.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [1, 0.5, 1],
+    outputRange: [0.3, 0.8, 0.3],
   });
 
   return (
@@ -112,7 +120,10 @@ export default function Splash({ navigation }) {
           style={[
             styles.bubble,
             styles.bubble1,
-            { opacity: bubbleOpacity, transform: [{ translateY: bubbleTranslateY }] },
+            { 
+              opacity: bubbleOpacity, 
+              transform: [{ translateY: bubbleTranslateY }] 
+            },
           ]}
         />
         <Animated.View
@@ -122,13 +133,13 @@ export default function Splash({ navigation }) {
             {
               opacity: bubbleOpacity.interpolate({
                 inputRange: [0, 0.5, 1],
-                outputRange: [0.7, 0.3, 0.7],
+                outputRange: [0.2, 0.6, 0.2],
               }),
               transform: [
                 {
                   translateY: bubbleTranslateY.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0, -15],
+                    outputRange: [0, -20],
                   }),
                 },
               ],
@@ -142,13 +153,13 @@ export default function Splash({ navigation }) {
             {
               opacity: bubbleOpacity.interpolate({
                 inputRange: [0, 0.5, 1],
-                outputRange: [0.5, 0.2, 0.5],
+                outputRange: [0.1, 0.4, 0.1],
               }),
               transform: [
                 {
                   translateY: bubbleTranslateY.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0, -10],
+                    outputRange: [0, -15],
                   }),
                 },
               ],
@@ -167,7 +178,7 @@ export default function Splash({ navigation }) {
                 {
                   translateY: bounceAnim.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0, -10],
+                    outputRange: [0, -20], // More noticeable bounce
                   }),
                 },
               ],
@@ -180,7 +191,7 @@ export default function Splash({ navigation }) {
           />
         </Animated.View>
 
-        {/* Text */}
+        {/* Text - Animate after logo appears */}
         <Animated.View
           style={{
             opacity: fadeAnim,
@@ -188,7 +199,7 @@ export default function Splash({ navigation }) {
               {
                 translateY: fadeAnim.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [20, 0],
+                  outputRange: [30, 0],
                 }),
               },
             ],
@@ -204,7 +215,7 @@ export default function Splash({ navigation }) {
               {
                 translateY: fadeAnim.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [30, 0],
+                  outputRange: [40, 0],
                 }),
               },
             ],

@@ -24,70 +24,72 @@ const RegisterScreen = ({ navigation }) => {
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // ✅ Password validation regex (same as ResetPassword)
+  const passwordRegex =
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{};':"\\|,.<>/?-]).{8,}$/;
+
   useEffect(() => {
     dispatch(resetVendorState());
   }, [dispatch]);
 
   const handleCreateAccount = async () => {
-  setIsSubmitted(true);
-  const newErrors = {};
+    setIsSubmitted(true);
+    const newErrors = {};
 
-  if (!firstName.trim()) newErrors.firstName = 'First name is required';
-  if (!lastName.trim()) newErrors.lastName = 'Last name is required';
+    // ✅ Validate each field
+    if (!firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!lastName.trim()) newErrors.lastName = 'Last name is required';
 
-  if (!mobileNumber.trim()) newErrors.mobileNumber = 'Mobile number is required';
-  else if (!/^[0-9]{10}$/.test(mobileNumber))
-    newErrors.mobileNumber = 'Enter a valid 10-digit number';
+    if (!mobileNumber.trim()) newErrors.mobileNumber = 'Mobile number is required';
+    else if (!/^[0-9]{10}$/.test(mobileNumber))
+      newErrors.mobileNumber = 'Enter a valid 10-digit number';
 
-  if (!email.trim()) newErrors.email = 'Email is required';
-  else if (!/\S+@\S+\.\S+/.test(email))
-    newErrors.email = 'Enter a valid email address';
+    if (!email.trim()) newErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(email))
+      newErrors.email = 'Enter a valid email address';
 
-  if (!password) newErrors.password = 'Password is required';
-  else if (password.length < 6)
-    newErrors.password = 'Password must be at least 6 characters';
+    if (!password) newErrors.password = 'Password is required';
+    else if (!passwordRegex.test(password))
+      newErrors.password =
+        'Password must be at least 8 characters, include a capital letter, a number and a special character';
 
-  if (!confirmPassword)
-    newErrors.confirmPassword = 'Please confirm your password';
-  else if (confirmPassword !== password)
-    newErrors.confirmPassword = 'Passwords do not match';
+    if (!confirmPassword)
+      newErrors.confirmPassword = 'Please confirm your password';
+    else if (confirmPassword !== password)
+      newErrors.confirmPassword = 'Passwords do not match';
 
-  setErrors(newErrors);
+    setErrors(newErrors);
 
-  // Stop if any validation error exists
-  if (Object.keys(newErrors).length > 0) return;
+    // ❌ Stop if any validation error
+    if (Object.keys(newErrors).length > 0) return;
 
-  // ✅ Construct payload
-  const payload = {
-    firstName: firstName.trim(),
-    lastName: lastName.trim(),
-    email: email.trim(),
-    password,
-    phone: mobileNumber.trim(),
-    role: 'vendor',
-  };
-  
-  try {
-    const resultAction = await dispatch(signupVendor(payload));
-    if (signupVendor.fulfilled.match(resultAction)) {
-      showToast( 'Account created successfully!', "success");
+    // ✅ Payload
+    const payload = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim(),
+      password,
+      phone: mobileNumber.trim(),
+      role: 'vendor',
+    };
 
-      setTimeout(() => {
-        navigation.replace('PasswordLogin');
-      }, 1500);
-    } else if (signupVendor.rejected.match(resultAction)) {
+    try {
+      const resultAction = await dispatch(signupVendor(payload));
+      if (signupVendor.fulfilled.match(resultAction)) {
+        setTimeout(() => {
+          navigation.replace('PasswordLogin');
+        }, 1500);
+      } else if (signupVendor.rejected.match(resultAction)) {
         showToast(resultAction?.payload?.message || 'Signup Failed', "error");
-    }
-  } catch (err) {
-    console.error('Signup error:', err);
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
       showToast(err || 'Signup Failed', "error");
-  } finally {
-  
-  }
-};
-  // ✅ Real-time validation: clears error if field becomes valid
+    }
+  };
+
+  // ✅ Live validation for each field
   const handleInputChange = (field, value) => {
-    // update value
     switch (field) {
       case "firstName":
         setFirstName(value);
@@ -107,7 +109,7 @@ const RegisterScreen = ({ navigation }) => {
         break;
       case "password":
         setPassword(value);
-        if (value.length >= 6) removeError(field);
+        if (passwordRegex.test(value)) removeError(field);
         break;
       case "confirmPassword":
         setConfirmPassword(value);
@@ -184,6 +186,8 @@ const RegisterScreen = ({ navigation }) => {
               secureTextEntry
               error={errors.confirmPassword}
             />
+
+        
           </View>
 
           <CustomButton

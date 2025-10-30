@@ -102,24 +102,28 @@ export default function AddOwner({ navigation, route }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const submit = () => {
-    if (!validate()) return;
+const submit = () => {
+  if (!validate()) return;
 
-    const newOwner = { 
-      firstName, 
-      lastName, 
-      primary, 
-      whatsapp: sameAsPrimary ? primary : whatsapp,
-      governmentId 
-    };
-
-    if (editingOwner) {
-      editOwner(editingOwner.id, newOwner);
-    } else {
-      addOwner(newOwner);
-    }
-    navigation.goBack();
+  const newOwner = { 
+    firstName, 
+    lastName, 
+    primary, 
+    whatsapp: sameAsPrimary ? primary : whatsapp,
+    governmentId 
   };
+
+  if (editingOwner) {
+    // Update existing owner
+    editOwner(editingOwner.id, newOwner);
+  } else {
+    // Add new owner
+    addOwner(newOwner);
+  }
+
+  navigation.goBack();
+};
+
 
   return (
     <SafeAreaView style={styles.mainContainer}>

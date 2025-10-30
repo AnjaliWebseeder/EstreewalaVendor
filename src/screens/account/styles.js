@@ -108,6 +108,26 @@ logoutContainer: {
              color: appColors.white, fontSize: 16, fontWeight: '600',
              fontFamily:fonts.InterSemiBold
 
+      },
+      subscriptionPlan:{
+          borderRadius: 16,
+      paddingVertical: 18,
+      paddingHorizontal: 13,
+      flexDirection: "row",
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOpacity: 0.1,
+      shadowRadius: 6,
+      elevation: 4,
+      },
+      mainContainer:{
+        flex: 1 , marginLeft:12
+      },
+      textStyle:{
+        color: "#fff", fontSize: 16, fontWeight: "700"
+      },
+      content:{
+        color: "#fff", fontSize: 13, marginTop: 4, opacity: 0.9,width:windowHeight(240),lineHeight:17
       }
 
 

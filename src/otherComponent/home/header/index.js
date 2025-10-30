@@ -49,11 +49,13 @@ export default function Header(props) {
             <View style={styles.locationIconWrapper}>
               <LocationIcon color={appColors.white} />
             </View>
-               {userLocation?.address &&  <View style={styles.locationTextContainer}>
+               {/* {userLocation?.address &&  <View style={styles.locationTextContainer}> */}
+              <View style={styles.locationTextContainer}>
               <View style={styles.locationRow}>
-                <Text style={styles.locationText}>{userLocation.address}</Text>
+                <Text style={styles.locationText}>{userLocation?.address || "Airoli, Navi Mumbai"}</Text>
               </View>
-            </View> }
+            </View> 
+            {/* } */}
            
           </TouchableOpacity>
 
