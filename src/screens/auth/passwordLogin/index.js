@@ -8,7 +8,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useToast } from '../../../utils/context/toastContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginVendor, resetVendorState } from '../../../redux/slices/loginSlice';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { VendorContext } from '../../../utils/context/vendorContext';
 
 const PasswordLoginScreen = ({ navigation }) => {
@@ -53,11 +52,9 @@ const PasswordLoginScreen = ({ navigation }) => {
       const resultAction = await dispatch(loginVendor(payload));
       if (loginVendor.fulfilled.match(resultAction)) {
           const {token,user} = resultAction.payload
-         await AsyncStorage.setItem('userToken',token);
-         await AsyncStorage.setItem('userDetails', JSON.stringify(user));
-          // Update context
-          login(token);
-          saveUserDetails(user);
+    
+          await login(token, user);
+         
           
         setTimeout(() => {
           navigation.replace('VendorRegistration');

@@ -6,9 +6,8 @@ import { styles } from './styles';
 import { BackIcon } from '../../../assets/Icons/backIcon';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
-import { verifyOtp, clearError,resetOtpVerifyState } from "../../../redux/slices/otpVerifySlice"
+import { verifyOtp} from "../../../redux/slices/otpVerifySlice"
 import { useToast } from '../../../utils/context/toastContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { VendorContext } from '../../../utils/context/vendorContext';
 
 const OtpScreen = ({ navigation , route }) => {
@@ -63,14 +62,10 @@ const OtpScreen = ({ navigation , route }) => {
 
 if (verifyOtp.fulfilled.match(result)) {
   const { token, vendor } = result.payload;
-  console.log("TOKEN", token, vendor);
-
   if (token && vendor) {
-    await AsyncStorage.setItem('userToken', token);
-    await AsyncStorage.setItem('userDetails', JSON.stringify(vendor));
-
-    login(token);
-    saveUserDetails(vendor);
+    
+   await login(token,vendor);
+  
 
     navigation.replace('VendorRegistration');
   } else {

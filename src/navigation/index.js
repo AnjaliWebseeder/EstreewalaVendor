@@ -40,43 +40,76 @@ const Navigation = () => {
     hasCompletedSubscription,
   } = useContext(VendorContext);
 
-  const [initialRoute, setInitialRoute] = useState(null);
+  const [initialRoute, setInitialRoute] = useState('Splash');
+  const [navigationReady, setNavigationReady] = useState(false);
 
   useEffect(() => {
+    console.log('🔍 Navigation State Update:', {
+      isLoading,
+      userToken: !!userToken,
+      hasCompletedVendorRegistration,
+      hasCompletedSubscription,
+      isFirstLaunch
+    });
+
     if (!isLoading) {
-      let route;
+      let route = 'Welcome'; // Default route
 
       // 🟡 Not logged in → Show Welcome/Login flow
       if (!userToken) {
         route = 'Welcome';
+        console.log('🚦 Navigation: No token → Welcome');
       }
       // 🟢 Logged in but vendor not registered yet → Go to registration flow
       else if (!hasCompletedVendorRegistration) {
         route = 'VendorRegistration';
+        console.log('🚦 Navigation: Token but no vendor registration → VendorRegistration');
       }
       // 🟢 Registered but no subscription yet → Show subscription plans
       else if (!hasCompletedSubscription) {
         route = 'SubscriptionPlans';
+        console.log('🚦 Navigation: Vendor registered but no subscription → SubscriptionPlans');
       }
       // ✅ Everything completed → Go directly to main app
       else {
         route = 'Main';
+        console.log('🚦 Navigation: All completed → Main');
       }
 
       setInitialRoute(route);
-      console.log('✅ Initial route set to:', route);
+      
+      // Mark navigation as ready after a small delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        setNavigationReady(true);
+      }, 300);
+
+      return () => clearTimeout(timer);
     }
   }, [isLoading, userToken, hasCompletedVendorRegistration, hasCompletedSubscription]);
 
-  if (isLoading || !initialRoute) {
+  // Show splash screen while loading or navigation not ready
+  if (isLoading || !navigationReady) {
     return <Splash />;
   }
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
+      <Stack.Navigator 
+        screenOptions={{ 
+          headerShown: false,
+          gestureEnabled: false // Prevent back gestures on initial screens
+        }} 
+        initialRouteName={initialRoute}
+      >
+        {/* ===== Splash Screen ===== */}
+        <Stack.Screen name="Splash" component={Splash} />
+
         {/* ===== Auth Flow ===== */}
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        <Stack.Screen 
+          name="Welcome" 
+          component={WelcomeScreen}
+          options={{ gestureEnabled: false }}
+        />
         <Stack.Screen name="Otp" component={OtpScreen} />
         <Stack.Screen name="PasswordLogin" component={PasswordLoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
@@ -85,7 +118,11 @@ const Navigation = () => {
         <Stack.Screen name="ResetPassword" component={ResetPassword} />
 
         {/* ===== Vendor Onboarding ===== */}
-        <Stack.Screen name="VendorRegistration" component={VendorRegistration} />
+        <Stack.Screen 
+          name="VendorRegistration" 
+          component={VendorRegistration}
+          options={{ gestureEnabled: false }}
+        />
         <Stack.Screen name="AddOwner" component={AddOwner} />
         <Stack.Screen name="AddBranch" component={AddBranch} />
         <Stack.Screen name="SelectLocation" component={SelectLocation} />
@@ -93,14 +130,22 @@ const Navigation = () => {
         <Stack.Screen name="SetPrice" component={SetPrice} />
 
         {/* ===== Subscription Flow ===== */}
-        <Stack.Screen name="SubscriptionPlans" component={SubscriptionPlans} />
+        <Stack.Screen 
+          name="SubscriptionPlans" 
+          component={SubscriptionPlans}
+          options={{ gestureEnabled: false }}
+        />
         <Stack.Screen name="ConfirmPayment" component={ConfirmPayment} />
         <Stack.Screen name="OrderSummary" component={OrderSummary} />
         <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
         <Stack.Screen name="MySubscription" component={MySubscriptionsScreen} />
 
         {/* ===== Main App ===== */}
-        <Stack.Screen name="Main" component={BottomTab} />
+        <Stack.Screen 
+          name="Main" 
+          component={BottomTab}
+          options={{ gestureEnabled: false }}
+        />
 
         {/* ===== Settings & Info ===== */}
         <Stack.Screen name="ContactSupport" component={ContactSupport} />

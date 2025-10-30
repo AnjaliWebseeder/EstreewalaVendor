@@ -1,3 +1,4 @@
+// context/VendorContext.js
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAppLaunchStatus, setAppLaunched } from "./appLaunchStatus"
@@ -5,17 +6,22 @@ import { mockData } from '../data';
 
 export const VendorContext = createContext();
 
-// Create a global token access function
+// Create a global token access function with better management
 let globalToken = null;
 let globalUserDetails = null;
+let globalTokenListeners = [];
 
 export const setGlobalAuth = (token, userDetails) => {
   globalToken = token;
   globalUserDetails = userDetails;
   console.log('🔐 Global auth updated:', { token: !!token, userDetails: !!userDetails });
+  
+  // Notify all listeners about token change
+  globalTokenListeners.forEach(listener => listener(token));
 };
 
 export const getGlobalToken = () => {
+  console.log('🔐 Getting global token:', !!globalToken);
   return globalToken;
 };
 
@@ -27,6 +33,20 @@ export const clearGlobalAuth = () => {
   globalToken = null;
   globalUserDetails = null;
   console.log('🔐 Global auth cleared');
+  
+  // Notify all listeners about token removal
+  globalTokenListeners.forEach(listener => listener(null));
+};
+
+// Add listener for token changes (useful for axios interceptor)
+export const addTokenListener = (listener) => {
+  globalTokenListeners.push(listener);
+  return () => {
+    const index = globalTokenListeners.indexOf(listener);
+    if (index > -1) {
+      globalTokenListeners.splice(index, 1);
+    }
+  };
 };
 
 export const VendorProvider = ({ children }) => {
@@ -57,56 +77,94 @@ export const VendorProvider = ({ children }) => {
   const [userLocation, setUserLocation] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
 
-  useEffect(() => {
-    const loadStorageData = async () => {
-      try {
-        const appLaunched = await getAppLaunchStatus();
-        setIsFirstLaunch(!appLaunched);
+  // Enhanced loadStorageData with better error handling
+  const loadStorageData = useCallback(async () => {
+    try {
+      console.log('🔄 Loading storage data...');
+      
+      const [appLaunched, registrationCompleted, subscriptionCompleted, token, userData] = await Promise.all([
+        getAppLaunchStatus(),
+        AsyncStorage.getItem('vendorRegistrationCompleted'),
+        AsyncStorage.getItem('subscriptionCompleted'),
+        AsyncStorage.getItem('userToken'),
+        AsyncStorage.getItem('userDetails'),
+      ]);
 
-        const registrationCompleted = await AsyncStorage.getItem('vendorRegistrationCompleted');
-        setHasCompletedVendorRegistration(registrationCompleted === 'true');
+      setIsFirstLaunch(!appLaunched);
+      setHasCompletedVendorRegistration(registrationCompleted === 'true');
+      setHasCompletedSubscription(subscriptionCompleted === 'true');
 
-        const subscriptionCompleted = await AsyncStorage.getItem('subscriptionCompleted');
-        setHasCompletedSubscription(subscriptionCompleted === 'true');
+      console.log("🔐 Loaded Token:", !!token);
+      console.log("👤 Loaded UserData:", !!userData);
 
-        // ✅ Load token and user separately
-        const token = await AsyncStorage.getItem('userToken');
-        const userData = await AsyncStorage.getItem('userDetails');
-        console.log("TOKEN IS", token);
-        console.log("USERDATA IS", userData);
-
-        if (token) {
-          setUserToken(token);
-          setGlobalAuth(token, userData ? JSON.parse(userData) : null); // Set global auth
-        }
-        if (userData) setUserDetails(JSON.parse(userData));
-      } catch (error) {
-        console.log('Error loading storage data:', error);
-      } finally {
-        setIsLoading(false);
+      if (token) {
+        setUserToken(token);
+        setGlobalAuth(token, userData ? JSON.parse(userData) : null);
       }
-    };
-
-    loadStorageData();
+      
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        setUserDetails(parsedUser);
+        // Ensure global auth has both token and user details
+        if (token) {
+          setGlobalAuth(token, parsedUser);
+        }
+      }
+    } catch (error) {
+      console.log('❌ Error loading storage data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const login = async (token, user) => {
-    try {
-      await AsyncStorage.setItem('userToken', token);
-      await AsyncStorage.setItem('userDetails', JSON.stringify(user));
-      setUserToken(token);
-      setUserDetails(user);
-      setGlobalAuth(token, user); // Update global auth
-    } catch (error) {
-      console.log('Error saving auth:', error);
+  useEffect(() => {
+    loadStorageData();
+  }, [loadStorageData]);
+
+// context/VendorContext.js - Fix the login function
+// context/VendorContext.js - Ensure login function is correct
+const login = async (token, user) => {
+  try {
+    console.log('🔐 Login process started...', { 
+      token: !!token, 
+      user: !!user 
+    });
+    
+    // Validate inputs
+    if (!token) {
+      throw new Error('Token is required for login');
     }
-  };
+    
+    if (!user) {
+      throw new Error('User details are required for login');
+    }
+
+    // Set AsyncStorage first
+    await Promise.all([
+      AsyncStorage.setItem('userToken', token),
+      AsyncStorage.setItem('userDetails', JSON.stringify(user)),
+    ]);
+
+    // Then update state and global auth
+    setUserToken(token);
+    setUserDetails(user);
+    setGlobalAuth(token, user); // Update global auth
+    
+    console.log('✅ Login successful - token and user details saved');
+  } catch (error) {
+    console.log('❌ Login error:', error);
+    throw error;
+  }
+};
 
   const saveUserDetails = async (user) => {
     try {
       await AsyncStorage.setItem('userDetails', JSON.stringify(user));
       setUserDetails(user);
-      setGlobalAuth(userToken, user); // Update global auth with current token
+      // Update global auth with current token and new user details
+      if (userToken) {
+        setGlobalAuth(userToken, user);
+      }
     } catch (error) {
       console.log('Error saving user details:', error);
     }
@@ -114,21 +172,29 @@ export const VendorProvider = ({ children }) => {
  
   const logout = async () => {
     try {
-      console.log('Logging out...');
+      console.log('🔐 Logout process started...');
+      
+      // Clear AsyncStorage
       await Promise.all([
         AsyncStorage.removeItem('userToken'),
         AsyncStorage.removeItem('userDetails'),
         AsyncStorage.removeItem('userLocation'),
       ]);
+
+      // Clear state
       setUserToken(null);
       setUserDetails(null);
-      clearGlobalAuth(); // Clear global auth
-      console.log('Logout successful - app launch status preserved');
+      
+      // Clear global auth
+      clearGlobalAuth();
+      
+      console.log('✅ Logout successful');
     } catch (error) {
-      console.log('Logout error:', error);
+      console.log('❌ Logout error:', error);
       throw error;
     }
   };
+
 
   const completeVendorRegistration = async () => {
     try {
@@ -155,7 +221,6 @@ export const VendorProvider = ({ children }) => {
     }
   };
 
-  // ... rest of your existing functions remain the same ...
   // CORRECTED getAllPricingData function - matches API structure exactly
   const getAllPricingData = useCallback(() => {
     // Initialize the structure exactly as API expects
@@ -518,7 +583,8 @@ export const VendorProvider = ({ children }) => {
         userLocation,
         hasCompletedSubscription,
         completeSubscription,
-        getAllPricingData
+        getAllPricingData,
+           reloadAuth: loadStorageData 
       }}
     >
       {children}
