@@ -35,6 +35,7 @@ export const completeStep1 = createAsyncThunk(
         MULTISTEPONBOARDINGSTEP1,
         stepData
       );
+      console.log("STEP DATA IS---------->",stepData,response)
       return response.data;
     } catch (error) {
       console.log("❌ Step 1 Error:", error.response?.data || error.message);

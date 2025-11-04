@@ -152,6 +152,7 @@ const VendorRegistration = ({ route }) => {
 
       switch (localCurrentStep) {
         case 0:
+          console.log("Latitude and longitude data is", selectedLocation?.latitude,selectedLocation?.longitude)
           await tryDispatch(
             completeStep1,
             {

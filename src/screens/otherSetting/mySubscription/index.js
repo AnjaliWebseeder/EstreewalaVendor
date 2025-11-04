@@ -168,7 +168,7 @@ const SubscriptionCard = ({
           </View>
         </View>
         <View style={styles.priceContainer}>
-          <Text style={styles.price}>₹{subscription.basePrice}</Text>
+          <Text style={styles.price}>₹{subscription.proratedPrice}</Text>
           <Text style={styles.duration}>/{subscription.duration}</Text>
         </View>
       </View>
