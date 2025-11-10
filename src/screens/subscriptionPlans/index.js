@@ -268,7 +268,19 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
         notes: {
           planType: selectedPlan,
           duration: selectedDuration
-        }
+        },
+          // Add these configurations to restrict payment methods
+      method: {
+        netbanking: false,
+        card: false,
+        upi: true,
+        wallet: true,
+        // Enable only the methods you want
+      },
+      // Alternative approach using hidden
+      hidden: {
+        method: ['netbanking', 'card'] // Hide netbanking and cards
+      }
       };
 
       const razorpayResponse = await RazorpayCheckout.open(options);

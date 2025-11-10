@@ -1,44 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../api/axiosConfig';
 
-// export const fetchVendorOrders = createAsyncThunk(
-//   'vendorOrders/fetchByStatus',
-//   async (status, { getState, rejectWithValue }) => {
-//     try {
-//       // ✅ Use getState() properly
-//       const state = getState();
-
-//       // ✅ Try to get token from either login or OTP verify slice
-//       const token =
-//         state?.login?.token ||
-//         state?.otpVerify?.token ||
-//         state?.vendor?.token || // optional fallback
-//         null;
-
-//       if (!token) throw new Error('No token found. Please log in again.');
-
-//       const url = `https://api.estreewalla.com/api/v1/vendors/order?status=${status}`;
-//       const response = await axiosInstance.get(url, {
-//         headers: { Authorization: `Bearer ${token}` },
-//         timeout: 10000,
-//       });
-
-//       console.log(`✅ Vendor Orders (${status}):`, response.data);
-//       return { status, data: response.data.data };
-//     } catch (error) {
-//       console.log('❌ Fetch Vendor Orders Error:', error);
-//       const msg =
-//         error.response?.data?.message ||
-//         error.response?.data?.error ||
-//         error.message ||
-//         'Failed to fetch vendor orders';
-//       return rejectWithValue(msg);
-//     }
-//   },
-// );
-
 /* -------------------- 1️⃣ Get Orders by Status -------------------- */
-
 export const fetchVendorOrders = createAsyncThunk(
   'vendorOrders/fetchByStatus',
   async (status, { getState, rejectWithValue }) => {
@@ -94,7 +57,13 @@ export const fetchOrderSummary = createAsyncThunk(
   'vendorOrders/fetchSummary',
   async (orderId, { getState, rejectWithValue }) => {
     try {
-      const token = getState()?.login?.token;
+        const state = getState();
+      const token =
+        state?.login?.token ||
+        state?.otpVerify?.token ||
+        state?.vendor?.token ||
+        null;
+
       if (!token) throw new Error('No token found. Please log in again.');
 
       const url = `https://api.estreewalla.com/api/v1/vendors/orders/${orderId}/summary`;

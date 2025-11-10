@@ -194,7 +194,7 @@ const CustomerPickupCard = ({
             </Text>
             {item.acceptedAt && (
               <Text style={styles.acceptedTime}>
-                Accepted: {new Date(item.acceptedAt).toLocaleDateString()}
+              Accepted: {new Date(item.acceptedAt).toLocaleDateString('en-GB')}
               </Text>
             )}
           </View>
@@ -208,7 +208,7 @@ const CustomerPickupCard = ({
             </View>
             <View>
               <Text style={styles.timelineLabel}>Pickup</Text>
-              <Text style={styles.timelineValue}>{item.pickupDate}</Text>
+         <Text style={styles.timelineValue}>{item.pickupDate}</Text>
               <Text style={styles.timelineTime}>{item.pickupTime}</Text>
             </View>
           </View>

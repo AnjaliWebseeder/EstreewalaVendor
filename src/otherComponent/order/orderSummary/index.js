@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
+  Linking
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from './styles';
@@ -57,8 +58,8 @@ const OrderSummary = ({ navigation }) => {
   const deliveryAddress = orderSummary?.deliveryAddress || {};
 
   // Derived values
-  const pickupDate = new Date(timeline?.pickupDateTime).toDateString();
-  const deliveryDate = new Date(timeline?.deliveryDateTime).toDateString();
+  const pickupDate = new Date(orderSummary?.timeline?.pickupDateTime).toDateString();
+  const deliveryDate = new Date(orderSummary?.timeline?.deliveryDateTime).toDateString();
   const pickupTime = new Date(timeline?.pickupDateTime).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
@@ -455,7 +456,7 @@ const OrderSummary = ({ navigation }) => {
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineLabel}>Pickup Scheduled</Text>
                 <Text style={styles.timelineDate}>{pickupDate}</Text>
-                <Text style={styles.timelineTime}>{pickupTime}</Text>
+                {/* <Text style={styles.timelineTime}>{pickupTime}</Text> */}
                 <Text style={styles.timelineAddress}>
                   {deliveryAddress?.landmark || 'Not Available'}
                 </Text>
@@ -470,7 +471,7 @@ const OrderSummary = ({ navigation }) => {
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineLabel}>Estimated Delivery</Text>
                 <Text style={styles.timelineDate}>{deliveryDate}</Text>
-                <Text style={styles.timelineTime}>{deliveryTime}</Text>
+                {/* <Text style={styles.timelineTime}>{deliveryTime}</Text> */}
                 <Text style={styles.timelineAddress}>
                   {deliveryAddress?.address || 'Not Available'}
                 </Text>
@@ -480,31 +481,46 @@ const OrderSummary = ({ navigation }) => {
         </View>
 
         {/* Customer Info */}
-        <View style={styles.infoCard}>
-          <View style={styles.cardHeader}>
-            <View style={styles.iconContainer}>
-              <Ionicons name="person" size={10} color={appColors.white} />
-            </View>
-            <Text style={styles.cardTitle}>Customer Details</Text>
-          </View>
+       <View style={styles.infoCard}>
+  <View style={styles.cardHeader}>
+    <View style={styles.iconContainer}>
+      <Ionicons name="person" size={10} color={appColors.white} />
+    </View>
+    <Text style={styles.cardTitle}>Customer Details</Text>
+  </View>
 
-          <View style={styles.customerInfo}>
-            <Image
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/512/847/847969.png',
-              }}
-              style={styles.avatar}
-            />
-            <View style={styles.customerDetails}>
-              <Text style={styles.customerName}>
-                {customer?.name || 'Unknown'}
-              </Text>
-              <Text style={styles.customerLocation}>
-                {deliveryAddress?.landmark || 'No address'}
-              </Text>
-            </View>
-          </View>
-        </View>
+  <View style={styles.customerInfo}>
+    <Image
+      source={{
+        uri: 'https://cdn-icons-png.flaticon.com/512/847/847969.png',
+      }}
+      style={styles.avatar}
+    />
+
+    <View style={styles.customerDetails}>
+      <Text style={styles.customerName}>
+        {customer?.name || 'Unknown'}
+      </Text>
+      <Text style={styles.customerLocation}>
+        {deliveryAddress?.landmark || 'No address'}
+      </Text>
+    </View>
+
+    {/* 📞 Call Icon */}
+    <TouchableOpacity
+      onPress={() => {
+        if (customer?.phone) {
+          Linking.openURL(`tel:${customer.phone}`);
+        } else {
+          alert("Phone number not available");
+        }
+      }}
+      style={styles.callButton}
+    >
+      <Ionicons name="call" size={22} color={appColors.primary} />
+    </TouchableOpacity>
+  </View>
+</View>
 
         {/* Order Items */}
         <View style={styles.itemsCard}>

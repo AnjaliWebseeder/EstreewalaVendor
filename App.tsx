@@ -8,14 +8,6 @@ import { persistor, store } from "./src/redux/store"
 
 export default function App() {
   return (
-    //  <Provider store={store} >
-    //      <ToastProvider>
-    //       <VendorProvider>
-    //     <Navigation/>
-    //     </VendorProvider>
-    //     </ToastProvider>
-    //  </Provider>
-
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <ToastProvider>

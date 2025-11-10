@@ -85,6 +85,7 @@ userName: {
   fontWeight: "600",
   color: appColors.white,
   textAlign: "center",
+  marginBottom:windowHeight(18)
 },
 userEmail: {
   fontSize: 14,

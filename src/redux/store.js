@@ -11,11 +11,12 @@ import subscriptionReducer from './slices/subscriptionSlice';
 import vendorOrderReducer from './slices/vendorOrderSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistStore, persistReducer } from 'redux-persist';
+import vendorReducer from "./slices/vendorSlice"
 
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['login', 'otp', 'otpVerify'], // ✅ only persist auth slice
+  whitelist: ['login', 'otp', 'otpVerify'], 
 };
 
 const rootReducer = combineReducers({
@@ -29,30 +30,14 @@ const rootReducer = combineReducers({
   vendorOnboarding: vendorOnboardingReducer,
   subscription: subscriptionReducer,
   vendorOrders: vendorOrderReducer,
+  vendor:vendorReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// const store = configureStore({
-//   reducer: {
-//     signup: signupReducer,
-//     login: loginReducer,
-//     otp:otpReducer,
-//     otpVerify: otpVerifyReducer,
-//     forgotPassword: forgotPasswordReducer,
-//     verifyOtpReset:verifyOtpResetReducer,
-//     resetPassword: resetPasswordReducer,
-//     vendorOnboarding: vendorOnboardingReducer,
-//     subscription: subscriptionReducer,
-//     vendorOrders: vendorOrderReducer,
-//   },
-// });
-
 export const store = configureStore({
   reducer: persistedReducer,
 });
-
-// export default store;
 
 export const persistor = persistStore(store);
 

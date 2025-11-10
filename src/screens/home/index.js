@@ -17,37 +17,63 @@ export default function Home({ navigation }) {
   const dispatch = useDispatch();
   const { pendingOrders, loading } = useSelector(state => state.vendorOrders);
 
+ 
   useEffect(() => {
     dispatch(fetchVendorOrders('pending'));
   }, [dispatch]);
 
-  const newPickups = useMemo(() => {
-    return pendingOrders?.map(order => ({
+const newPickups = useMemo(() => {
+  return pendingOrders?.map(order => {
+    const pickupDate = new Date(order.pickupDateTime);
+    const deliveryDate = new Date(order.deliveryDateTime);
+    const acceptedAt = new Date(order.createdAt);
+
+    const isPickupValid = !isNaN(pickupDate);
+    const isDeliveryValid = !isNaN(deliveryDate);
+    const isAcceptedValid = !isNaN(acceptedAt);
+
+    return {
       id: order.id,
       totalAmount: `₹${order.totalAmount}`,
       name: order.customer?.name || 'Unknown',
-      location: order.customer?.phone || '',
+      location: order.deliveryAddress?.address || '',
       avatar: 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-      pickupDate: new Date(order.pickupDateTime).toLocaleDateString(),
-      pickupTime: new Date(order.pickupDateTime).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      estimatedDelivery: `${new Date(
-        order.deliveryDateTime,
-      ).toLocaleDateString()}   ${new Date(
-        order.deliveryDateTime,
-      ).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+
+      pickupDate: isPickupValid
+        ? pickupDate.toLocaleDateString('en-GB') // DD/MM/YYYY
+        : '—',
+
+      pickupTime: isPickupValid
+        ? pickupDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : '—',
+
+      estimatedDelivery: isDeliveryValid
+        ? `${deliveryDate.toLocaleDateString('en-GB')} ${deliveryDate.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}`
+        : '—',
+
       pickupPoint: 'Customer Location',
       destination: order.instructions || 'N/A',
-      daysLeft: Math.ceil(
-        (new Date(order.deliveryDateTime) - new Date()) / (1000 * 60 * 60 * 24),
-      ),
+
+      daysLeft: isDeliveryValid
+        ? Math.ceil((deliveryDate - new Date()) / (1000 * 60 * 60 * 24))
+        : 0,
+
       paymentStatus: 'pending',
       status: order.status,
-      acceptedAt: order.createdAt,
-    }));
-  }, [pendingOrders]);
+
+      acceptedAt: isAcceptedValid
+        ? `${acceptedAt.toLocaleDateString('en-GB')} ${acceptedAt.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}`
+        : '—',
+    };
+  });
+}, [pendingOrders]);
+
 
   return (
     <SafeAreaView style={styles.safe}>

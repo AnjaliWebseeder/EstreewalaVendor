@@ -24,10 +24,10 @@ import { RateUsIcon } from "../../assets/Icons/rateUs";
 import { SubscriptionIcon } from "../../assets/Icons/subscriptionIcon";
 import LinearGradient from "react-native-linear-gradient";
 import { VendorContext } from "../../utils/context/vendorContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import PremiumSubscriptionIcon from "../../assets/Icons/premiumSubscription";
 import { useDispatch, useSelector } from "react-redux";
 import { getMySubscriptions } from "../../redux/slices/subscriptionSlice";
+import {getVendorDetails} from "../../redux/slices/vendorSlice"
 
 // ==== MENU ITEM COMPONENT ====
 const MenuItem = ({ icon, label, onPress, isLast, rightComponent }) => (
@@ -51,8 +51,9 @@ export default function Account({ navigation }) {
   const [profileImage, setProfileImage] = useState(null);
   const { logout } = useContext(VendorContext);
   const dispatch = useDispatch();
-  const { mySubscriptions, loading } = useSelector((state) => state.subscription
-  );
+  const { mySubscriptions, loading } = useSelector((state) => state.subscription);
+  const {vendorData} = useSelector((state) => state.vendor)
+
 
   const handleRateApp = () => {
     Linking.openURL("market://details?id=your.package.name");
@@ -79,6 +80,7 @@ export default function Account({ navigation }) {
   // 🔹 Fetch user subscriptions on screen mount
   useEffect(() => {
     dispatch(getMySubscriptions());
+    dispatch(getVendorDetails())
   }, [dispatch]);
 
   // 🔹 Check if the user has at least one active subscription
@@ -103,8 +105,7 @@ export default function Account({ navigation }) {
             />
           </TouchableOpacity>
 
-          <Text style={styles.userName}>Sparkling Suds</Text>
-          <Text style={styles.userEmail}>johan.smith@example.com</Text>
+          <Text style={styles.userName}>{vendorData?.businessName}</Text>
         </View>
       </View>
 
