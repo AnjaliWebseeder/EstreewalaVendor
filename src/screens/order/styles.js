@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: appColors.background,
-    paddingHorizontal: 16,
+    paddingHorizontal: 8, // Reduced padding to fit four tabs
     borderBottomWidth: 1,
     borderBottomColor: appColors.border,
     paddingTop: windowHeight(3)
@@ -23,14 +23,16 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     position: 'relative',
+    minWidth: 80, // Added minWidth for better touch area
   },
   activeTab: {
     backgroundColor: appColors.background,
   },
   tabText: {
-    fontSize: 12, // Reduced to fit three tabs
+    fontSize: 11, // Slightly reduced to fit four tabs
     fontWeight: '600',
     color: '#6c757d',
+    textAlign: 'center',
   },
   activeTabText: {
     color: appColors.secondary,
@@ -39,7 +41,7 @@ export const styles = StyleSheet.create({
   activeIndicator: {
     position: 'absolute',
     bottom: 0,
-    width: '70%', // Adjusted for three tabs
+    width: '60%', // Adjusted for four tabs
     height: 3,
     backgroundColor: appColors.secondary,
     borderRadius: 2,
@@ -47,18 +49,18 @@ export const styles = StyleSheet.create({
   badge: {
     position: 'absolute',
     top: 8,
-    right: 10, // Adjusted for three tabs
+    right: 5, // Adjusted position for four tabs
     backgroundColor: appColors.secondary,
     borderRadius: 10,
-    minWidth: 18,
-    height: 18,
+    minWidth: 16,
+    height: 16,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 4,
   },
   badgeText: {
     color: appColors.white,
-    fontSize: 10,
+    fontSize: 9, // Slightly smaller
     fontWeight: 'bold',
   },
   contentContainer: {

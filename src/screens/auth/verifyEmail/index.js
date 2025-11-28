@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert,StatusBar } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { styles } from './styles';
 import BannerHeader from '../../../otherComponent/bannerHeader';
@@ -96,6 +96,7 @@ export default function VerifyEmail({ navigation , route }) {
 
   return (
     <SafeAreaView style={styles.container}>
+    <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
       <View style={styles.container}>
         <BannerHeader
           bannerImage={require('../../../assets/images/background.png')}

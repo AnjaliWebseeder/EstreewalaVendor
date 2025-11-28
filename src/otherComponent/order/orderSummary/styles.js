@@ -380,6 +380,17 @@ export const styles = StyleSheet.create({
   },
   
   // Enhanced Action Bar
+   fullWidthButton: {
+    width: '100%',
+    flex: 1,
+  },
+
+  // Half width button (for two button states)
+  halfWidthButton: {
+    width: '48%', // Slightly less than 50% for spacing
+    flex: 0.48,
+  },
+
   actionBar: {
     position: 'absolute',
     bottom: 0,
@@ -388,7 +399,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: appColors.white,
     padding: 16,
-    paddingVertical:14,
+    paddingVertical: 14,
     borderTopWidth: 1,
     borderTopColor: appColors.border,
     shadowColor: '#000',
@@ -396,21 +407,20 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 8,
+    justifyContent: 'space-between', // This handles the spacing
   },
   rejectButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: appColors.white,
     borderWidth: 0.8,
     borderColor: '#FF0000',
-    height:windowHeight(35),
+    height: windowHeight(35),
     borderRadius: 12,
-    marginRight: 12,
-    marginTop:3,
-    marginHorizontal:10
+    // Remove: marginRight, marginHorizontal
   },
+  
   rejectText: {
     fontSize: 16,
     fontWeight: '600',
@@ -548,4 +558,113 @@ export const styles = StyleSheet.create({
     color: appColors.white,
     fontFamily: fonts.InterSemiBold
   },
+
+
+
+  // Add to your styles.js
+statusHeaderBadge: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: 8,
+  paddingVertical: 4,
+  borderRadius: 12,
+  marginLeft: 10,
+},
+statusHeaderText: {
+  color: '#fff',
+  fontSize: 12,
+  fontWeight: '600',
+  marginLeft: 4,
+},
+acceptButton: {
+  flex: 1,
+ backgroundColor: "#10C761",
+  borderRadius: 8,
+  alignItems: 'center',
+  marginLeft: 10,
+  flexDirection:"row",
+  justifyContent:"center"
+  
+},
+completeButton: {
+  flex: 1,
+  backgroundColor: '#4CAF50',
+  borderRadius: 8,
+  alignItems: 'center',
+  flexDirection:"row",
+  padding:12,
+  justifyContent:"center"
+},
+statusBadge: {
+  flex: 1,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingVertical: 12,
+  backgroundColor: '#f8f9fa',
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: '#e9ecef',
+},
+statusText: {
+  fontSize: 16,
+  fontWeight: '600',
+  marginLeft: 8,
+  color: '#495057',
+},
+ loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  loadingButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: appColors.primary,
+    paddingVertical: 12,
+    borderRadius: 8,
+    height: windowHeight(35),
+  },
+  
+  loadingText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: appColors.white,
+    marginLeft: 8,
+    fontFamily: fonts.InterSemiBold
+  },
+
+  // Disabled state for buttons
+  disabledButton: {
+    opacity: 0.6,
+  },
+  // Add these styles to your existing styles
+itemImage: {
+  width: 40,
+  height: 40,
+  borderRadius: 8,
+  marginRight: 12,
+},
+itemDetails: {
+  flex: 1,
+},
+itemName: {
+  fontSize: 15,
+  fontWeight: '600',
+  color: '#333',
+  marginBottom: 4,
+},
+itemService: {
+  fontSize: 14,
+  color: '#666',
+  marginBottom: 2,
+},
+itemQuantity: {
+  fontSize: 12,
+  color: '#888',
+  marginBottom: 2,
+},
+
 });

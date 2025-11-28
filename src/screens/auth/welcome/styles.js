@@ -5,8 +5,8 @@ import fonts from '../../../theme/appFonts'
 
 export const styles = StyleSheet.create({
   container: { flex: 1,backgroundColor:appColors.background},
-  banner:
-   { width: "100%", height:'45%', resizeMode:'cover' },
+  banner:{ width: "100%", height:'45%', resizeMode:'cover' },
+  contentContainerStyle:{paddingBottom:30},
   title: { fontSize: 20,marginTop:windowHeight(14),fontFamily:fonts.InterSemiBold,textAlign:"center",fontWeight:"700" },
   subText: { fontSize: 14, color: appColors.subTitle, textAlign: 'center', marginVertical: 10, lineHeight: 22,fontFamily:fonts.InterRegular,marginHorizontal:windowHeight(20) },
   main:{

@@ -87,7 +87,7 @@ fontFamily:fonts.InterRegular,
     backgroundColor: appColors.secondary,
     paddingVertical: 10,
     borderRadius: 10,
-    marginTop: 20,
+    margin: 20,
     alignItems: 'center',
   },
   submitText: {

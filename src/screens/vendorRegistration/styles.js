@@ -70,7 +70,9 @@ export const styles = StyleSheet.create({
   },
   mainView:{
     marginHorizontal:18,
-    marginTop:15
+    marginTop:15,
+    marginBottom:1,
+    
   },
   largeInput: {
     fontSize: fontSizes.FONT16,

@@ -8,8 +8,13 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: appColors.white,
   },
+  scrollContent: {
+  flexGrow: 1,
+  paddingBottom: 20, // Add some bottom padding for better scrolling
+},
   // Main form container
   mainContainerStyle: {
+     flex: 1,
     marginHorizontal: 20,
   },
   // Input forgot password

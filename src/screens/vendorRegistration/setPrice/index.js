@@ -34,30 +34,16 @@ export default function SetPrice({
     priceMap,
     setItemPrice,
     getAllPricingData,
+    getItemPrice, // Add this new function
   } = useContext(VendorContext);
 
   // Animation
   const [fadeAnim] = useState(new Animated.Value(0));
 
-  // Initialize prices - only run once
+  // Initialize active service
   useEffect(() => {
     if (selectedServiceIds.length > 0) {
       setActiveServiceId(selectedServiceIds[0]);
-    }
-
-    // Initialize prices only if priceMap is empty
-    if (Object.keys(priceMap).length === 0) {
-      const initialPrices = {};
-      Object.keys(mockData).forEach(category => {
-        mockData[category].forEach(item => {
-          initialPrices[item.id] = item.price;
-        });
-      });
-
-      // Set all initial prices at once
-      Object.keys(initialPrices).forEach(itemId => {
-        setItemPrice(itemId, initialPrices[itemId]);
-      });
     }
 
     Animated.timing(fadeAnim, {
@@ -65,15 +51,15 @@ export default function SetPrice({
       duration: 400,
       useNativeDriver: true,
     }).start();
-  }, []); // Empty dependency array - run only once
+  }, []);
 
-  // Notify parent when pricing changes - with proper dependency handling
+  // Notify parent when pricing changes
   useEffect(() => {
-    if (onPricingUpdate) {
+    if (onPricingUpdate && activeServiceId) {
       const pricingData = getAllPricingData();
       onPricingUpdate(pricingData);
     }
-  }, [priceMap]); // Only depend on priceMap, not onPricingUpdate
+  }, [priceMap, activeServiceId]);
 
   const filters = [
     { key: 'all', label: 'All Items', icon: 'grid-outline' },
@@ -84,28 +70,19 @@ export default function SetPrice({
 
   const getAllItems = () => {
     let allItems = [];
-
-    // Use the new mockData structure
     Object.keys(mockData).forEach(category => {
       const categoryItems = mockData[category].map(item => ({
         ...item,
-        category:
-          category === 'mens'
-            ? 'man'
-            : category === 'womens'
-            ? 'woman'
-            : 'kids',
+        category: category === 'mens' ? 'man' : category === 'womens' ? 'woman' : 'kids',
       }));
       allItems = [...allItems, ...categoryItems];
     });
-
     return allItems;
   };
 
   const getFilteredItems = () => {
     if (selectedFilter === 'all') return getAllItems();
 
-    // Map filter keys to mockData keys
     const filterMap = {
       mens: 'mens',
       womens: 'womens',
@@ -116,33 +93,28 @@ export default function SetPrice({
     if (mockData[dataKey]) {
       return mockData[dataKey].map(item => ({
         ...item,
-        category:
-          selectedFilter === 'mens'
-            ? 'man'
-            : selectedFilter === 'womens'
-            ? 'woman'
-            : 'kids',
+        category: selectedFilter === 'mens' ? 'man' : selectedFilter === 'womens' ? 'woman' : 'kids',
       }));
     }
     return [];
   };
 
-  const startEditing = item => {
+  const startEditing = (item) => {
     Keyboard.dismiss();
     setEditingItemId(item.id);
-    setPriceInput((priceMap[item.id] ?? item.price).toString());
+    // Get service-specific price
+    const currentPrice = getItemPrice(activeServiceId, item.id, item.price);
+    setPriceInput(currentPrice.toString());
   };
 
   const savePrice = () => {
-    if (editingItemId && priceInput) {
+    if (editingItemId && priceInput && activeServiceId) {
       const priceValue = parseFloat(priceInput);
       if (!isNaN(priceValue) && priceValue >= 0) {
-        setItemPrice(editingItemId, priceValue);
+        // Save service-specific price
+        setItemPrice(activeServiceId, editingItemId, priceValue);
         setEditingItemId(null);
         setPriceInput('');
-
-        // Show success message
-        // Alert.alert("✅ Success", "Price updated successfully!");
       } else {
         Alert.alert('❌ Invalid Price', 'Please enter a valid price');
       }
@@ -154,13 +126,12 @@ export default function SetPrice({
     setPriceInput('');
   };
 
-  // Use useCallback to prevent unnecessary re-renders of PriceCard
   const PriceCard = useCallback(
     ({ item }) => {
-      const price = priceMap[item.id] ?? item.price;
+      // Get service-specific price
+      const price = getItemPrice(activeServiceId, item.id, item.price);
       const isEditing = editingItemId === item.id;
-      const isCustomPrice =
-        priceMap[item.id] !== undefined && priceMap[item.id] !== item.price;
+      const isCustomPrice = getItemPrice(activeServiceId, item.id) !== undefined;
 
       return (
         <Animated.View
@@ -175,8 +146,7 @@ export default function SetPrice({
               <Text style={styles.itemName}>{item.name}</Text>
               <View style={styles.itemMeta}>
                 <Text style={styles.itemCategory}>
-                  {item.category.charAt(0).toUpperCase() +
-                    item.category.slice(1)}
+                  {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
                 </Text>
                 <Text style={styles.basePrice}>Base: ₹{item.price}</Text>
               </View>
@@ -242,12 +212,11 @@ export default function SetPrice({
         </Animated.View>
       );
     },
-    [editingItemId, priceInput, priceMap, fadeAnim],
+    [editingItemId, priceInput, priceMap, fadeAnim, activeServiceId, getItemPrice],
   );
 
   const filteredItems = getFilteredItems();
 
-  // Use useCallback for renderItem to prevent unnecessary re-renders
   const renderPriceCard = useCallback(
     ({ item }) => <PriceCard item={item} />,
     [PriceCard],
@@ -261,10 +230,9 @@ export default function SetPrice({
       >
         <View style={styles.container}>
           {/* Service Tabs */}
-          {/* Service Tabs */}
           <View style={styles.serviceTabsContainer}>
             <FlatList
-              data={services.filter(s => selectedServiceIds.includes(s.id))} // Only show selected services
+              data={services.filter(s => selectedServiceIds.includes(s.id))}
               horizontal
               keyExtractor={item => item.id.toString()}
               showsHorizontalScrollIndicator={false}
@@ -280,8 +248,7 @@ export default function SetPrice({
                   <Text
                     style={[
                       styles.serviceTabText,
-                      activeServiceId === service.id &&
-                        styles.serviceTabTextActive,
+                      activeServiceId === service.id && styles.serviceTabTextActive,
                     ]}
                   >
                     {service.name}
@@ -293,6 +260,17 @@ export default function SetPrice({
               }
             />
           </View>
+
+          {/* Current Service Info */}
+          {activeServiceId && (
+            <View style={styles.currentServiceInfo}>
+              <Text style={styles.currentServiceText}>
+                Setting prices for: <Text style={styles.serviceName}>
+                  {services.find(s => s.id === activeServiceId)?.name}
+                </Text>
+              </Text>
+            </View>
+          )}
 
           {/* Filter Header */}
           <View style={styles.containerStyle}>

@@ -6,10 +6,7 @@ export const fetchVendorOrders = createAsyncThunk(
   'vendorOrders/fetchByStatus',
   async (status, { getState, rejectWithValue }) => {
     try {
-      // ✅ Get full Redux state
       const state = getState();
-
-      // ✅ Try multiple token sources
       const token =
         state?.login?.token ||
         state?.otpVerify?.token ||
@@ -24,21 +21,6 @@ export const fetchVendorOrders = createAsyncThunk(
         timeout: 10000,
       });
 
-      // ✅ Detailed Logging for Debugging
-      console.log(
-        `\n📦 FETCHED VENDOR ORDERS (${status.toUpperCase()})`,
-        '\nURL:', url,
-        '\n-----------------------------------',
-      );
-      console.log('🔹 Full Response:', JSON.stringify(response.data, null, 2));
-
-      // Optional: quickly preview the first order’s customer info
-      if (response?.data?.data?.length) {
-        console.log('👤 Sample Customer:', response.data.data[0].customer);
-        console.log('📍 Possible Location:', response.data.data[0].customer?.location || 'Not Found');
-      }
-
-      // ✅ Return usable data for slice
       return { status, data: response.data.data };
     } catch (error) {
       console.log('❌ Fetch Vendor Orders Error:', error);
@@ -57,7 +39,7 @@ export const fetchOrderSummary = createAsyncThunk(
   'vendorOrders/fetchSummary',
   async (orderId, { getState, rejectWithValue }) => {
     try {
-        const state = getState();
+      const state = getState();
       const token =
         state?.login?.token ||
         state?.otpVerify?.token ||
@@ -72,7 +54,6 @@ export const fetchOrderSummary = createAsyncThunk(
         timeout: 10000,
       });
 
-      console.log('✅ Order Summary:', response.data);
       return response.data.order;
     } catch (error) {
       console.log('❌ Fetch Order Summary Error:', error);
@@ -92,16 +73,15 @@ export const updateOrderStatus = createAsyncThunk(
   async ({ orderId, status, reason }, { getState, rejectWithValue }) => {
     try {
       const state = getState();
-
       const token =
         state?.login?.token ||
         state?.otpVerify?.token ||
         state?.vendor?.token ||
         null;
 
+
       if (!token) throw new Error('No token found. Please log in again.');
 
-      // ✅ Ensure reason is always provided when rejected
       const finalReason =
         status === 'rejected'
           ? reason || 'Order rejected by vendor'
@@ -119,7 +99,6 @@ export const updateOrderStatus = createAsyncThunk(
         timeout: 10000,
       });
 
-      console.log('✅ Order Status Updated:', response.data);
       return response.data?.order || response.data;
     } catch (error) {
       console.log('❌ Update Order Status Error:', error);
@@ -132,7 +111,6 @@ export const updateOrderStatus = createAsyncThunk(
     }
   },
 );
-
 
 /* -------------------- Slice Definition -------------------- */
 const vendorOrderSlice = createSlice({
@@ -148,6 +126,36 @@ const vendorOrderSlice = createSlice({
     statusUpdateLoading: false,
   },
   reducers: {
+    // NEW: Optimistic update for immediate UI changes
+    optimisticallyUpdateOrderStatus: (state, action) => {
+      const { orderId, newStatus, orderData } = action.payload;
+      
+      // Remove from all arrays first
+      state.pendingOrders = state.pendingOrders.filter(order => order.id !== orderId);
+      state.acceptedOrders = state.acceptedOrders.filter(order => order.id !== orderId);
+      state.completedOrders = state.completedOrders.filter(order => order.id !== orderId);
+      state.rejectedOrders = state.rejectedOrders.filter(order => order.id !== orderId);
+      
+      // Add to the appropriate array with updated status
+      const updatedOrder = orderData ? { ...orderData, status: newStatus } : null;
+      
+      if (updatedOrder) {
+        switch (newStatus) {
+          case 'pending':
+            state.pendingOrders.unshift(updatedOrder);
+            break;
+          case 'accepted':
+            state.acceptedOrders.unshift(updatedOrder);
+            break;
+          case 'completed':
+            state.completedOrders.unshift(updatedOrder);
+            break;
+          case 'rejected':
+            state.rejectedOrders.unshift(updatedOrder);
+            break;
+        }
+      }
+    },
     resetVendorOrderState: state => {
       state.pendingOrders = [];
       state.acceptedOrders = [];
@@ -169,10 +177,10 @@ const vendorOrderSlice = createSlice({
       .addCase(fetchVendorOrders.fulfilled, (state, action) => {
         state.loading = false;
         const { status, data } = action.payload;
-        if (status === 'pending') state.pendingOrders = data;
-        else if (status === 'accepted') state.acceptedOrders = data;
-        else if (status === 'rejected') state.rejectedOrders = data;
-        else if (status === 'completed') state.completedOrders = data;
+        if (status === 'pending') state.pendingOrders = data || [];
+        else if (status === 'accepted') state.acceptedOrders = data || [];
+        else if (status === 'rejected') state.rejectedOrders = data || [];
+        else if (status === 'completed') state.completedOrders = data || [];
       })
       .addCase(fetchVendorOrders.rejected, (state, action) => {
         state.loading = false;
@@ -200,11 +208,31 @@ const vendorOrderSlice = createSlice({
       })
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
         state.statusUpdateLoading = false;
-        const updated = action.payload;
-        // Optional: update local arrays
-        state.pendingOrders = state.pendingOrders.filter(
-          o => o.id !== updated.id,
-        );
+        const updatedOrder = action.payload;
+        
+        if (updatedOrder) {
+          // Remove from all arrays
+          state.pendingOrders = state.pendingOrders.filter(order => order.id !== updatedOrder.id);
+          state.acceptedOrders = state.acceptedOrders.filter(order => order.id !== updatedOrder.id);
+          state.completedOrders = state.completedOrders.filter(order => order.id !== updatedOrder.id);
+          state.rejectedOrders = state.rejectedOrders.filter(order => order.id !== updatedOrder.id);
+          
+          // Add to correct array based on new status
+          switch (updatedOrder.status) {
+            case 'pending':
+              state.pendingOrders.unshift(updatedOrder);
+              break;
+            case 'accepted':
+              state.acceptedOrders.unshift(updatedOrder);
+              break;
+            case 'completed':
+              state.completedOrders.unshift(updatedOrder);
+              break;
+            case 'rejected':
+              state.rejectedOrders.unshift(updatedOrder);
+              break;
+          }
+        }
       })
       .addCase(updateOrderStatus.rejected, (state, action) => {
         state.statusUpdateLoading = false;
@@ -213,5 +241,5 @@ const vendorOrderSlice = createSlice({
   },
 });
 
-export const { resetVendorOrderState } = vendorOrderSlice.actions;
+export const { optimisticallyUpdateOrderStatus, resetVendorOrderState } = vendorOrderSlice.actions;
 export default vendorOrderSlice.reducer;

@@ -254,6 +254,45 @@ containerStyle:{
   paddingTop:windowHeight(7),
   paddingBottom:windowHeight(10),
   marginHorizontal:windowHeight(10)
-} 
+},
+// Add to your styles
+currentServiceInfo: {
+  paddingHorizontal: 0,
+  marginHorizontal: 16,
+  borderRadius: 8,
+  // marginBottom: 2,
+   marginTop:windowHeight(10)
+},
+currentServiceText: {
+  fontSize: 14,
+  color: appColors.font,
+  textAlign: "left",
+},
+serviceName: {
+  fontWeight: 'bold',
+  color: appColors.secondary,
+},
+// Validation Styles
+validationBanner: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  padding: 12,
+  marginHorizontal: 16,
+  marginTop: 8,
+  borderRadius: 8,
+},
+validationSuccess: {
+  backgroundColor: appColors.success,
+},
+validationError: {
+  backgroundColor: appColors.error,
+},
+validationText: {
+  color: appColors.white,
+  fontSize: 14,
+  marginLeft: 8,
+  flex: 1,
+},
+
 
 });

@@ -1,6 +1,6 @@
 // VendorRegistration.js
 import React, { useContext, useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert,StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -44,8 +44,14 @@ const VendorRegistration = ({ route }) => {
     deliveryOption,
     setDeliveryOption,
     owners,
-    getAllPricingData, // Get the new function from context
+    getAllPricingData,
     completeVendorRegistration,
+    formData,
+    updateBusinessDetails,
+    updateOwners,
+    updateServices,
+    updatePricing,
+    updateDeliveryOption
   } = useContext(VendorContext);
 
   const { currentStep: apiCurrentStep, loading } = useSelector(
@@ -53,21 +59,40 @@ const VendorRegistration = ({ route }) => {
   );
 
   const { fromScreen } = route?.params || {};
-  const [businessName, setBusinessName] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState(null);
   const [localCurrentStep, setLocalCurrentStep] = useState(0);
   const [completedStep, setCompletedStep] = useState(0);
   const [localError, setLocalError] = useState('');
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('all');
-  const [pricingData, setPricingData] = useState({}); // Change to object to match API structure
+  
+  const { businessName, selectedLocation, pricingData } = formData;
+
+  // Debug logs to track state changes
   useEffect(() => {
-    console.log('🧩 Owners updated in VendorRegistration:', owners);
-  }, [owners]);
+    console.log('🔄 Current Step:', localCurrentStep);
+    console.log('🏢 Business Data:', { businessName, selectedLocation: selectedLocation?.address });
+    console.log('👥 Owners Count:', owners.length);
+    console.log('🔧 Selected Services:', selectedServiceIds);
+    console.log('💰 Pricing Data:', pricingData ? 'Available' : 'Not Available');
+    console.log('🚚 Delivery Option:', deliveryOption);
+  }, [localCurrentStep, businessName, selectedLocation, owners, selectedServiceIds, pricingData, deliveryOption]);
+
+  // Update context when form fields change
+  const handleBusinessNameChange = (text) => {
+    updateBusinessDetails(text, selectedLocation);
+  };
+
+  const handleLocationChange = (location) => {
+    updateBusinessDetails(businessName, location);
+  };
+
+  const handlePricingUpdate = useCallback((updatedPricing) => {
+    console.log('📊 Pricing updated in VendorRegistration:', updatedPricing);
+    updatePricing(updatedPricing);
+  }, [updatePricing]);
 
   // Load vendor completion status
   useEffect(() => {
-    // COMMENTED OUT API CALL
     const fetchStatus = async () => {
       try {
         const res = await dispatch(getCompletionStatus()).unwrap();
@@ -91,10 +116,6 @@ const VendorRegistration = ({ route }) => {
       }
     };
     fetchStatus();
-
-    // // UI ONLY: Set initial step
-    // setLocalCurrentStep(0);
-    // setCompletedStep(0);
   }, [dispatch]);
 
   // If Redux updates step externally
@@ -104,173 +125,190 @@ const VendorRegistration = ({ route }) => {
     }
   }, [apiCurrentStep]);
 
-  // Handle pricing updates from SetPrice component
-  const handlePricingUpdate = useCallback(updatedPricing => {
-    setPricingData(updatedPricing);
-    console.log('📊 Updated Pricing Data:', updatedPricing);
-  }, []);
-
   // Handle step progression
   const nextStep = async () => {
     setLocalError('');
+    console.log('➡️ Next button clicked, current step:', localCurrentStep);
 
     try {
-      // Validation
-      if (localCurrentStep === 0 && !businessName.trim())
-        return setLocalError('Please enter Business Name');
-      if (localCurrentStep === 0 && !selectedLocation?.address)
-        return setLocalError('Please select your laundry shop address');
-      if (localCurrentStep === 1 && owners.length === 0)
-        return setLocalError('Please add at least one owner');
-      if (localCurrentStep === 2 && selectedServiceIds.length === 0)
-        return setLocalError('Please select at least one service');
-
-      // Updated validation for step 3 - check object structure
-      if (localCurrentStep === 3) {
-      }
-
-      // COMMENTED OUT API CALLS
-      let apiSuccess = false;
-
-      const tryDispatch = async (action, payload, msg) => {
-        try {
-          await dispatch(action(payload)).unwrap();
-          apiSuccess = true;
-          //  showToast(`${msg} completed successfully!`, "success");
-        } catch (err) {
-          if (err?.message?.includes('already completed')) {
-            showToast(err?.message, 'error');
-            apiSuccess = true; // gracefully skip
-          } else {
-            showToast(err?.message || `Failed to complete ${msg}`, 'error');
-          }
-        }
-      };
+      // Validation using persisted form data
+      let validationFailed = false;
 
       switch (localCurrentStep) {
         case 0:
-          console.log(
-            'Latitude and longitude data is',
-            selectedLocation?.latitude,
-            selectedLocation?.longitude,
-          );
-          await tryDispatch(
-            completeStep1,
-            {
-              businessName: businessName.trim(),
-              address: selectedLocation?.address,
-              location: {
-                lat: selectedLocation?.latitude,
-                lng: selectedLocation?.longitude,
-              },
-            },
-            'Step 1',
-          );
+          if (!formData.businessName.trim()) {
+            setLocalError('Please enter Business Name');
+            validationFailed = true;
+          } else if (!formData.selectedLocation?.address) {
+            setLocalError('Please select your laundry shop address');
+            validationFailed = true;
+          }
           break;
 
         case 1:
-          const ownerData = (owners || []).map(o => ({
+          if (owners.length === 0) {
+            setLocalError('Please add at least one owner');
+            validationFailed = true;
+          }
+          break;
+
+        case 2:
+          if (formData.selectedServiceIds.length === 0) {
+            setLocalError('Please select at least one service');
+            validationFailed = true;
+          }
+          break;
+
+        case 3:
+  const pricing = formData.pricingData?.itemPricing;
+
+  if (!pricing || Object.keys(pricing).length === 0) {
+    setLocalError('Please set prices for each selected service');
+    validationFailed = true;
+    break;
+  }
+
+  // Validate every service/category/item
+  for (const serviceName of Object.keys(pricing)) {
+    const categories = pricing[serviceName];
+
+    for (const category of Object.keys(categories)) {
+      const items = categories[category];
+
+      for (const item of items) {
+        if (!item.price || item.price <= 0) {
+          showToast( `Please set prices for all selected services.`, 'error');
+          validationFailed = true;
+          break;
+        }
+      }
+
+      if (validationFailed) break;
+    }
+
+    if (validationFailed) break;
+  }
+
+  break;
+
+
+        case 4:
+          if (!formData.deliveryOption) {
+            setLocalError('Please select a delivery option');
+            validationFailed = true;
+          }
+          break;
+      }
+
+      if (validationFailed) {
+        console.log('❌ Validation failed for step:', localCurrentStep);
+        return;
+      }
+
+      console.log('✅ Validation passed for step:', localCurrentStep);
+
+      // API calls for each step
+      switch (localCurrentStep) {
+        case 0:
+          await dispatch(
+            completeStep1({
+              businessName: formData.businessName.trim(),
+              address: formData.selectedLocation?.address,
+              location: {
+                lat: formData.selectedLocation?.latitude,
+                lng: formData.selectedLocation?.longitude,
+              },
+            })
+          ).unwrap();
+          break;
+
+        case 1:
+          const ownerData = formData.owners.map(o => ({
             firstName: o.firstName,
             lastName: o.lastName,
             primaryNumber: o.primary,
             whatsappNumber: o.whatsapp || o.primary,
             governmentId: o.governmentId,
           }));
-          await tryDispatch(completeStep2, { owners: ownerData }, 'Step 2');
+          await dispatch(completeStep2({ owners: ownerData })).unwrap();
           break;
 
         case 2:
-          const serviceNames = (selectedServiceIds || []).map(id => {
+          const serviceNames = formData.selectedServiceIds.map(id => {
             const s = services.find(x => x.id === id);
             return s?.name || id;
           });
-          await tryDispatch(
-            completeStep3,
-            { services: serviceNames },
-            'Step 3',
-          );
+          await dispatch(completeStep3({ services: serviceNames })).unwrap();
           break;
 
-        // In VendorRegistration.js - update the step 4 case
         case 3:
-          console.log('📦 Sending Pricing Data to API:', pricingData);
-
-          // Check if pricingData is valid - now it should have itemPricing structure
-          if (
-            !pricingData ||
-            !pricingData.itemPricing ||
-            Object.keys(pricingData.itemPricing).length === 0
-          ) {
-            return setLocalError('Please set prices for at least one item');
-          }
-
-          // Validate that we have at least one service with pricing
-          const hasValidPricing = Object.keys(pricingData.itemPricing).some(
-            service => {
-              const serviceData = pricingData.itemPricing[service];
-              return (
-                serviceData &&
-                (serviceData.man?.length > 0 ||
-                  serviceData.woman?.length > 0 ||
-                  serviceData.kids?.length > 0)
-              );
-            },
-          );
-
-          if (!hasValidPricing) {
-            return setLocalError('Please set prices for at least one item');
-          }
-
-          console.log('🔄 Validated Pricing Data:', pricingData);
-
-          await tryDispatch(
-            completeStep4,
-            pricingData, // Pass the entire pricingData object which has { itemPricing: ... }
-            'Step 4',
-          );
+          console.log("Submitting pricing data:",formData.pricingData)
+          await dispatch(completeStep4(formData.pricingData)).unwrap();
           break;
+
         case 4:
-          await tryDispatch(
-            completeStep5,
-            { deliveryMethods: deliveryOption ? [deliveryOption] : [] },
-            'Step 5',
-          );
+          await dispatch(
+          completeStep5({ deliveryMethods: [formData.deliveryOption] })
+          ).unwrap();
           break;
       }
 
-      // UI ONLY: Proceed to next step without API calls
-      // const next = localCurrentStep + 1;
-      // setLocalCurrentStep(next);
-      // setCompletedStep(Math.max(completedStep, next - 1));
-      // // showToast(`Step ${localCurrentStep + 1} completed successfully!`, "success");
-    } catch (err) {
-      console.log('Step progression error:', err);
-      setLocalError(err.message || 'Failed to complete step');
+      // Move to next step
+      if (localCurrentStep < steps.length - 1) {
+        const nextStepIndex = localCurrentStep + 1;
+        console.log('🔄 Moving to step:', nextStepIndex);
+        setLocalCurrentStep(nextStepIndex);
+      } else {
+        console.log('🎉 All steps completed!');
+      }
+
+    } catch (error) {
+      console.log('❌ Step progression error:', error);
+      setLocalError(error.message || 'Failed to complete step');
+      showToast(error.message || 'Failed to complete step', 'error');
     }
   };
 
   // Handle final submission
   const handleSubmit = async () => {
     try {
+      console.log('🚀 Submitting vendor registration...');
       await dispatch(
         completeStep5({ deliveryMethods: [deliveryOption] }),
       ).unwrap();
-      // Alert.alert("Success", "Vendor registration completed successfully!");
-      if (fromScreen) navigation.goBack();
-      else navigation.navigate('SubscriptionPlans');
+      
+      showToast('Vendor registration completed successfully!', 'success');
+      
+      if (fromScreen) {
+        navigation.goBack();
+      } else {
+        navigation.navigate('SubscriptionPlans');
+      }
     } catch (err) {
-      console.log('Submit error:', err);
+      console.log('❌ Submit error:', err);
       setLocalError(err.message || 'Submission failed');
+      showToast(err.message || 'Submission failed', 'error');
     }
   };
 
   // Back button logic
   const prevStep = () => {
     if (localCurrentStep > 0) {
-      setLocalCurrentStep(prev => prev - 1);
+      const prevStepIndex = localCurrentStep - 1;
+      console.log('🔙 Moving back to step:', prevStepIndex);
+      setLocalCurrentStep(prevStepIndex);
+      setLocalError('');
     } else {
       navigation.goBack();
     }
+  };
+
+  // Handle delivery option selection
+  const handleDeliveryOptionSelect = (option) => {
+    console.log('🚚 Delivery option selected:', option);
+    setDeliveryOption(option);
+    // Force immediate UI update by updating formData
+    updateDeliveryOption(option);
   };
 
   const renderStepSlider = () => (
@@ -306,6 +344,7 @@ const VendorRegistration = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+    <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
       <View style={styles.mainHeader}>
         <View style={styles.headerStyle}>
           <TouchableOpacity
@@ -322,18 +361,22 @@ const VendorRegistration = ({ route }) => {
         {renderStepSlider()}
       </View>
 
-      <ScrollView
+      <ScrollView 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        key={`step-${localCurrentStep}`} // Force re-render on step change
       >
+        {/* Step 0: Business Details */}
         {localCurrentStep === 0 && (
           <BusinessDetails
-            businessName={businessName}
-            setBusinessName={setBusinessName}
-            selectedLocation={selectedLocation}
-            setSelectedLocation={setSelectedLocation}
+            businessName={formData.businessName}
+            setBusinessName={handleBusinessNameChange}
+            selectedLocation={formData.selectedLocation}
+            setSelectedLocation={handleLocationChange}
           />
         )}
+
+        {/* Step 1: Owner Details */}
         {localCurrentStep === 1 && (
           <View style={styles.stepContainer}>
             <TitleSubtitle
@@ -342,8 +385,8 @@ const VendorRegistration = ({ route }) => {
               titleStyle={styles.largeTitle}
               subtitleStyle={styles.largeSubtitle}
             />
-            {owners.map((o, idx) => (
-              <VendorOwnCard key={idx} owner={o} navigation={navigation} />
+            {formData.owners.map((o, idx) => (
+              <VendorOwnCard key={o.id || idx} owner={o} navigation={navigation} />
             ))}
             <TouchableOpacity
               style={styles.addButton}
@@ -354,6 +397,8 @@ const VendorRegistration = ({ route }) => {
             </TouchableOpacity>
           </View>
         )}
+
+        {/* Step 2: Services Provided */}
         {localCurrentStep === 2 && (
           <View style={styles.stepContainer}>
             <TitleSubtitle
@@ -364,7 +409,7 @@ const VendorRegistration = ({ route }) => {
             />
             <View style={styles.servicesContainer}>
               {services.map(s => {
-                const selected = selectedServiceIds.includes(s.id);
+                const selected = formData.selectedServiceIds.includes(s.id);
                 return (
                   <TouchableOpacity
                     key={s.id}
@@ -386,6 +431,8 @@ const VendorRegistration = ({ route }) => {
             </View>
           </View>
         )}
+
+        {/* Step 3: Set Pricing */}
         {localCurrentStep === 3 && (
           <>
             <TitleSubtitle
@@ -399,10 +446,12 @@ const VendorRegistration = ({ route }) => {
               onOpenFilter={() => setShowFilterModal(true)}
               selectedFilter={selectedFilter}
               navigation={navigation}
-              onPricingUpdate={handlePricingUpdate} // Pass the callback
+              onPricingUpdate={handlePricingUpdate}
             />
           </>
         )}
+
+        {/* Step 4: Delivery Options */}
         {localCurrentStep === 4 && (
           <View style={styles.stepContainer}>
             <TitleSubtitle
@@ -412,56 +461,24 @@ const VendorRegistration = ({ route }) => {
               subtitleStyle={styles.largeSubtitle}
             />
             <View style={styles.optionsContainer}>
-              {/* {["Delivery", "Pickup", "Pickup & Delivery"].map((opt) => (
-                <TouchableOpacity
-                  key={opt}
-                  style={[
-                    styles.optionCard,
-                    deliveryOption === opt && styles.selectedOptionCard,
-                  ]}
-                  onPress={() => setDeliveryOption(opt)}
-                >
-                  <Icon
-                    name={
-                      deliveryOption === opt
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={18}
-                    color={
-                      deliveryOption === opt
-                        ? appColors.secondary
-                        : appColors.font
-                    }
-                  />
-                  <Text
-                    style={[
-                      styles.optionText,
-                      deliveryOption === opt && styles.selectedOptionText,
-                    ]}
-                  >
-                    {opt}
-                  </Text>
-                </TouchableOpacity>
-              ))} */}
               {['Pickup & Delivery'].map(opt => (
                 <TouchableOpacity
                   key={opt}
                   style={[
                     styles.optionCard,
-                    deliveryOption === opt && styles.selectedOptionCard,
+                    formData.deliveryOption === opt && styles.selectedOptionCard,
                   ]}
-                  onPress={() => setDeliveryOption(opt)}
+                  onPress={() => handleDeliveryOptionSelect(opt)}
                 >
                   <Icon
                     name={
-                      deliveryOption === opt
+                      formData.deliveryOption === opt
                         ? 'radio-button-on'
                         : 'radio-button-off'
                     }
                     size={18}
                     color={
-                      deliveryOption === opt
+                      formData.deliveryOption === opt
                         ? appColors.secondary
                         : appColors.font
                     }
@@ -469,7 +486,7 @@ const VendorRegistration = ({ route }) => {
                   <Text
                     style={[
                       styles.optionText,
-                      deliveryOption === opt && styles.selectedOptionText,
+                      formData.deliveryOption === opt && styles.selectedOptionText,
                     ]}
                   >
                     {opt}
@@ -479,28 +496,27 @@ const VendorRegistration = ({ route }) => {
             </View>
           </View>
         )}
+
+        {/* Error Message */}
         {localError ? (
           <Text style={styles.errorStyle}>{localError}</Text>
         ) : null}
       </ScrollView>
 
+      {/* Navigation Buttons */}
       <View
         style={[
           styles.navButtons,
           {
-            justifyContent:
-              localCurrentStep === 0 ? 'flex-end' : 'space-between',
+            justifyContent: localCurrentStep === 0 ? 'flex-end' : 'space-between',
           },
         ]}
       >
         {localCurrentStep > 0 && (
           <TouchableOpacity
-            style={[
-              styles.backButtonContainer,
-              localCurrentStep > completedStep && styles.disabledButtonStyle, // 👈 disable style
-            ]}
+            style={styles.backButtonContainer}
             onPress={prevStep}
-            disabled={localCurrentStep > completedStep}
+            disabled={loading}
           >
             <Icon
               style={{ paddingLeft: 7, marginTop: 2 }}

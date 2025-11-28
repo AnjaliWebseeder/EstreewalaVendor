@@ -17,3 +17,4 @@ export const CREATE_SUBSCRIPTION = `${BASE_URL}/subscriptions/create`
 export const VERIFY_SUBSCRIPTION = `${BASE_URL}/subscriptions/verify`
 export const  MY_SUBSCRIPTIONS  = `${BASE_URL}/subscriptions/my`
 export const GET_VENDORDETAILS = `${BASE_URL}/vendors/details`
+export const UPDATE_FCM_API = `${BASE_URL}/vendors/update-fcm-token`

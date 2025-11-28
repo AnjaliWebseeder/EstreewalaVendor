@@ -83,8 +83,8 @@ const MySubscriptions = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor="#1a1a1a" barStyle="light-content" />
-      
+           <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+
       {/* Header */}
        <Header
               title="My Subscription"

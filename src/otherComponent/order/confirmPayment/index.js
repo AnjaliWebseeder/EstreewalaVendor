@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity,StatusBar } from "react-native";
 import Header from "../../../components/header"
 import {styles} from "./styles"
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ConfirmPayment({ navigation }) {
   return (
    <SafeAreaView style={styles.container}>
+    <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
      <View style={styles.container}>
       {/* Custom Header */}
       <Header title={"Confirm Payment"} onBack={() => navigation.goBack()} />

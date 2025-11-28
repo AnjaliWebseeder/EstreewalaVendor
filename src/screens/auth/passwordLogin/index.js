@@ -1,5 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
+import { 
+  View, 
+  TouchableOpacity, 
+  Text, 
+  StatusBar, 
+  ScrollView, 
+  KeyboardAvoidingView, 
+  Platform 
+} from 'react-native';
 import CustomButton from '../../../components/button';
 import CustomInput from '../../../components/Input';
 import BannerHeader from '../../../otherComponent/bannerHeader';
@@ -9,6 +17,8 @@ import { useToast } from '../../../utils/context/toastContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginVendor, resetVendorState } from '../../../redux/slices/loginSlice';
 import { VendorContext } from '../../../utils/context/vendorContext';
+import { getFcmToken } from '../../../utils/notification/notificationService';
+import { updateFcmToken } from '../../../redux/slices/notificationSlice';
 
 const PasswordLoginScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -18,6 +28,7 @@ const PasswordLoginScreen = ({ navigation }) => {
   const { showToast } = useToast();
   const { loading } = useSelector((state) => state.login);
   const { login, saveUserDetails } = useContext(VendorContext);
+  
   // ✅ Password validation regex (same as ResetPassword screen)
   const passwordRegex =
     /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{};':"\\|,.<>/?-]).{8,}$/;
@@ -26,6 +37,17 @@ const PasswordLoginScreen = ({ navigation }) => {
   useEffect(() => {
     dispatch(resetVendorState());
   }, [dispatch]);
+
+  const saveFcmTokenAfterLogin = () => async (dispatch) => {
+    try {
+      const token = await getFcmToken();
+      if (!token) return;
+  
+      await dispatch(updateFcmToken(token));
+    } catch (error) {
+      console.log("❌ Error saving FCM Token:", error);
+    }
+  };
 
   const handleLogin = async () => {
     const newErrors = {};
@@ -53,8 +75,8 @@ const PasswordLoginScreen = ({ navigation }) => {
       if (loginVendor.fulfilled.match(resultAction)) {
           const {token,user} = resultAction.payload
     
-          await login(token, user);
-         
+        await login(token, user);
+        await dispatch(saveFcmTokenAfterLogin());
           
         setTimeout(() => {
           navigation.replace('VendorRegistration');
@@ -99,53 +121,64 @@ const PasswordLoginScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.container}>
-        <BannerHeader
-          bannerImage={require('../../../assets/images/background.png')}
-          title="Welcome Back"
-          subtitle="Sign in to your account"
-          onBackPress={() => navigation.goBack()}
-        />
-
-        <View style={styles.mainContainerStyle}>
-          <CustomInput
-            iconName="mail"
-            label="Email Address"
-            placeholder="e.g. patel@123"
-            value={email}
-            onChangeText={handleEmailChange}
-            error={errors.email}
+      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+      
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <BannerHeader
+            bannerImage={require('../../../assets/images/background.png')}
+            title="Welcome Back"
+            subtitle="Sign in to your account"
+            onBackPress={() => navigation.goBack()}
           />
 
-          <CustomInput
-            iconName="lock"
-            label="Enter your password"
-            placeholder="******"
-            value={password}
-            onChangeText={handlePasswordChange}
-            secureTextEntry
-            error={errors.password}
-          />
+          <View style={styles.mainContainerStyle}>
+            <CustomInput
+              iconName="mail"
+              label="Email Address"
+              placeholder="e.g. patel@123"
+              value={email}
+              onChangeText={handleEmailChange}
+              error={errors.email}
+            />
 
-          <Text style={styles.footerTextStyle}>
-            Password must be{' '}
-            <Text style={styles.linkStyle}>at least 8 Characters</Text> and must
-            contain at least a <Text style={styles.linkStyle}>Capital Letter</Text>, a{' '}
-            <Text style={styles.linkStyle}>Number</Text> and a{' '}
-            <Text style={styles.linkStyle}>Special Character</Text>.
-          </Text>
+            <CustomInput
+              iconName="lock"
+              label="Enter your password"
+              placeholder="******"
+              value={password}
+              onChangeText={handlePasswordChange}
+              secureTextEntry
+              error={errors.password}
+            />
 
-          <TouchableOpacity
-            onPress={() => navigation.navigate('ForgotPassword')}
-            style={styles.forgot}
-          >
-            <Text style={styles.forgotText}>Forgot Password?</Text>
-          </TouchableOpacity>
-        </View>
+            <Text style={styles.footerTextStyle}>
+              Password must be{' '}
+              <Text style={styles.linkStyle}>at least 8 Characters</Text> and must
+              contain at least a <Text style={styles.linkStyle}>Capital Letter</Text>, a{' '}
+              <Text style={styles.linkStyle}>Number</Text> and a{' '}
+              <Text style={styles.linkStyle}>Special Character</Text>.
+            </Text>
 
-        {/* ✅ Disabled only if email/password invalid */}
-        <CustomButton loading={loading} title="Sign In" onPress={handleLogin} />
-      </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ForgotPassword')}
+              style={styles.forgot}
+            >
+              <Text style={styles.forgotText}>Forgot Password?</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* ✅ Disabled only if email/password invalid */}
+          <CustomButton loading={loading} title="Sign In" onPress={handleLogin} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

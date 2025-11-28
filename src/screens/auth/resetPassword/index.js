@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, StatusBar, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { styles } from './styles';
 import BannerHeader from '../../../otherComponent/bannerHeader';
@@ -7,15 +7,15 @@ import CustomButton from '../../../components/button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useToast } from '../../../utils/context/toastContext';
 import { useDispatch, useSelector } from 'react-redux';
- import { resetPassword } from '../../../redux/slices/resetPasswordSlice';
+import { resetPassword } from '../../../redux/slices/resetPasswordSlice';
 
-export default function ResetPassword({ navigation , route }) {
+export default function ResetPassword({ navigation, route }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
-   const { loading } = useSelector((state) => state.resetPassword);
+  const { loading } = useSelector((state) => state.resetPassword);
   const { showToast } = useToast();
   const dispatch = useDispatch();
   
@@ -72,11 +72,10 @@ export default function ResetPassword({ navigation , route }) {
     const payload = {
       email: route?.params?.payload?.email?.trim(),
       newPassword: password,
-      confirmPassword:confirmPassword,
+      confirmPassword: confirmPassword,
       otp: route?.params?.payload?.otp,
     };
     
-    // COMMENTED OUT API CALL
     try {
       const result = await dispatch(resetPassword(payload));
       if (resetPassword.fulfilled.match(result)) {
@@ -93,46 +92,57 @@ export default function ResetPassword({ navigation , route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.container}>
-        <BannerHeader
-          bannerImage={require('../../../assets/images/background.png')}
-          title="Create New Password"
-          subtitle="Enter your new password below here!"
-          onBackPress={() => navigation.goBack()}
-        />
-
-        <View style={styles.mainContainerStyle}>
-          <CustomInput
-            label="Password *"
-            placeholder="Enter password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            error={errors.password}
-          />
-          <CustomInput
-            label="Confirm Password *"
-            placeholder="Confirm password"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            error={errors.confirmPassword}
+      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+      
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <BannerHeader
+            bannerImage={require('../../../assets/images/background.png')}
+            title="Create New Password"
+            subtitle="Enter your new password below here!"
+            onBackPress={() => navigation.goBack()}
           />
 
-          <Text style={styles.footerText}>
-            Password must be <Text style={styles.link}>at least 8 Characters</Text> and must contain at least a{' '}
-            <Text style={styles.link}>Capital Letter</Text>, a Number and a <Text style={styles.link}>Special Character</Text>.
-          </Text>
-        </View>
+          <View style={styles.mainContainerStyle}>
+            <CustomInput
+              label="Password *"
+              placeholder="Enter password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              error={errors.password}
+            />
+            <CustomInput
+              label="Confirm Password *"
+              placeholder="Confirm password"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+              error={errors.confirmPassword}
+            />
 
-        {/* ✅ Button disabled until form is valid */}
-        <CustomButton 
-          loading={loading} 
-          title="Next" 
-          onPress={handleNext} 
-          disabled={!isFormValid} 
-        />
-      </View>
+            <Text style={styles.footerText}>
+              Password must be <Text style={styles.link}>at least 8 Characters</Text> and must contain at least a{' '}
+              <Text style={styles.link}>Capital Letter</Text>, a Number and a <Text style={styles.link}>Special Character</Text>.
+            </Text>
+          </View>
+
+          {/* ✅ Button disabled until form is valid */}
+          <CustomButton 
+            loading={loading} 
+            title="Next" 
+            onPress={handleNext} 
+            disabled={!isFormValid} 
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

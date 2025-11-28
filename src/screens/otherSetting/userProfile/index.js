@@ -6,7 +6,7 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
-  Alert,
+  StatusBar
 } from "react-native";
 import Header from "../../../components/header";
 import { styles } from "./styles";
@@ -142,11 +142,12 @@ const LoginSecurityScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[styles.container, { paddingHorizontal: 0 }]}>
+              <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+
       <View style={styles.container}>
-        <Header  title={"Login & Security"} onBack={() => navigation.goBack()} />
+        <Header  title={"Personal Information"} onBack={() => navigation.goBack()} />
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Personal Information</Text>
             <View style={styles.sectionCard}>
               {fields.map((item, idx) => (
                 <View

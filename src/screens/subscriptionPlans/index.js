@@ -514,7 +514,8 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="transparent" />
+          <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+
       
       {/* Header */}
       <View style={styles.header}>

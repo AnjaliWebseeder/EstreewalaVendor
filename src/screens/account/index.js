@@ -20,6 +20,7 @@ import { PasswordIcon } from "../../assets/Icons/password";
 import { AboutIcon } from "../../assets/Icons/aboutus";
 import { PrivacyPolicyIcon } from "../../assets/Icons/privacypolicy";
 import { FaqIcon } from "../../assets/Icons/faq";
+import TermsServiceIcon from "../../assets/Icons/termsServiceIcon"
 import { RateUsIcon } from "../../assets/Icons/rateUs";
 import { SubscriptionIcon } from "../../assets/Icons/subscriptionIcon";
 import LinearGradient from "react-native-linear-gradient";
@@ -28,6 +29,7 @@ import PremiumSubscriptionIcon from "../../assets/Icons/premiumSubscription";
 import { useDispatch, useSelector } from "react-redux";
 import { getMySubscriptions } from "../../redux/slices/subscriptionSlice";
 import {getVendorDetails} from "../../redux/slices/vendorSlice"
+import DeleteAccountModal from "../../otherComponent/deleteModal"
 
 // ==== MENU ITEM COMPONENT ====
 const MenuItem = ({ icon, label, onPress, isLast, rightComponent }) => (
@@ -49,6 +51,12 @@ const MenuItem = ({ icon, label, onPress, isLast, rightComponent }) => (
 
 export default function Account({ navigation }) {
   const [profileImage, setProfileImage] = useState(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+  const handleDeleteAccount = () => {
+    setDeleteModalVisible(false)
+  }
+
   const { logout } = useContext(VendorContext);
   const dispatch = useDispatch();
   const { mySubscriptions, loading } = useSelector((state) => state.subscription);
@@ -208,6 +216,11 @@ export default function Account({ navigation }) {
             label="FAQ"
             onPress={() => navigation.navigate("Faq")}
           />
+           <MenuItem
+            icon={<TermsServiceIcon />}
+            label="Terms of Service"
+            onPress={() => navigation.navigate("TermsOfServiceScreen")}
+          />
           <MenuItem
             icon={<RateUsIcon />}
             label="Rate Us"
@@ -234,6 +247,32 @@ export default function Account({ navigation }) {
             </LinearGradient>
           </TouchableOpacity>
         </View>
+         
+       <View style={{ marginVertical: 10 }}>
+  <TouchableOpacity
+    activeOpacity={0.8}
+    onPress={() => setDeleteModalVisible(true)}
+    style={styles.deleteButton}
+  >
+    <Icon
+      name="trash-outline"
+      size={20}
+      color="#f07777ff"
+      style={{ marginRight: 10 }}
+    />
+    <Text style={styles.deleteText}>Delete Account</Text>
+  </TouchableOpacity>
+</View>
+
+<DeleteAccountModal
+  visible={deleteModalVisible}
+  onCancel={() => setDeleteModalVisible(false)}
+  onConfirm={handleDeleteAccount}
+  isDeleting={loading}
+/>
+
+
+
       </ScrollView>
     </SafeAreaView>
   );

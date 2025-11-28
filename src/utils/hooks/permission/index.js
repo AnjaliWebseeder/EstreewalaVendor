@@ -5,8 +5,7 @@ import { useContext } from "react";
 import { VendorContext } from "../../context/vendorContext";
 
 export const usePermissions = () => {
-  const { saveLocation } = useContext(VendorContext);
-
+  const { saveLocation  } = useContext(VendorContext);
   // ------------------ LOCATION PERMISSION ------------------
   const requestLocationPermission = async () => {
     if (Platform.OS === "android") {

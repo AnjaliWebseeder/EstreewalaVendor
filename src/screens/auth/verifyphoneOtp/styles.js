@@ -9,6 +9,10 @@ export const styles = StyleSheet.create({
   position: 'relative',
   
 },
+scrollContent: {
+  flexGrow: 1,
+  paddingBottom: 20, // Add some bottom padding for better scrolling
+},
 backButton: {
   position: 'absolute',
   top: windowHeight(15),
@@ -49,5 +53,13 @@ backButton: {
     marginTop:10
   },
     link: { color: appColors.secondary, textAlign:"center",fontFamily:fonts.PoppinsMedium, fontSize:fontSizes.FONT15,textDecorationLine:"underline"},
+    errorText: {
+  color: 'red',
+  fontSize: 14,
+  textAlign: 'center',
+  marginTop: 10,
+  marginBottom: 10,
+},
+
 
 });

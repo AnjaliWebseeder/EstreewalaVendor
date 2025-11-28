@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SelectLocation = () => {
   const navigation = useNavigation();
@@ -151,7 +152,7 @@ const SelectLocation = () => {
     /* Address Bar */
     .address-bar {
       position: fixed;
-      bottom: 80px;
+      bottom: 110px;
       left: 10px;
       right: 10px;
       background: white;
@@ -174,7 +175,7 @@ const SelectLocation = () => {
     /* Action Buttons */
     .action-buttons {
       position: fixed;
-      bottom: 20px;
+      bottom: 40px;
       left: 10px;
       right: 10px;
       z-index: 500; /* Same as search container */
@@ -586,7 +587,8 @@ const SelectLocation = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
@@ -617,6 +619,8 @@ const SelectLocation = () => {
         </View>
       )} 
     </View>
+    </SafeAreaView>
+ 
   );
 };
 

@@ -5,7 +5,8 @@ import {
   TouchableOpacity,
   Linking,
   TextInput,
-  ScrollView
+  ScrollView,
+  StatusBar
 } from 'react-native';
 import { styles } from './styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -18,7 +19,7 @@ export default function ContactSupport({ navigation }) {
   const [charCount, setCharCount] = useState(0);
 
   const openEmail = () => {
-    Linking.openURL('mailto:support@estreewala.in');
+    Linking.openURL('mailto:support@estreewalla.com');
   };
 
   const openDialer = () => {
@@ -37,6 +38,7 @@ export default function ContactSupport({ navigation }) {
 
   return (
  <SafeAreaView style={styles.container}>
+  <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
      <View style={styles.container}>
         <Header
         title="Contact Support"
@@ -45,7 +47,7 @@ export default function ContactSupport({ navigation }) {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.helpTitle}>Need Help? We're just a tap away.</Text>
         <Text style={styles.helpSubText}>
-          Reach out via call or email, or send us a quick message. Our support team is always here to assist you.
+          Reach out via email. Our support team is always here to assist you.
         </Text>
 
         <TouchableOpacity style={styles.cardBox} onPress={openEmail}>
@@ -53,15 +55,15 @@ export default function ContactSupport({ navigation }) {
             <Ionicons name="mail" size={20} color={appColors.black} />
             <Text style={styles.cardTitle}> Email Us</Text>
           </View>
-          <Text style={styles.cardValue}>support@estreewala.in</Text>
+          <Text style={styles.cardValue}>support@estreewalla.com</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.cardBox} onPress={openDialer}>
+        {/* <TouchableOpacity style={styles.cardBox} onPress={openDialer}>
           <View style={styles.row}>
             <Ionicons name="call" size={20} color={appColors.black} />
             <Text style={styles.cardTitle}> Call Us</Text>
           </View>
-          <Text style={styles.cardValue}>+91 12356</Text>
+          <Text style={styles.cardValue}>+91 9557919140</Text>
         </TouchableOpacity>
 
         <View style={styles.messageRow}>
@@ -80,9 +82,11 @@ export default function ContactSupport({ navigation }) {
           onChangeText={handleMessageChange}
           placeholderTextColor={appColors.font}
         />
-        <Text style={styles.charCount}>{charCount}/500</Text>
+        <Text style={styles.charCount}>{charCount}/500</Text> */}
 
-        <TouchableOpacity 
+     
+      </ScrollView>
+         <TouchableOpacity 
           style={styles.submitBtn} 
           onPress={handleSubmit}
          
@@ -91,7 +95,6 @@ export default function ContactSupport({ navigation }) {
             {'Submit'}
           </Text>
         </TouchableOpacity>
-      </ScrollView>
     </View>
  </SafeAreaView>
   );

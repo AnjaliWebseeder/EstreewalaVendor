@@ -28,6 +28,7 @@ import OrderSummary from "../otherComponent/order/orderSummary";
 import PaymentSuccess from "../otherComponent/order/paymentSuccess";
 import MySubscriptionsScreen from "../screens/otherSetting/mySubscription";
 import Splash from '../screens/spalsh';
+import TermsOfServiceScreen from "../screens/otherSetting/termsOfService"
 
 const Stack = createStackNavigator();
 
@@ -44,48 +45,44 @@ const Navigation = () => {
   const [navigationReady, setNavigationReady] = useState(false);
 
   useEffect(() => {
-    console.log('🔍 Navigation State Update:', {
-      isLoading,
-      userToken: !!userToken,
-      hasCompletedVendorRegistration,
-      hasCompletedSubscription,
-      isFirstLaunch
-    });
+  console.log('🔍 NAVIGATION DEBUG - Detailed State:', {
+    isLoading,
+    userToken: userToken ? `Token EXISTS (${userToken.substring(0, 10)}...)` : 'No Token',
+    hasCompletedVendorRegistration,
+    hasCompletedSubscription,
+    isFirstLaunch
+  });
 
-    if (!isLoading) {
-      let route = 'Welcome'; // Default route
+  if (!isLoading) {
+    let route = 'Welcome';
 
-      // 🟡 Not logged in → Show Welcome/Login flow
-      if (!userToken) {
-        route = 'Welcome';
-        console.log('🚦 Navigation: No token → Welcome');
-      }
-      // 🟢 Logged in but vendor not registered yet → Go to registration flow
-      else if (!hasCompletedVendorRegistration) {
-        route = 'VendorRegistration';
-        console.log('🚦 Navigation: Token but no vendor registration → VendorRegistration');
-      }
-      // 🟢 Registered but no subscription yet → Show subscription plans
-      else if (!hasCompletedSubscription) {
-        route = 'SubscriptionPlans';
-        console.log('🚦 Navigation: Vendor registered but no subscription → SubscriptionPlans');
-      }
-      // ✅ Everything completed → Go directly to main app
-      else {
-        route = 'Main';
-        console.log('🚦 Navigation: All completed → Main');
-      }
-
-      setInitialRoute(route);
-      
-      // Mark navigation as ready after a small delay to ensure smooth transition
-      const timer = setTimeout(() => {
-        setNavigationReady(true);
-      }, 300);
-
-      return () => clearTimeout(timer);
+    if (!userToken) {
+      route = 'Welcome';
+      console.log('🚦 ROUTE: No token → Welcome');
     }
-  }, [isLoading, userToken, hasCompletedVendorRegistration, hasCompletedSubscription]);
+    else if (hasCompletedVendorRegistration === false) {
+      route = 'VendorRegistration';
+      console.log('🚦 ROUTE: Token + Registration FALSE → VendorRegistration');
+    }
+    else if (!hasCompletedSubscription) {
+      route = 'SubscriptionPlans';
+      console.log('🚦 ROUTE: Registered + No subscription → SubscriptionPlans');
+    }
+    else {
+      route = 'Main';
+      console.log('🚦 ROUTE: All complete → Main');
+    }
+
+    console.log('🎯 FINAL ROUTE DECISION:', route);
+    setInitialRoute(route);
+    
+    const timer = setTimeout(() => {
+      setNavigationReady(true);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }
+}, [isLoading, userToken, hasCompletedVendorRegistration, hasCompletedSubscription]);
 
   // Show splash screen while loading or navigation not ready
   if (isLoading || !navigationReady) {
@@ -102,6 +99,7 @@ const Navigation = () => {
         initialRouteName={initialRoute}
       >
         {/* ===== Splash Screen ===== */}
+        
         <Stack.Screen name="Splash" component={Splash} />
 
         {/* ===== Auth Flow ===== */}
@@ -154,6 +152,8 @@ const Navigation = () => {
         <Stack.Screen name="Faq" component={FAQS} />
         <Stack.Screen name="Notification" component={Notification} />
         <Stack.Screen name="LoginSecurityScreen" component={LoginSecurityScreen} />
+        <Stack.Screen name="TermsOfServiceScreen" component={TermsOfServiceScreen} />
+        
       </Stack.Navigator>
     </NavigationContainer>
   );

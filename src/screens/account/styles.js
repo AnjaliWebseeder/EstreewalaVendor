@@ -129,12 +129,25 @@ logoutContainer: {
       },
       content:{
         color: "#fff", fontSize: 13, marginTop: 4, opacity: 0.9,width:windowHeight(240),lineHeight:17
-      }
+      },
+      deleteButton: {
+  backgroundColor: "white", // iOS system red (Instagram/Uber style)
+  paddingVertical: 12,
+  borderRadius: 12,
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  marginHorizontal: 0,
+  marginBottom: 10,
+  opacity:0.9,
+  borderColor:appColors.error,
+  borderWidth:1
+},
 
-
-
-
-  // ===== SIGN OUT =====
-
+deleteText: {
+  color: "#f07777ff",
+  fontSize: 16,
+  fontWeight: "600",
+},
 
 });

@@ -75,13 +75,20 @@ const otpVerifySlice = createSlice({
         state.success = false;
       })
       .addCase(verifyOtp.fulfilled, (state, action) => {
-        state.loading = false;
-        state.success = true;
-        state.error = null;
-        state.user = action.payload.user || action.payload.data;
-        state.token = action.payload.token || action.payload.accessToken;
-        console.log("OTP VERIFIED SUCCESSFULLY => ", action.payload);
-      })
+  state.loading = false;
+  state.success = true;
+  state.error = null;
+  
+  // FIX: Handle both vendor and user responses
+  state.user = action.payload.vendor || action.payload.user || action.payload.data;
+  state.token = action.payload.token || action.payload.accessToken;
+  
+  console.log("✅ OTP VERIFIED SUCCESSFULLY => ", {
+    token: !!state.token,
+    user: state.user,
+    vendor: action.payload.vendor // This is what your OTP API returns
+  });
+})
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
         state.success = false;

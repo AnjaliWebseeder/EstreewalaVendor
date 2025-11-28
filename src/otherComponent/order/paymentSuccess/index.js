@@ -4,6 +4,7 @@ import {
   Text,
   Animated,
   Easing,
+  StatusBar
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import LottieView from 'lottie-react-native';
@@ -76,6 +77,7 @@ const PaymentSuccessScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+    <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
       <View style={styles.content}>
         {/* Success Animation */}
         <Animated.View

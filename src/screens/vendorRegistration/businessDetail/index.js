@@ -26,14 +26,14 @@ const BusinessDetails = ({
   };
 
   const handleAddressPress = () => {
-    console.log("📍 Current selectedLocation:", selectedLocation);
     navigation.navigate('SelectLocation', { 
       onLocationSelect: handleLocationSelect,
       initialLocation: selectedLocation 
     });
   };
 
-  return (
+
+ return (
     <View style={styles.stepContainer}>
       {/* Business Name */}
       <InputField
@@ -51,7 +51,7 @@ const BusinessDetails = ({
         onPress={handleAddressPress}
         style={{
           borderWidth: 1,
-          borderColor:   appColors.border,
+          borderColor: appColors.border,
           borderRadius: 10,
           padding: 12,
           marginTop: 8,
@@ -69,10 +69,9 @@ const BusinessDetails = ({
         </Text>
         <Icon name="location-outline" size={20} color={appColors.secondary} />
       </TouchableOpacity>
-      
-    
     </View>
   );
 };
+
 
 export default BusinessDetails;
