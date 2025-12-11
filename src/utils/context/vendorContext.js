@@ -56,19 +56,27 @@ export const VendorProvider = ({ children }) => {
   const [hasCompletedVendorRegistration, setHasCompletedVendorRegistration] = useState(false);
   const [hasCompletedSubscription, setHasCompletedSubscription] = useState(false);
   
-  const initialServices = [
-    { id: 1, name: "Dry Wash" },
-    { id: 2, name: "Washing" },
-    { id: 3, name: "Ironing" },
-    { id: 4, name: "Wash & Iron" },
-  ];
+
+// In VendorContext.js, update the services:
+const initialServices = [
+  { id: 1, name: "Ironing", type: "basic" },
+  { id: 2, name: "Washing", type: "basic" },
+  { id: 3, name: "Dry Wash", type: "basic" },
+  { id: 4, name: "Wash & Iron", type: "basic" },
+  // Premium services - now all required
+  { id: 6, name: "Steam Ironing", type: "premium" },
+  { id: 7, name: "Spin Washing", type: "premium" },
+  { id: 8, name: "Steam Washing", type: "premium" },
+  { id: 9, name: "Stain Removal", type: "premium" },
+];
+
 
   // States
   const [owners, setOwners] = useState([]);
   const [branches, setBranches] = useState([]);
   const [location, setLocation] = useState(null);
-  const [services] = useState(initialServices);
-  const [selectedServiceIds, setSelectedServiceIds] = useState([]);
+const [services] = useState(initialServices); // Only initialServices now
+const [selectedServiceIds, setSelectedServiceIds] = useState([1, 2, 3, 4, 6, 7, 8, 9]);
   const [priceMap, setPriceMap] = useState({});
   const [coupons, setCoupons] = useState([]);
   const [pricingSet, setPricingSet] = useState(false);
@@ -77,14 +85,14 @@ export const VendorProvider = ({ children }) => {
   const [userLocation, setUserLocation] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
 
-  const [formData, setFormData] = useState({
-    businessName: '',
-    selectedLocation: null,
-    owners: [],
-    selectedServiceIds: [],
-    pricingData: {},
-    deliveryOption: 'Pickup & Delivery'
-  });
+const [formData, setFormData] = useState({
+  businessName: '',
+  selectedLocation: null,
+  owners: [],
+  selectedServiceIds: [1, 2, 3, 4, 6, 7, 8, 9], // ALL services selected by default
+  pricingData: {},
+  deliveryOption: 'Pickup & Delivery'
+});
 
   // Storage functions without dependencies
   const saveFormDataToStorage = useCallback(async (data) => {
@@ -96,23 +104,36 @@ export const VendorProvider = ({ children }) => {
     }
   }, []);
 
-  const loadFormDataFromStorage = useCallback(async () => {
-    try {
-      const storedFormData = await AsyncStorage.getItem('vendorFormData');
-      if (storedFormData) {
-        const parsedData = JSON.parse(storedFormData);
-        setFormData(parsedData);
-        console.log('💾 Form data loaded from storage:', parsedData);
-        
-        // Sync with individual states
-        setOwners(parsedData.owners || []);
-        setSelectedServiceIds(parsedData.selectedServiceIds || []);
-        setDeliveryOption(parsedData.deliveryOption || 'Pickup & Delivery');
-      }
-    } catch (error) {
-      console.log('❌ Error loading form data:', error);
+ const loadFormDataFromStorage = useCallback(async () => {
+  try {
+    const storedFormData = await AsyncStorage.getItem('vendorFormData');
+    if (storedFormData) {
+      const parsedData = JSON.parse(storedFormData);
+      
+      // ✅ ENSURE ALL services are always selected
+      const allServiceIds = [1, 2, 3, 4, 6, 7, 8, 9];
+      const updatedSelectedServiceIds = [...new Set([
+        ...(parsedData.selectedServiceIds || []),
+        ...allServiceIds // Add ALL services
+      ])];
+      
+      const updatedFormData = {
+        ...parsedData,
+        selectedServiceIds: updatedSelectedServiceIds
+      };
+      
+      setFormData(updatedFormData);
+      console.log('💾 Form data loaded from storage:', updatedFormData);
+      
+      // Sync with individual states
+      setOwners(updatedFormData.owners || []);
+      setSelectedServiceIds(updatedSelectedServiceIds);
+      setDeliveryOption(updatedFormData.deliveryOption || 'Pickup & Delivery');
     }
-  }, []);
+  } catch (error) {
+    console.log('❌ Error loading form data:', error);
+  }
+}, []);
 
   const clearFormDataFromStorage = useCallback(async () => {
     try {
@@ -180,22 +201,22 @@ export const VendorProvider = ({ children }) => {
     });
   }, [saveFormDataToStorage]);
 
-  const clearFormData = useCallback(() => {
-    const emptyFormData = {
-      businessName: '',
-      selectedLocation: null,
-      owners: [],
-      selectedServiceIds: [],
-      pricingData: {},
-      deliveryOption: 'Pickup & Delivery'
-    };
-    setFormData(emptyFormData);
-    clearFormDataFromStorage();
-    // Also clear individual states
-    setOwners([]);
-    setSelectedServiceIds([]);
-    setDeliveryOption('Pickup & Delivery');
-  }, [clearFormDataFromStorage]);
+const clearFormData = useCallback(() => {
+  const emptyFormData = {
+    businessName: '',
+    selectedLocation: null,
+    owners: [],
+    selectedServiceIds: [1, 2, 3, 4, 6, 7, 8, 9], // Reset with ALL services
+    pricingData: {},
+    deliveryOption: 'Pickup & Delivery'
+  };
+  setFormData(emptyFormData);
+  clearFormDataFromStorage();
+  // Also clear individual states
+  setOwners([]);
+  setSelectedServiceIds([1, 2, 3, 4, 6, 7, 8, 9]); // Reset with ALL services
+  setDeliveryOption('Pickup & Delivery');
+}, [clearFormDataFromStorage]);
 
   // Sync functions with storage
   const addOwnerWithSync = useCallback((owner) => {
@@ -218,13 +239,12 @@ export const VendorProvider = ({ children }) => {
     updateOwners(newOwners);
   }, [owners, updateOwners]);
 
+
   const toggleServiceCategoryWithSync = useCallback((id) => {
-    const newSelectedServiceIds = selectedServiceIds.includes(id) 
-      ? selectedServiceIds.filter((x) => x !== id) 
-      : [...selectedServiceIds, id];
-    setSelectedServiceIds(newSelectedServiceIds);
-    updateServices(newSelectedServiceIds);
-  }, [selectedServiceIds, updateServices]);
+  // ✅ ALL services (1-4, 6-9) cannot be deselected
+  console.log('ℹ️ All services are compulsory and cannot be deselected:', id);
+  return;
+}, []);
 
   const setDeliveryOptionWithSync = useCallback((option) => {
     setDeliveryOption(option);
@@ -232,55 +252,69 @@ export const VendorProvider = ({ children }) => {
   }, [updateDeliveryOption]);
 
   // FIXED: Load storage data without circular dependencies
-  const loadStorageData = useCallback(async () => {
-    try {
-      console.log('🔄 Loading storage data...');
-      
-      const [appLaunched, registrationCompleted, subscriptionCompleted, token, userData, storedFormData] = await Promise.all([
-        getAppLaunchStatus(),
-        AsyncStorage.getItem('vendorRegistrationCompleted'),
-        AsyncStorage.getItem('subscriptionCompleted'),
-        AsyncStorage.getItem('userToken'),
-        AsyncStorage.getItem('userDetails'),
-        AsyncStorage.getItem('vendorFormData'),
-      ]);
+const loadStorageData = useCallback(async () => {
+  try {
+    console.log('🔄 Loading storage data...');
+    
+    const [appLaunched, registrationCompleted, subscriptionCompleted, token, userData, storedFormData] = await Promise.all([
+      getAppLaunchStatus(),
+      AsyncStorage.getItem('vendorRegistrationCompleted'),
+      AsyncStorage.getItem('subscriptionCompleted'),
+      AsyncStorage.getItem('userToken'),
+      AsyncStorage.getItem('userDetails'),
+      AsyncStorage.getItem('vendorFormData'),
+    ]);
 
-      setIsFirstLaunch(!appLaunched);
-      setHasCompletedVendorRegistration(registrationCompleted === 'true');
-      setHasCompletedSubscription(subscriptionCompleted === 'true');
+    setIsFirstLaunch(!appLaunched);
+    setHasCompletedVendorRegistration(registrationCompleted === 'true');
+    setHasCompletedSubscription(subscriptionCompleted === 'true');
 
-      console.log("🔐 Loaded Token:", !!token);
-      console.log("👤 Loaded UserData:", !!userData);
-      console.log("📝 Loaded FormData:", !!storedFormData);
+    console.log("🔐 Loaded Token:", !!token);
+    console.log("👤 Loaded UserData:", !!userData);
+    console.log("📝 Loaded FormData:", !!storedFormData);
 
-      if (token) {
-        setUserToken(token);
-        setGlobalAuth(token, userData ? JSON.parse(userData) : null);
-      }
-      
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        setUserDetails(parsedUser);
-        if (token) {
-          setGlobalAuth(token, parsedUser);
-        }
-      }
-
-      // Load form data if it exists
-      if (storedFormData) {
-        const parsedFormData = JSON.parse(storedFormData);
-        setFormData(parsedFormData);
-        // Sync with individual states
-        setOwners(parsedFormData.owners || []);
-        setSelectedServiceIds(parsedFormData.selectedServiceIds || []);
-        setDeliveryOption(parsedFormData.deliveryOption || 'Pickup & Delivery');
-      }
-    } catch (error) {
-      console.log('❌ Error loading storage data:', error);
-    } finally {
-      setIsLoading(false);
+    if (token) {
+      setUserToken(token);
+      setGlobalAuth(token, userData ? JSON.parse(userData) : null);
     }
-  }, []);
+    
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setUserDetails(parsedUser);
+      if (token) {
+        setGlobalAuth(token, parsedUser);
+      }
+    }
+
+    // Load form data if it exists
+    if (storedFormData) {
+      const parsedFormData = JSON.parse(storedFormData);
+      
+      // ✅ ENSURE ALL services are always included
+      const allServiceIds = [1, 2, 3, 4, 6, 7, 8, 9];
+      const updatedSelectedServiceIds = [...new Set([
+        ...(parsedFormData.selectedServiceIds || []),
+        ...allServiceIds
+      ])];
+      
+      const updatedFormData = {
+        ...parsedFormData,
+        selectedServiceIds: updatedSelectedServiceIds
+      };
+      
+      setFormData(updatedFormData);
+      // Sync with individual states
+      setOwners(updatedFormData.owners || []);
+      setSelectedServiceIds(updatedSelectedServiceIds);
+      setDeliveryOption(updatedFormData.deliveryOption || 'Pickup & Delivery');
+    }
+  } catch (error) {
+    console.log('❌ Error loading storage data:', error);
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
+
 
   // Load data on mount - only once
   useEffect(() => {
@@ -393,17 +427,41 @@ export const VendorProvider = ({ children }) => {
   };
 
 const getAllPricingData = useCallback(() => {
-  const itemPricing = {
-    "Dry Wash": { man: [], woman: [], kids: [] },
-    "Washing": { man: [], woman: [], kids: [] },
-    "Ironing": { man: [], woman: [], kids: [] },
-    "Wash & Iron": { man: [], woman: [], kids: [] }
+ const itemPricing = {
+  "Dry Wash": { man: [], woman: [], kids: [] },
+  "Washing": { man: [], woman: [], kids: [] },
+  "Ironing": { man: [], woman: [], kids: [] },
+  "Wash & Iron": { man: [], woman: [], kids: [] },
+  "Steam Ironing": { man: [], woman: [], kids: [] },
+  "Spin Washing": { man: [], woman: [], kids: [] },
+  "Steam Washing": { man: [], woman: [], kids: [] },
+  "Stain Removal": { man: [], woman: [], kids: [] }
+};
+
+const allServiceNames = [
+    "Dry Wash", "Washing", "Ironing", "Wash & Iron",
+    "Steam Ironing", "Spin Washing", "Steam Washing", "Stain Removal"
+  ];
+  
+  console.log("✅ ALL Services for Pricing:", allServiceNames);
+
+ const basicServiceNames = ["Dry Wash", "Washing", "Ironing", "Wash & Iron"];
+
+  const premiumMappings = {
+    6: "Steam Ironing",
+    7: "Spin Washing", 
+    8: "Steam Washing",
+    9: "Stain Removal"
   };
 
-  const selectedServices = services
-    .filter(service => selectedServiceIds.includes(service.id))
-    .map(service => service.name);
+  const selectedServices = [...basicServiceNames];
 
+  selectedServiceIds.forEach(id => {
+    if (premiumMappings[id] && !selectedServices.includes(premiumMappings[id])) {
+      selectedServices.push(premiumMappings[id]);
+    }
+  });
+    
   console.log("✅ Selected Services for Pricing:", selectedServices);
 
   const categoryItems = {
@@ -587,8 +645,22 @@ const getAllPricingData = useCallback(() => {
   ]);
 
 
+ const isBasicService = (serviceId) => {
+  return [1, 2, 3, 4].includes(serviceId);
+};
 
-  // Accept order function
+
+const isPremiumService = (serviceId) => {
+  return [6, 7, 8, 9].includes(serviceId);
+};
+
+const isAllServicesSelected = () => {
+  const allServiceIds = [1, 2, 3, 4, 6, 7, 8, 9];
+  return allServiceIds.every(id => selectedServiceIds.includes(id));
+};
+
+
+  // Accept order function 
   const acceptOrder = (orderId) => {
     const orderToAccept = newPickups.find(order => order.id === orderId);
     if (orderToAccept) {
@@ -826,6 +898,8 @@ const getItemPrice = useCallback((serviceId, itemId, defaultPrice = 0) => {
         // Pricing Data
         getAllPricingData,
         reloadAuth: loadStorageData,
+        isBasicService,
+        isPremiumService,
         
         // Form Data Persistence
         formData,

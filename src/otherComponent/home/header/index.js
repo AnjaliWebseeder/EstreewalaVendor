@@ -52,7 +52,7 @@ export default function Header(props) {
                {/* {userLocation?.address &&  <View style={styles.locationTextContainer}> */}
               <View style={styles.locationTextContainer}>
               <View style={styles.locationRow}>
-                <Text style={styles.locationText}>{userLocation?.address || "Airoli, Navi Mumbai"}</Text>
+                <Text style={styles.locationText}>{userLocation?.address}</Text>
               </View>
             </View> 
             {/* } */}

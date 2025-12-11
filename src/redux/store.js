@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistStore, persistReducer } from 'redux-persist';
 import vendorReducer from "./slices/vendorSlice"
 import notificationReducer from "./slices/notificationSlice"
+import deleteAccountReducer from "./slices/deleteAccountSlice"
 
 const persistConfig = {
   key: 'root',
@@ -32,7 +33,8 @@ const rootReducer = combineReducers({
   subscription: subscriptionReducer,
   vendorOrders: vendorOrderReducer,
   vendor:vendorReducer,
-  notification:notificationReducer
+  notification:notificationReducer,
+  deleteAccount: deleteAccountReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

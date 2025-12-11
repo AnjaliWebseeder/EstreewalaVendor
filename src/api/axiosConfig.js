@@ -15,7 +15,6 @@ let currentToken = getGlobalToken();
 // Listen for token changes
 addTokenListener((token) => {
   currentToken = token;
-  console.log('🔐 Axios interceptor token updated:', !!token);
 });
 
 // Request interceptor to automatically add token
@@ -25,9 +24,7 @@ axiosInstance.interceptors.request.use(
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('🔐 Token added to request:', config.url);
     } else {
-      console.log('⚠️ No token found for request:', config.url);
       // Don't throw error here, let the server handle unauthorized requests
     }
     return config;
@@ -40,7 +37,6 @@ axiosInstance.interceptors.request.use(
 // Response interceptor for error handling
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log('✅ API Success:', response.config.url, response.status);
     return response;
   },
   (error) => {
@@ -52,7 +48,6 @@ axiosInstance.interceptors.response.use(
     
     if (error.response?.status === 401) {
       // Token expired or invalid - clear auth
-      console.log('🔐 Authentication failed (401), clearing auth data');
       clearGlobalAuth();
       
       // You can add navigation to login screen here

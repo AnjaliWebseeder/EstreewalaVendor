@@ -27,7 +27,6 @@ import {
   verifySubscription,
   clearSubscriptionError 
 } from "../../redux/slices/subscriptionSlice"
-
 const { height } = Dimensions.get('window');
 
 const SubscriptionPlansScreen = ({ navigation, route }) => {
@@ -39,8 +38,8 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
     verifying, 
     error,
     currentOrder 
-  } = useSelector((state) => state.subscription);
-  
+  } = useSelector((state) => state.subscription)
+
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedDuration, setSelectedDuration] = useState('monthly');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -54,8 +53,6 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
   const [scaleAnim] = useState(new Animated.Value(0.9));
   const { completeSubscription } = useContext(VendorContext);
   const insets = useSafeAreaInsets();
-
-  console.log("sssssssssssssss",selectedPlan,selectedDuration)
 
   // Load subscription plans on component mount
   useEffect(() => {
@@ -148,7 +145,7 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
       badge: 'Popular'
     },
     { 
-      code: 'half-yearly', 
+      code: 'halfyearly', 
       label: 'Half Yearly', 
       days: '210 days', 
       freeDays: '30 days free', 
@@ -168,19 +165,9 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
   // Get selected plan price from actual API data
   const getSelectedPlanPrice = () => {
     if (!selectedPlan || !selectedDuration || !plans) return 0;
-    
     const plan = plans[selectedPlan];
     if (!plan || !plan.durations || !plan.durations[selectedDuration]) return 0;
-    
     return plan.durations[selectedDuration].price;
-  };
-
-  // Get prorated price for display
-  const getProratedPrice = () => {
-    if (currentOrder && currentOrder.planDetails && currentOrder.planDetails.isProrated) {
-      return currentOrder.planDetails.price;
-    }
-    return getSelectedPlanPrice();
   };
 
   const showToast = (text, type = 'info') => {
@@ -228,7 +215,8 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
       })).unwrap();
 
       if (result.success) {
-        console.log('✅ Subscription order created:', result);
+        console.log('✅ Subscription order created:', result?.planDetails?.note);
+        
         // Payment modal will be shown via useEffect
       }
     } catch (error) {
@@ -236,7 +224,7 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
       showToast('Failed to create subscription order', 'error');
     }
   };
-
+  
   const initiateRazorpayPayment = async () => {
     if (!currentOrder || !currentOrder.success) {
       showToast('Order not created properly', 'error');
@@ -282,7 +270,6 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
         method: ['netbanking', 'card'] // Hide netbanking and cards
       }
       };
-
       const razorpayResponse = await RazorpayCheckout.open(options);
       console.log('✅ Razorpay Response:', razorpayResponse);
       
@@ -300,8 +287,6 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
 
   const handlePaymentVerification = async (razorpayResponse) => {
     try {
-      console.log('🔍 Verifying payment...', razorpayResponse);
-      
       const verificationData = {
         razorpay_order_id: razorpayResponse.razorpay_order_id,
         razorpay_payment_id: razorpayResponse.razorpay_payment_id,
@@ -309,11 +294,9 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
         planType: selectedPlan,
         duration: selectedDuration
       };
-
       const result = await dispatch(verifySubscription(verificationData)).unwrap();
-
       if (result.success) {
-        console.log('✅ Payment verified successfully!');
+
         setShowPaymentModal(false);
         showToast('Subscription activated successfully!', 'success');
         
@@ -330,7 +313,6 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
         }
       }
     } catch (error) {
-      console.log('❌ Payment verification failed:', error);
       showToast('Payment verification failed! Please contact support.', 'error');
     }
   };
@@ -346,7 +328,6 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
         navigation.replace('Main');
       }
     } catch (error) {
-      console.log('Error skipping subscription:', error);
       showToast('Error completing subscription', 'error');
     }
   };
@@ -500,7 +481,7 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
   );
 
   const uiPlans = transformPlans();
-  const displayPrice = currentOrder ? getProratedPrice() : getSelectedPlanPrice();
+  const displayPrice =  getSelectedPlanPrice();
 
   if (loading && !plans) {
     return (
@@ -533,7 +514,7 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
             Choose the perfect laundry plan for your needs
           </Text>
         </View>
-        <TouchableOpacity 
+         <TouchableOpacity 
           style={styles.skipButton}
           onPress={() => params ? navigation.goBack() : handleSkip()}
         >
@@ -747,12 +728,6 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
             <View style={styles.modalHeader}>
               <View>
                 <Text style={styles.modalTitle}>Complete Payment</Text>
-                <Text style={styles.paymentAmount}>
-                  ₹{displayPrice}
-                  {currentOrder?.planDetails?.isProrated && (
-                    <Text style={styles.proratedText}> (prorated)</Text>
-                  )}
-                </Text>
               </View>
               <TouchableOpacity 
                 onPress={() => setShowPaymentModal(false)}
@@ -787,6 +762,14 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
                 <Text style={styles.paymentFeatureText}>24/7 support</Text>
               </View>
             </View>
+         
+           {currentOrder?.planDetails?.note &&  <View style={styles.note}>
+              <Text style={[styles.paymentFeatureText,{fontWeight:"700"}]}>Note: {currentOrder?.planDetails?.note
+  ?.replace("Prorated:", "")
+  .replace("Prorated", "")
+  .trim()}</Text>
+            </View>}
+          
 
             <TouchableOpacity 
               style={styles.razorpayButton}
@@ -796,7 +779,7 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
               <View style={styles.razorpayButtonContent}>
                 <Icon name="payment" size={24} color="#FFFFFF" />
                 <Text style={styles.razorpayButtonText}>
-                  {verifying ? 'Processing...' : `Pay ₹${displayPrice}`}
+                  {verifying ? 'Processing...' : `Pay ₹${currentOrder?.amount}`}
                 </Text>
               </View>
               <Icon name="lock" size={16} color="#FFFFFF" />
@@ -846,8 +829,6 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
     </TouchableOpacity>
   </Animated.View>
 )}
-
-      
     </SafeAreaView>
   );
 };

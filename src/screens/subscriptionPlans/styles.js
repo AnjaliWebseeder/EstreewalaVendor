@@ -297,9 +297,9 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.gold,
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
+    borderRadius:6,
     zIndex: 1,
+    
   },
   popularRibbonText: {
     color: COLORS.black,
@@ -310,6 +310,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 0,
+    marginTop:8
   },
   planIcon: {
     width: 45,
@@ -857,6 +858,9 @@ paymentFeature: {
   flexDirection: 'row',
   alignItems: 'center',
   marginBottom: 8,
+},
+note:{
+marginTop:10
 },
 
 paymentFeatureText: {

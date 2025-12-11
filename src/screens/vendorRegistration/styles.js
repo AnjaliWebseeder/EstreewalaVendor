@@ -168,7 +168,7 @@ export const styles = StyleSheet.create({
     paddingVertical: windowHeight(9),
     paddingHorizontal: windowHeight(14),
     borderRadius: 10,
-    marginBottom: windowHeight(8),
+    marginBottom: windowHeight(12),
     borderWidth: 1.5,
     borderColor: appColors.border,
   },
@@ -188,6 +188,120 @@ export const styles = StyleSheet.create({
     color: appColors.white,
     fontWeight: '600',
   },
+sectionContainer: {
+  marginBottom: 10,
+},
+sectionTitle: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  marginBottom: 4,
+  color: appColors.text,
+},
+masterCardContainer: {
+  backgroundColor: '#f8f9fa',
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: '#e9ecef',
+  overflow: 'hidden',
+  marginBottom: 12,
+  marginTop:2
+},
+selectedMasterContainer: {
+  backgroundColor: '#e9edf1ff',
+  borderColor: appColors.primary,
+},
+masterCardHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: 16,
+  paddingVertical:10
+},
+masterCardLeft: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: 1,
+},
+masterCardTextContainer: {
+  marginLeft: 12,
+  flex: 1,
+},
+masterCardTitle: {
+  fontSize: 14,
+  fontWeight: '600',
+  color: appColors.text,
+  marginBottom: 2,
+},
+masterCardSubtitle: {
+  fontSize: 10,
+  color: '#666',
+},
+dropdownContent: {
+  padding: 16,
+  paddingTop: 0,
+  backgroundColor: '#fff',
+  borderTopWidth: 1,
+  borderTopColor: '#f0f0f0',
+},
+includedServicesHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 12,
+  paddingTop: 12,
+  borderTopWidth: 1,
+  borderTopColor: '#f0f0f0',
+},
+includedServicesTitle: {
+  fontSize: 14,
+  fontWeight: '500',
+  color: '#666',
+  marginLeft: 8,
+},
+includedServicesGrid: {
+  marginBottom: 12,
+},
+includedServiceItem: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingVertical: 8,
+  borderBottomWidth: 1,
+  borderBottomColor: '#f8f8f8',
+},
+serviceBadge: {
+  width: 24,
+  height: 24,
+  borderRadius: 12,
+  backgroundColor: appColors.primary + '20',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginRight: 12,
+},
+serviceBadgeNumber: {
+  fontSize: 12,
+  fontWeight: '600',
+  color: appColors.primary,
+},
+includedServiceName: {
+  flex: 1,
+  fontSize: 14,
+  color: '#555',
+},
+allSelectedNote: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: appColors.success + '15',
+  padding: 10,
+  borderRadius: 8,
+  marginTop: 1,
+  paddingVertical:0
+},
+allSelectedText: {
+  fontSize: 13,
+  color: appColors.success,
+  marginLeft: 8,
+  fontWeight: '500',
+},
+
 
   // Enhanced Options Section
   optionsContainer: {

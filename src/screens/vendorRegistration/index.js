@@ -64,7 +64,6 @@ const VendorRegistration = ({ route }) => {
   const [localError, setLocalError] = useState('');
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('all');
-  
   const { businessName, selectedLocation, pricingData } = formData;
 
   // Debug logs to track state changes
@@ -151,16 +150,24 @@ const VendorRegistration = ({ route }) => {
             validationFailed = true;
           }
           break;
-
-        case 2:
-          if (formData.selectedServiceIds.length === 0) {
-            setLocalError('Please select at least one service');
-            validationFailed = true;
-          }
-          break;
-
-        case 3:
+           case 2:
+  // All services are always included
+  const allServiceNames = [
+    "Ironing", "Washing", "Dry Wash", "Wash & Iron",
+    "Steam Ironing", "Spin Washing", "Steam Washing", "Stain Removal"
+  ];
+  
+  const servicesPayload = {
+    services: allServiceNames
+  };
+  
+  console.log("✅ SERVICES PAYLOAD (All services):", servicesPayload);
+  await dispatch(completeStep3(servicesPayload)).unwrap();
+  break;
+        
+  case 3:
   const pricing = formData.pricingData?.itemPricing;
+  console.log("PRICING IS", pricing);
 
   if (!pricing || Object.keys(pricing).length === 0) {
     setLocalError('Please set prices for each selected service');
@@ -169,6 +176,8 @@ const VendorRegistration = ({ route }) => {
   }
 
   // Validate every service/category/item
+  let missingPriceItems = [];
+  
   for (const serviceName of Object.keys(pricing)) {
     const categories = pricing[serviceName];
 
@@ -176,20 +185,36 @@ const VendorRegistration = ({ route }) => {
       const items = categories[category];
 
       for (const item of items) {
-        if (!item.price || item.price <= 0) {
-          showToast( `Please set prices for all selected services.`, 'error');
-          validationFailed = true;
-          break;
+        // Check if price is undefined, null, empty, or 0
+        if (item.price === undefined || item.price === null || item.price === "" || Number(item.price) <= 0) {
+          missingPriceItems.push({
+            service: serviceName,
+            category: category,
+            item: item.item,
+            price: item.price
+          });
         }
       }
-
-      if (validationFailed) break;
     }
-
-    if (validationFailed) break;
   }
 
+  if (missingPriceItems.length > 0) {
+    console.log("❌ Missing/Invalid prices found:", missingPriceItems);
+    
+    // Show a more specific error message
+    const firstMissingItem = missingPriceItems[0];
+    showToast(
+     `Please set a valid price for ${firstMissingItem.item} under ${firstMissingItem.service}`,
+      'error'
+    );
+    
+    validationFailed = true;
+    break;
+  }
+
+  console.log("✅ All prices are valid");
   break;
+ 
 
 
         case 4:
@@ -233,13 +258,27 @@ const VendorRegistration = ({ route }) => {
           await dispatch(completeStep2({ owners: ownerData })).unwrap();
           break;
 
-        case 2:
-          const serviceNames = formData.selectedServiceIds.map(id => {
-            const s = services.find(x => x.id === id);
-            return s?.name || id;
-          });
-          await dispatch(completeStep3({ services: serviceNames })).unwrap();
-          break;
+      case 2:
+  const serviceNames = formData.selectedServiceIds
+    .flatMap(id => {
+      const service = services.find(x => x.id === id);
+      if (!service) return [];
+      
+      if (id === 5) {
+        // Return all premium service names
+        return services
+          .filter(s => [6, 7, 8, 9].includes(s.id))
+          .map(s => s.name);
+      } else {
+        // Return the service name
+        return [service.name];
+      }
+    })
+    .filter((name, index, array) => array.indexOf(name) === index); // Remove duplicates
+
+  console.log("✅ SERVICES FOR BACKEND:", serviceNames);
+  await dispatch(completeStep3({ services: serviceNames })).unwrap();
+  break;
 
         case 3:
           console.log("Submitting pricing data:",formData.pricingData)
@@ -342,6 +381,10 @@ const VendorRegistration = ({ route }) => {
     </View>
   );
 
+
+
+  
+
   return (
     <SafeAreaView style={styles.container}>
     <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
@@ -399,38 +442,43 @@ const VendorRegistration = ({ route }) => {
         )}
 
         {/* Step 2: Services Provided */}
-        {localCurrentStep === 2 && (
-          <View style={styles.stepContainer}>
-            <TitleSubtitle
-              title="Services Provided"
-              subtitle="Select services you offer."
-              titleStyle={styles.largeTitle}
-              subtitleStyle={styles.largeSubtitle}
+{/* Step 2: Services Provided */}
+{localCurrentStep === 2 && (
+  <View style={styles.stepContainer}>
+    <TitleSubtitle
+      title="Services Provided"
+      subtitle="All laundry services are required for vendor registration."
+      titleStyle={styles.largeTitle}
+      subtitleStyle={styles.largeSubtitle}
+    />
+    
+
+    
+    {/* All Services Section - All Compulsory */}
+    <View style={styles.sectionContainer}>  
+      <View style={styles.servicesContainer}>
+        {services.map(s => (
+          <View
+            key={s.id}
+            style={[
+              styles.serviceCard,
+              styles.selectedServiceCard,
+              styles.compulsoryCard,
+            ]}
+          >
+            <Icon
+              name="checkmark-circle"
+              size={17}
+              color={appColors.success}
             />
-            <View style={styles.servicesContainer}>
-              {services.map(s => {
-                const selected = formData.selectedServiceIds.includes(s.id);
-                return (
-                  <TouchableOpacity
-                    key={s.id}
-                    style={[
-                      styles.serviceCard,
-                      selected && styles.selectedServiceCard,
-                    ]}
-                    onPress={() => toggleServiceCategory(s.id)}
-                  >
-                    <Icon
-                      name={selected ? 'checkmark-circle' : 'ellipse-outline'}
-                      size={18}
-                      color={appColors.secondary}
-                    />
-                    <Text style={styles.serviceName}>{s.name}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+            <Text style={styles.serviceName}>{s.name}</Text>
           </View>
-        )}
+        ))}
+      </View>
+    </View>
+  </View>
+)}
+
 
         {/* Step 3: Set Pricing */}
         {localCurrentStep === 3 && (

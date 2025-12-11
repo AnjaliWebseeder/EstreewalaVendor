@@ -18,7 +18,7 @@ const MySubscriptions = ({navigation}) => {
   const dispatch = useDispatch();
   const { mySubscriptions, loading, error } = useSelector(state => state.subscription);
   const [refreshing, setRefreshing] = useState(false);
-
+  
   useEffect(() => {
     loadSubscriptions();
   }, []);

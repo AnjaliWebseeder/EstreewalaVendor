@@ -230,7 +230,7 @@ export default function Orders({ navigation, route }) {
     return {
       id: order.id,
       totalAmount: `₹${order.totalAmount}`,
-      name: order.customer?.name || 'Unknown',
+      name: order.customer?.name,
       location: order.deliveryAddress?.address || '',
       avatar: 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
       pickupDate: order?.pickupDate,

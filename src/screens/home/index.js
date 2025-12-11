@@ -30,7 +30,6 @@ const newPickups = useMemo(() => {
   return pendingOrders?.map(order => {
     const acceptedAt = new Date(order.createdAt);
     const isAcceptedValid = !isNaN(acceptedAt);
-
     let daysLeft = '—';
 
     if (order?.deliveryDate) {
@@ -45,7 +44,7 @@ const newPickups = useMemo(() => {
     return {
       id: order.id,
       totalAmount: `₹${order.totalAmount}`,
-      name: order.customer?.name || 'Unknown',
+      name: order.customer?.name ,
       location: order.deliveryAddress?.address || '',
       avatar: 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
 

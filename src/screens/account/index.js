@@ -30,6 +30,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { getMySubscriptions } from "../../redux/slices/subscriptionSlice";
 import {getVendorDetails} from "../../redux/slices/vendorSlice"
 import DeleteAccountModal from "../../otherComponent/deleteModal"
+import { deleteAccount } from "../../redux/slices/deleteAccountSlice";
+import { useFocusEffect } from "@react-navigation/native";
 
 // ==== MENU ITEM COMPONENT ====
 const MenuItem = ({ icon, label, onPress, isLast, rightComponent }) => (
@@ -52,15 +54,31 @@ const MenuItem = ({ icon, label, onPress, isLast, rightComponent }) => (
 export default function Account({ navigation }) {
   const [profileImage, setProfileImage] = useState(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-
-  const handleDeleteAccount = () => {
-    setDeleteModalVisible(false)
-  }
-
   const { logout } = useContext(VendorContext);
   const dispatch = useDispatch();
   const { mySubscriptions, loading } = useSelector((state) => state.subscription);
   const {vendorData} = useSelector((state) => state.vendor)
+  
+  useFocusEffect(
+  React.useCallback(() => {
+    dispatch(getMySubscriptions());
+    dispatch(getVendorDetails());
+  }, [])
+);
+
+
+    const handleDeleteAccount = async () => {
+    try {
+      const result = await dispatch(deleteAccount()).unwrap();
+      console.log("Account deletion result:", result);
+      await logout();
+      navigation.replace("Welcome");
+    } catch (error) {
+      console.error("Delete account error:", error);
+    } finally {
+      setDeleteModalVisible(false);
+    }
+  };
 
 
   const handleRateApp = () => {
@@ -95,6 +113,8 @@ export default function Account({ navigation }) {
   const hasActiveSubscription =
     mySubscriptions && mySubscriptions.length > 0 && 
     mySubscriptions.some((item) => item.status === "active");
+
+    
 
   return (
     <SafeAreaView style={styles.container}>
@@ -176,7 +196,7 @@ export default function Account({ navigation }) {
             />
           )}
 
-          <MenuItem
+          {/* <MenuItem
             icon={<VendorIcon />}
             label="Vendor Details"
             onPress={() =>
@@ -184,7 +204,7 @@ export default function Account({ navigation }) {
                 fromScreen: "Account",
               })
             }
-          />
+          /> */}
 
           <MenuItem
             icon={<ContactIcon size={19} />}
@@ -270,9 +290,6 @@ export default function Account({ navigation }) {
   onConfirm={handleDeleteAccount}
   isDeleting={loading}
 />
-
-
-
       </ScrollView>
     </SafeAreaView>
   );
