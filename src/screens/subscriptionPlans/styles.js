@@ -792,21 +792,6 @@ paymentMethodName: {
   fontWeight: '600',
   color: COLORS.textPrimary,
 },
-cancelButton: {
-  paddingHorizontal: 16,
-  paddingVertical:13,
-  alignItems: 'center',
-  borderWidth: 1,
-  borderColor: COLORS.border,
-  borderRadius: 12,
-  backgroundColor: appColors.secondary,
-},
-cancelButtonText: {
-  color: COLORS.white,
-  fontSize: 14,
-  fontWeight: '600',
-  fontFamily:fonts.InterSemiBold
-},
 // Add these styles to your existing styles.js
 
 paymentModalContent: {

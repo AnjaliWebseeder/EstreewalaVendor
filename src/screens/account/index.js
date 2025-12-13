@@ -196,15 +196,12 @@ export default function Account({ navigation }) {
             />
           )}
 
-          {/* <MenuItem
+       <MenuItem
             icon={<VendorIcon />}
             label="Vendor Details"
-            onPress={() =>
-              navigation.navigate("VendorRegistration", {
-                fromScreen: "Account",
-              })
+            onPress={() => navigation.navigate('VendorDetails')
             }
-          /> */}
+          />
 
           <MenuItem
             icon={<ContactIcon size={19} />}

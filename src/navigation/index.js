@@ -29,6 +29,7 @@ import PaymentSuccess from "../otherComponent/order/paymentSuccess";
 import MySubscriptionsScreen from "../screens/otherSetting/mySubscription";
 import Splash from '../screens/spalsh';
 import TermsOfServiceScreen from "../screens/otherSetting/termsOfService"
+import VendorDetails from "../screens/otherSetting/vendorDetails"
 
 const Stack = createStackNavigator();
 
@@ -39,6 +40,7 @@ const Navigation = () => {
     isFirstLaunch,
     hasCompletedVendorRegistration,
     hasCompletedSubscription,
+    subscriptionShownOnce
   } = useContext(VendorContext);
 
   const [initialRoute, setInitialRoute] = useState('Splash');
@@ -56,22 +58,19 @@ const Navigation = () => {
   if (!isLoading) {
     let route = 'Welcome';
 
-    if (!userToken) {
-      route = 'Welcome';
-      console.log('🚦 ROUTE: No token → Welcome');
-    }
-    else if (hasCompletedVendorRegistration === false) {
-      route = 'VendorRegistration';
-      console.log('🚦 ROUTE: Token + Registration FALSE → VendorRegistration');
-    }
-    else if (!hasCompletedSubscription) {
-      route = 'SubscriptionPlans';
-      console.log('🚦 ROUTE: Registered + No subscription → SubscriptionPlans');
-    }
-    else {
-      route = 'Main';
-      console.log('🚦 ROUTE: All complete → Main');
-    }
+  if (!userToken) {
+  route = 'Welcome';
+}
+else if (!hasCompletedSubscription && !subscriptionShownOnce) {
+  route = 'SubscriptionPlans';
+}
+else if (hasCompletedVendorRegistration === false) {
+  route = 'VendorRegistration';
+}
+else {
+  route = 'Main';
+}
+
 
     console.log('🎯 FINAL ROUTE DECISION:', route);
     setInitialRoute(route);
@@ -153,7 +152,8 @@ const Navigation = () => {
         <Stack.Screen name="Notification" component={Notification} />
         <Stack.Screen name="LoginSecurityScreen" component={LoginSecurityScreen} />
         <Stack.Screen name="TermsOfServiceScreen" component={TermsOfServiceScreen} />
-        
+         <Stack.Screen name="VendorDetails" component={VendorDetails} />
+      
       </Stack.Navigator>
     </NavigationContainer>
   );

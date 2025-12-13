@@ -151,8 +151,8 @@ filter:{
     borderColor: appColors.secondary,
     borderRadius: 8,
     paddingHorizontal: 8,
-    paddingVertical: 5,
-    fontSize: fontSizes.FONT14,
+    paddingVertical: 3,
+    fontSize: fontSizes.FONT13,
     fontWeight: '700',
     color: appColors.title,
     textAlign: 'center',
@@ -292,6 +292,10 @@ validationText: {
   fontSize: 14,
   marginLeft: 8,
   flex: 1,
+},
+clearButton: {
+  padding: 4,
+  marginRight: 4,
 },
 
 

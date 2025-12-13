@@ -28,6 +28,7 @@ import {
   clearSubscriptionError 
 } from "../../redux/slices/subscriptionSlice"
 const { height } = Dimensions.get('window');
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SubscriptionPlansScreen = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -53,8 +54,15 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
   const [scaleAnim] = useState(new Animated.Value(0.9));
   const { completeSubscription } = useContext(VendorContext);
   const insets = useSafeAreaInsets();
+   const [isPaying, setIsPaying] = useState(false);
+
+   console.log("PPPPPPPPPPPPPPPPPPPPPPPPP",params)
 
   // Load subscription plans on component mount
+  useEffect(() => {
+  AsyncStorage.setItem("subscriptionShownOnce", "true");
+}, []);
+
   useEffect(() => {
     dispatch(getSubscriptionPlans());
   }, [dispatch]);
@@ -226,10 +234,14 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
   };
   
   const initiateRazorpayPayment = async () => {
+    
     if (!currentOrder || !currentOrder.success) {
       showToast('Order not created properly', 'error');
       return;
     }
+
+     setShowPaymentModal(false);  
+    setIsPaying(true);         
 
     try {
       console.log('💰 Payment Details:', {
@@ -309,7 +321,7 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
         if (params) {
           navigation.goBack();
         } else {
-          navigation.replace('Main');
+          navigation.replace('VendorRegistration');
         }
       }
     } catch (error) {
@@ -325,7 +337,7 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
       if (params) {
         navigation.goBack();
       } else {
-        navigation.replace('Main');
+        navigation.replace('VendorRegistration');
       }
     } catch (error) {
       showToast('Error completing subscription', 'error');
@@ -725,6 +737,24 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, styles.paymentModalContent]}>
+            {/* TEST MODE inside Payment modal */}
+{currentOrder?.key?.startsWith("rzp_test") && (
+  <View style={{
+    backgroundColor: "#FFE066",
+    padding: 6,
+    marginBottom: 10,
+    borderRadius: 6,
+  }}>
+    <Text style={{
+      color: "#7A0000",
+      fontWeight: "700",
+      textAlign: "center"
+    }}>
+      ⚠ Razorpay Test Mode — No actual payment
+    </Text>
+  </View>
+)}
+
             <View style={styles.modalHeader}>
               <View>
                 <Text style={styles.modalTitle}>Complete Payment</Text>
@@ -772,29 +802,27 @@ const SubscriptionPlansScreen = ({ navigation, route }) => {
           
 
             <TouchableOpacity 
-              style={styles.razorpayButton}
+                style={[styles.razorpayButton, isPaying && {opacity:0.6}]}
               onPress={initiateRazorpayPayment}
-              disabled={verifying}
+              disabled={isPaying}
             >
-              <View style={styles.razorpayButtonContent}>
+                <View style={styles.razorpayButtonContent}>
                 <Icon name="payment" size={24} color="#FFFFFF" />
-                <Text style={styles.razorpayButtonText}>
-                  {verifying ? 'Processing...' : `Pay ₹${currentOrder?.amount}`}
-                </Text>
+                <Text style={styles.razorpayButtonText}>{isPaying ? 'Processing...' : `Pay ₹${currentOrder?.amount}`}</Text>
               </View>
               <Icon name="lock" size={16} color="#FFFFFF" />
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.cancelButton}
-              onPress={() => setShowPaymentModal(false)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel Payment</Text>
             </TouchableOpacity>
 
             <Text style={styles.securityText}>
               🔒 Your payment is secure and encrypted
             </Text>
+
+               {isPaying && (
+              <View style={styles.verifyingOverlay}>
+                <ActivityIndicator size="large" color={appColors.secondary} />
+                <Text style={styles.text}>Verifying Payment…</Text>
+              </View>
+            )}
           </View>
         </View>
       </Modal>

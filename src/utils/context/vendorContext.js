@@ -55,7 +55,8 @@ export const VendorProvider = ({ children }) => {
   const [isFirstLaunch, setIsFirstLaunch] = useState(true);
   const [hasCompletedVendorRegistration, setHasCompletedVendorRegistration] = useState(false);
   const [hasCompletedSubscription, setHasCompletedSubscription] = useState(false);
-  
+  const [subscriptionShownOnce, setSubscriptionShownOnce] = useState(false);
+
 
 // In VendorContext.js, update the services:
 const initialServices = [
@@ -258,8 +259,8 @@ const loadStorageData = useCallback(async () => {
     
     const [appLaunched, registrationCompleted, subscriptionCompleted, token, userData, storedFormData] = await Promise.all([
       getAppLaunchStatus(),
-      AsyncStorage.getItem('vendorRegistrationCompleted'),
       AsyncStorage.getItem('subscriptionCompleted'),
+      AsyncStorage.getItem('vendorRegistrationCompleted'),
       AsyncStorage.getItem('userToken'),
       AsyncStorage.getItem('userDetails'),
       AsyncStorage.getItem('vendorFormData'),
@@ -268,6 +269,8 @@ const loadStorageData = useCallback(async () => {
     setIsFirstLaunch(!appLaunched);
     setHasCompletedVendorRegistration(registrationCompleted === 'true');
     setHasCompletedSubscription(subscriptionCompleted === 'true');
+    const shownOnce = await AsyncStorage.getItem("subscriptionShownOnce");
+    setSubscriptionShownOnce(shownOnce === "true");
 
     console.log("🔐 Loaded Token:", !!token);
     console.log("👤 Loaded UserData:", !!userData);
@@ -754,11 +757,6 @@ const isAllServicesSelected = () => {
     setBranches((prev) => prev.filter((b) => b.id !== id));
   };
 
-  // Services
-  const toggleServiceCategory = (id) =>
-    setSelectedServiceIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
 
 const setItemPrice = useCallback((serviceId, itemId, price) => {
   const key = `${serviceId}_${itemId}`;

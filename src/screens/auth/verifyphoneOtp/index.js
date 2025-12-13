@@ -85,7 +85,7 @@ const OtpScreen = ({ navigation, route }) => {
         if (token && vendor) {
           await login(token, vendor);
           await dispatch(saveFcmTokenAfterLogin());
-          navigation.replace('VendorRegistration');
+          navigation.replace('SubscriptionPlans');
         } else {
           console.warn("⚠️ Missing token or user in OTP verify response");
         }

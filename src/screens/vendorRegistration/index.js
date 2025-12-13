@@ -1,6 +1,6 @@
 // VendorRegistration.js
 import React, { useContext, useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert,StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView,StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -107,7 +107,7 @@ const VendorRegistration = ({ route }) => {
         if (res?.isComplete) {
           await completeVendorRegistration();
           showToast('Registration already complete!', 'success');
-          navigation.replace('SubscriptionPlans');
+          navigation.replace('Main');
         }
       } catch (err) {
         console.log('Error fetching completion status:', err);
@@ -316,12 +316,10 @@ const VendorRegistration = ({ route }) => {
         completeStep5({ deliveryMethods: [deliveryOption] }),
       ).unwrap();
       
-      showToast('Vendor registration completed successfully!', 'success');
-      
       if (fromScreen) {
         navigation.goBack();
       } else {
-        navigation.navigate('SubscriptionPlans');
+        navigation.navigate('Main');
       }
     } catch (err) {
       console.log('❌ Submit error:', err);

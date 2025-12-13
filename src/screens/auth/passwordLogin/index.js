@@ -79,7 +79,7 @@ const PasswordLoginScreen = ({ navigation }) => {
         await dispatch(saveFcmTokenAfterLogin());
           
         setTimeout(() => {
-          navigation.replace('VendorRegistration');
+          navigation.replace('SubscriptionPlans');
         }, 1500);
       } else if (loginVendor.rejected.match(resultAction)) {
         showToast(resultAction?.payload?.message || 'Sign In Failed', 'error');
