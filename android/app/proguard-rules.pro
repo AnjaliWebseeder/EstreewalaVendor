@@ -8,3 +8,22 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+# React Native
+-keep class com.facebook.react.** { *; }
+-keep class com.facebook.hermes.** { *; }
+-dontwarn com.facebook.react.**
+
+# Vector Icons
+-keep class com.oblador.vectoricons.** { *; }
+
+# OkHttp / Networking
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
+# Gson / JSON
+-keep class com.google.gson.** { *; }
+
+# Keep annotations
+-keepattributes *Annotation*
+

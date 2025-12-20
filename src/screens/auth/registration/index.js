@@ -1,32 +1,46 @@
-import { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView,StatusBar } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { SafeAreaView } from "react-native-safe-area-context";
-import CustomButton from "../../../components/button";
-import CustomInput from "../../../components/Input";
-import BannerHeader from "../../../otherComponent/bannerHeader";
-import { styles } from "./styles";
-import { windowHeight } from "../../../theme/appConstant";
-import { signupVendor, resetVendorState } from "../../../redux/slices/signupSlice";
-import { useToast } from "../../../utils/context/toastContext";
+import { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StatusBar,
+} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomButton from '../../../components/button';
+import CustomInput from '../../../components/Input';
+import BannerHeader from '../../../otherComponent/bannerHeader';
+import { styles } from './styles';
+import { windowHeight } from '../../../theme/appConstant';
+import {
+  signupVendor,
+  resetVendorState,
+} from '../../../redux/slices/signupSlice';
+import { useToast } from '../../../utils/context/toastContext';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const RegisterScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.signup);
+  const { loading } = useSelector(state => state.signup);
   const { showToast } = useToast();
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // ✅ Password validation regex (same as ResetPassword)
   const passwordRegex =
     /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{};':"\\|,.<>/?-]).{8,}$/;
+
+  const isValidIndianMobile = (number = '') => {
+    return /^[6-9]\d{9}$/.test(number);
+  };
 
   useEffect(() => {
     dispatch(resetVendorState());
@@ -40,9 +54,10 @@ const RegisterScreen = ({ navigation }) => {
     if (!firstName.trim()) newErrors.firstName = 'First name is required';
     if (!lastName.trim()) newErrors.lastName = 'Last name is required';
 
-    if (!mobileNumber.trim()) newErrors.mobileNumber = 'Mobile number is required';
-    else if (!/^[0-9]{10}$/.test(mobileNumber))
-      newErrors.mobileNumber = 'Enter a valid 10-digit number';
+    if (!mobileNumber.trim())
+      newErrors.mobileNumber = 'Mobile number is required';
+    else if (!isValidIndianMobile(mobileNumber))
+      newErrors.mobileNumber = 'Enter valid 10-digit Indian mobile number';
 
     if (!email.trim()) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(email))
@@ -80,38 +95,40 @@ const RegisterScreen = ({ navigation }) => {
           navigation.replace('PasswordLogin');
         }, 1500);
       } else if (signupVendor.rejected.match(resultAction)) {
-        showToast(resultAction?.payload?.message || 'Signup Failed', "error");
+        showToast(resultAction?.payload?.message || 'Signup Failed', 'error');
       }
     } catch (err) {
       console.error('Signup error:', err);
-      showToast(err || 'Signup Failed', "error");
+      showToast(err || 'Signup Failed', 'error');
     }
   };
 
   // ✅ Live validation for each field
   const handleInputChange = (field, value) => {
     switch (field) {
-      case "firstName":
+      case 'firstName':
         setFirstName(value);
         if (value.trim()) removeError(field);
         break;
-      case "lastName":
+      case 'lastName':
         setLastName(value);
         if (value.trim()) removeError(field);
         break;
-      case "mobileNumber":
-        setMobileNumber(value);
-        if (/^[0-9]{10}$/.test(value)) removeError(field);
+      case 'mobileNumber': {
+        const cleaned = value.replace(/[^0-9]/g, '');
+        setMobileNumber(cleaned);
+        if (isValidIndianMobile(cleaned)) removeError(field);
         break;
-      case "email":
+      }
+      case 'email':
         setEmail(value);
         if (/\S+@\S+\.\S+/.test(value)) removeError(field);
         break;
-      case "password":
+      case 'password':
         setPassword(value);
         if (passwordRegex.test(value)) removeError(field);
         break;
-      case "confirmPassword":
+      case 'confirmPassword':
         setConfirmPassword(value);
         if (value === password) removeError(field);
         break;
@@ -119,8 +136,8 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   // helper to remove error dynamically
-  const removeError = (field) => {
-    setErrors((prev) => {
+  const removeError = field => {
+    setErrors(prev => {
       const updated = { ...prev };
       delete updated[field];
       return updated;
@@ -129,81 +146,92 @@ const RegisterScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-    <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+      <StatusBar
+        barStyle="dark-content"
+        translucent
+        backgroundColor="transparent"
+      />
       <View style={styles.container}>
         <BannerHeader
-          bannerImage={require("../../../assets/images/background.png")}
+          bannerImage={require('../../../assets/images/background.png')}
           title="Create Account"
           subtitle="Join us to get started"
           bannerStyle={{ height: windowHeight(220) }}
           onBackPress={() => navigation.goBack()}
         />
 
-        <ScrollView contentContainerStyle={styles.contentContainerStyle}>
-          <View style={styles.mainStyle}>
-            <CustomInput
-              label="First Name *"
-              placeholder="e.g. Nick"
-              value={firstName}
-              onChangeText={(val) => handleInputChange("firstName", val)}
-              error={errors.firstName}
-            />
-            <CustomInput
-              label="Last Name *"
-              placeholder="e.g. Rao"
-              value={lastName}
-              onChangeText={(val) => handleInputChange("lastName", val)}
-              error={errors.lastName}
-            />
-            <CustomInput
-              label="Mobile Number *"
-              placeholder="e.g. 9876543210"
-              keyboardType="number-pad"
-              value={mobileNumber}
-              onChangeText={(val) => handleInputChange("mobileNumber", val)}
-              error={errors.mobileNumber}
-              maxLength={10}
-            />
-            <CustomInput
-              label="Email Address *"
-              placeholder="e.g. nick123@gmail.com"
-              value={email}
-              onChangeText={(val) => handleInputChange("email", val)}
-              error={errors.email}
-            />
-            <CustomInput
-              label="Password *"
-              placeholder="Enter password"
-              value={password}
-              onChangeText={(val) => handleInputChange("password", val)}
-              secureTextEntry
-              error={errors.password}
-            />
-            <CustomInput
-              label="Confirm Password *"
-              placeholder="Confirm password"
-              value={confirmPassword}
-              onChangeText={(val) => handleInputChange("confirmPassword", val)}
-              secureTextEntry
-              error={errors.confirmPassword}
+        <KeyboardAwareScrollView
+          contentContainerStyle={styles.contentContainerStyle}
+          keyboardShouldPersistTaps="handled"
+          extraScrollHeight={20}
+          enableOnAndroid
+        >
+          <ScrollView contentContainerStyle={styles.contentContainerStyle}>
+            <View style={styles.mainStyle}>
+              <CustomInput
+                label="First Name *"
+                placeholder="e.g. Nick"
+                value={firstName}
+                onChangeText={val => handleInputChange('firstName', val)}
+                error={errors.firstName}
+              />
+              <CustomInput
+                label="Last Name *"
+                placeholder="e.g. Rao"
+                value={lastName}
+                onChangeText={val => handleInputChange('lastName', val)}
+                error={errors.lastName}
+              />
+              <CustomInput
+                label="Mobile Number *"
+                placeholder="e.g. 9876543210"
+                keyboardType="number-pad"
+                value={mobileNumber}
+                onChangeText={val => handleInputChange('mobileNumber', val)}
+                error={errors.mobileNumber}
+                maxLength={10}
+              />
+              <CustomInput
+                label="Email Address *"
+                placeholder="e.g. nick123@gmail.com"
+                value={email}
+                onChangeText={val => handleInputChange('email', val)}
+                error={errors.email}
+              />
+              <CustomInput
+                label="Password *"
+                placeholder="Enter password"
+                value={password}
+                onChangeText={val => handleInputChange('password', val)}
+                secureTextEntry
+                error={errors.password}
+              />
+              <CustomInput
+                label="Confirm Password *"
+                placeholder="Confirm password"
+                value={confirmPassword}
+                onChangeText={val => handleInputChange('confirmPassword', val)}
+                secureTextEntry
+                error={errors.confirmPassword}
+              />
+            </View>
+
+            <CustomButton
+              loading={loading}
+              title="Create Account"
+              onPress={handleCreateAccount}
             />
 
-        
-          </View>
-
-          <CustomButton
-            loading={loading}
-            title="Create Account"
-            onPress={handleCreateAccount}
-          />
-
-          <View style={styles.row}>
-            <Text style={styles.footerText}>Already have an account ? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("PasswordLogin")}>
-              <Text style={styles.link}> Login</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+            <View style={styles.row}>
+              <Text style={styles.footerText}>Already have an account ? </Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('PasswordLogin')}
+              >
+                <Text style={styles.link}> Login</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
     </SafeAreaView>
   );

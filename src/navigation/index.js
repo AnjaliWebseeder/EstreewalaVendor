@@ -16,20 +16,20 @@ import SelectLocation from '../screens/vendorRegistration/selectLocation';
 import PaymentSetup from '../screens/vendorRegistration/paymentSetup';
 import SetPrice from '../screens/vendorRegistration/setPrice';
 import SubscriptionPlans from '../screens/subscriptionPlans';
-import BottomTab from "../navigation/bottomTab";
-import ContactSupport from "../screens/otherSetting/contactSupport";
-import AboutUs from "../screens/otherSetting/aboutUs";
-import PrivacyPolicy from "../screens/otherSetting/privacyPolicy";
-import FAQS from "../screens/otherSetting/faq";
-import Notification from "../screens/otherSetting/notification";
+import BottomTab from '../navigation/bottomTab';
+import ContactSupport from '../screens/otherSetting/contactSupport';
+import AboutUs from '../screens/otherSetting/aboutUs';
+import PrivacyPolicy from '../screens/otherSetting/privacyPolicy';
+import FAQS from '../screens/otherSetting/faq';
+import Notification from '../screens/otherSetting/notification';
 import LoginSecurityScreen from '../screens/otherSetting/userProfile';
-import ConfirmPayment from "../otherComponent/order/confirmPayment";
-import OrderSummary from "../otherComponent/order/orderSummary";
-import PaymentSuccess from "../otherComponent/order/paymentSuccess";
-import MySubscriptionsScreen from "../screens/otherSetting/mySubscription";
+import ConfirmPayment from '../otherComponent/order/confirmPayment';
+import OrderSummary from '../otherComponent/order/orderSummary';
+import PaymentSuccess from '../otherComponent/order/paymentSuccess';
+import MySubscriptionsScreen from '../screens/otherSetting/mySubscription';
 import Splash from '../screens/spalsh';
-import TermsOfServiceScreen from "../screens/otherSetting/termsOfService"
-import VendorDetails from "../screens/otherSetting/vendorDetails"
+import TermsOfServiceScreen from '../screens/otherSetting/termsOfService';
+import VendorDetails from '../screens/otherSetting/vendorDetails';
 
 const Stack = createStackNavigator();
 
@@ -40,48 +40,55 @@ const Navigation = () => {
     isFirstLaunch,
     hasCompletedVendorRegistration,
     hasCompletedSubscription,
-    subscriptionShownOnce
+    subscriptionShownOnce,
   } = useContext(VendorContext);
 
   const [initialRoute, setInitialRoute] = useState('Splash');
   const [navigationReady, setNavigationReady] = useState(false);
 
   useEffect(() => {
-  console.log('🔍 NAVIGATION DEBUG - Detailed State:', {
+    console.log('🔍 NAVIGATION DEBUG - Detailed State:', {
+      isLoading,
+      userToken: userToken
+        ? `Token EXISTS (${userToken.substring(0, 10)}...)`
+        : 'No Token',
+      hasCompletedVendorRegistration,
+      hasCompletedSubscription,
+      isFirstLaunch,
+    });
+
+    if (!isLoading) {
+      let route = 'Welcome';
+
+      if (!userToken) {
+        route = 'Welcome';
+      }
+      // else if (!hasCompletedSubscription && !subscriptionShownOnce) {
+      //   route = 'SubscriptionPlans';
+      // }
+      else if (userToken && !hasCompletedSubscription) {
+        route = 'SubscriptionPlans';
+      } else if (hasCompletedVendorRegistration === false) {
+        route = 'VendorRegistration';
+      } else {
+        route = 'Main';
+      }
+
+      console.log('🎯 FINAL ROUTE DECISION:', route);
+      setInitialRoute(route);
+
+      const timer = setTimeout(() => {
+        setNavigationReady(true);
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [
     isLoading,
-    userToken: userToken ? `Token EXISTS (${userToken.substring(0, 10)}...)` : 'No Token',
+    userToken,
     hasCompletedVendorRegistration,
     hasCompletedSubscription,
-    isFirstLaunch
-  });
-
-  if (!isLoading) {
-    let route = 'Welcome';
-
-  if (!userToken) {
-  route = 'Welcome';
-}
-else if (!hasCompletedSubscription && !subscriptionShownOnce) {
-  route = 'SubscriptionPlans';
-}
-else if (hasCompletedVendorRegistration === false) {
-  route = 'VendorRegistration';
-}
-else {
-  route = 'Main';
-}
-
-
-    console.log('🎯 FINAL ROUTE DECISION:', route);
-    setInitialRoute(route);
-    
-    const timer = setTimeout(() => {
-      setNavigationReady(true);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }
-}, [isLoading, userToken, hasCompletedVendorRegistration, hasCompletedSubscription]);
+  ]);
 
   // Show splash screen while loading or navigation not ready
   if (isLoading || !navigationReady) {
@@ -90,20 +97,20 @@ else {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator 
-        screenOptions={{ 
+      <Stack.Navigator
+        screenOptions={{
           headerShown: false,
-          gestureEnabled: false // Prevent back gestures on initial screens
-        }} 
+          gestureEnabled: false, // Prevent back gestures on initial screens
+        }}
         initialRouteName={initialRoute}
       >
         {/* ===== Splash Screen ===== */}
-        
+
         <Stack.Screen name="Splash" component={Splash} />
 
         {/* ===== Auth Flow ===== */}
-        <Stack.Screen 
-          name="Welcome" 
+        <Stack.Screen
+          name="Welcome"
           component={WelcomeScreen}
           options={{ gestureEnabled: false }}
         />
@@ -115,8 +122,8 @@ else {
         <Stack.Screen name="ResetPassword" component={ResetPassword} />
 
         {/* ===== Vendor Onboarding ===== */}
-        <Stack.Screen 
-          name="VendorRegistration" 
+        <Stack.Screen
+          name="VendorRegistration"
           component={VendorRegistration}
           options={{ gestureEnabled: false }}
         />
@@ -127,8 +134,8 @@ else {
         <Stack.Screen name="SetPrice" component={SetPrice} />
 
         {/* ===== Subscription Flow ===== */}
-        <Stack.Screen 
-          name="SubscriptionPlans" 
+        <Stack.Screen
+          name="SubscriptionPlans"
           component={SubscriptionPlans}
           options={{ gestureEnabled: false }}
         />
@@ -138,8 +145,8 @@ else {
         <Stack.Screen name="MySubscription" component={MySubscriptionsScreen} />
 
         {/* ===== Main App ===== */}
-        <Stack.Screen 
-          name="Main" 
+        <Stack.Screen
+          name="Main"
           component={BottomTab}
           options={{ gestureEnabled: false }}
         />
@@ -150,10 +157,15 @@ else {
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
         <Stack.Screen name="Faq" component={FAQS} />
         <Stack.Screen name="Notification" component={Notification} />
-        <Stack.Screen name="LoginSecurityScreen" component={LoginSecurityScreen} />
-        <Stack.Screen name="TermsOfServiceScreen" component={TermsOfServiceScreen} />
-         <Stack.Screen name="VendorDetails" component={VendorDetails} />
-      
+        <Stack.Screen
+          name="LoginSecurityScreen"
+          component={LoginSecurityScreen}
+        />
+        <Stack.Screen
+          name="TermsOfServiceScreen"
+          component={TermsOfServiceScreen}
+        />
+        <Stack.Screen name="VendorDetails" component={VendorDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );

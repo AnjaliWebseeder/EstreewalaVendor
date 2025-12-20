@@ -316,4 +316,18 @@ export const styles = StyleSheet.create({
   disabledButtonText: {
     color: '#9CA3AF',
   },
+  lockedInfo: {
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: '#F9FAFB',        // light neutral background
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',             // soft gray border
+    color: '#6B7280',                   // muted text (not error red)
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: 'center',
+  },
+  
 });

@@ -1,6 +1,12 @@
 // VendorRegistration.js
 import React, { useContext, useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView,StatusBar } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StatusBar,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,6 +29,7 @@ import {
   getCompletionStatus,
 } from '../../redux/slices/vendorOnboardingSlice';
 import { useToast } from '../../utils/context/toastContext';
+import { getVendorServices } from '../../redux/slices/vendorSlice';
 
 const steps = ['Business', 'Owner', 'Services', 'Pricing', 'Delivery'];
 
@@ -37,8 +44,15 @@ const VendorRegistration = ({ route }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const { showToast } = useToast();
+
+  const { services, servicesMeta } = useSelector(state => state.vendor);
+
+  useEffect(() => {
+    dispatch(getVendorServices());
+  }, []);
+
   const {
-    services,
+    // services,
     selectedServiceIds,
     toggleServiceCategory,
     deliveryOption,
@@ -51,12 +65,18 @@ const VendorRegistration = ({ route }) => {
     updateOwners,
     updateServices,
     updatePricing,
-    updateDeliveryOption
+    updateDeliveryOption,
   } = useContext(VendorContext);
 
   const { currentStep: apiCurrentStep, loading } = useSelector(
     state => state.vendorOnboarding,
   );
+
+  useEffect(() => {
+    if (services?.length) {
+      updateServices(services.map(s => s.id));
+    }
+  }, [services]);
 
   const { fromScreen } = route?.params || {};
   const [localCurrentStep, setLocalCurrentStep] = useState(0);
@@ -64,45 +84,74 @@ const VendorRegistration = ({ route }) => {
   const [localError, setLocalError] = useState('');
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('all');
-  const { businessName, selectedLocation, pricingData } = formData;
+  // const { businessName, selectedLocation, pricingData } = formData;
+  const { businessName, selectedLocation, city, pricingData } = formData;
 
   // Debug logs to track state changes
   useEffect(() => {
     console.log('🔄 Current Step:', localCurrentStep);
-    console.log('🏢 Business Data:', { businessName, selectedLocation: selectedLocation?.address });
+    console.log('🏢 Business Data:', {
+      businessName,
+      selectedLocation: selectedLocation?.address,
+    });
     console.log('👥 Owners Count:', owners.length);
     console.log('🔧 Selected Services:', selectedServiceIds);
-    console.log('💰 Pricing Data:', pricingData ? 'Available' : 'Not Available');
+    console.log(
+      '💰 Pricing Data:',
+      pricingData ? 'Available' : 'Not Available',
+    );
     console.log('🚚 Delivery Option:', deliveryOption);
-  }, [localCurrentStep, businessName, selectedLocation, owners, selectedServiceIds, pricingData, deliveryOption]);
+  }, [
+    localCurrentStep,
+    businessName,
+    selectedLocation,
+    owners,
+    selectedServiceIds,
+    pricingData,
+    deliveryOption,
+  ]);
 
-  // Update context when form fields change
-  const handleBusinessNameChange = (text) => {
-    updateBusinessDetails(text, selectedLocation);
+  const handleBusinessNameChange = text => {
+    updateBusinessDetails(text, selectedLocation, city);
   };
 
-  const handleLocationChange = (location) => {
-    updateBusinessDetails(businessName, location);
+  const handleCityChange = text => {
+    updateBusinessDetails(businessName, selectedLocation, text);
   };
 
-  const handlePricingUpdate = useCallback((updatedPricing) => {
-    console.log('📊 Pricing updated in VendorRegistration:', updatedPricing);
-    updatePricing(updatedPricing);
-  }, [updatePricing]);
+  const handleLocationChange = location => {
+    updateBusinessDetails(businessName, location, city);
+  };
+
+  const handlePricingUpdate = useCallback(
+    updatedPricing => {
+      console.log('📊 Pricing updated in VendorRegistration:', updatedPricing);
+      updatePricing(updatedPricing);
+    },
+    [updatePricing],
+  );
 
   // Load vendor completion status
   useEffect(() => {
     const fetchStatus = async () => {
       try {
         const res = await dispatch(getCompletionStatus()).unwrap();
-        const stepIndex = (res?.completionStep || 0) - 1;
-        const safeIndex = Math.max(
-          0,
-          Math.min(stepIndex + 1, steps.length - 1),
-        );
+        // const stepIndex = (res?.completionStep || 0) - 1;
+        // const safeIndex = Math.max(
+        //   0,
+        //   Math.min(stepIndex + 1, steps.length - 1),
+        // );
 
-        setCompletedStep(stepIndex >= 0 ? stepIndex : 0);
-        setLocalCurrentStep(safeIndex);
+        const completed = res?.completionStep || 0;
+
+        // next step = completed step
+        const nextStepIndex = Math.min(completed, steps.length - 1);
+
+        setCompletedStep(completed);
+        setLocalCurrentStep(nextStepIndex);
+
+        // setCompletedStep(stepIndex >= 0 ? stepIndex : 0);
+        // setLocalCurrentStep(safeIndex);
 
         if (res?.isComplete) {
           await completeVendorRegistration();
@@ -124,6 +173,49 @@ const VendorRegistration = ({ route }) => {
     }
   }, [apiCurrentStep]);
 
+  const extractCityFromAddress = (address = '') => {
+    if (!address) return '';
+
+    const parts = address
+      .split(',')
+      .map(p => p.trim())
+      .filter(Boolean);
+
+    // Indian address pattern:
+    // [Area, City, Taluka, District, State, Pincode, Country]
+
+    // 1️⃣ Most reliable: second part
+    if (parts.length >= 2) {
+      return parts[1];
+    }
+
+    // 2️⃣ Fallback: remove unwanted keywords
+    const blacklist = ['talhsil', 'tahsil', 'district', 'state', 'india'];
+    const clean = parts.find(
+      p => !blacklist.some(b => p.toLowerCase().includes(b)),
+    );
+
+    return clean || '';
+  };
+
+  useEffect(() => {
+    if (formData.selectedLocation?.address && !formData.city) {
+      const extractedCity = extractCityFromAddress(
+        formData.selectedLocation.address,
+      );
+
+      if (extractedCity) {
+        console.log('🏙 Auto-filled city:', extractedCity);
+
+        updateBusinessDetails(
+          formData.businessName,
+          formData.selectedLocation,
+          extractedCity,
+        );
+      }
+    }
+  }, [formData.selectedLocation]);
+
   // Handle step progression
   const nextStep = async () => {
     setLocalError('');
@@ -138,6 +230,9 @@ const VendorRegistration = ({ route }) => {
           if (!formData.businessName.trim()) {
             setLocalError('Please enter Business Name');
             validationFailed = true;
+          } else if (!formData.city?.trim()) {
+            setLocalError('Please enter City');
+            validationFailed = true;
           } else if (!formData.selectedLocation?.address) {
             setLocalError('Please select your laundry shop address');
             validationFailed = true;
@@ -150,72 +245,157 @@ const VendorRegistration = ({ route }) => {
             validationFailed = true;
           }
           break;
-           case 2:
-  // All services are always included
-  const allServiceNames = [
-    "Ironing", "Washing", "Dry Wash", "Wash & Iron",
-    "Steam Ironing", "Spin Washing", "Steam Washing", "Stain Removal"
-  ];
-  
-  const servicesPayload = {
-    services: allServiceNames
-  };
-  
-  console.log("✅ SERVICES PAYLOAD (All services):", servicesPayload);
-  await dispatch(completeStep3(servicesPayload)).unwrap();
-  break;
-        
-  case 3:
-  const pricing = formData.pricingData?.itemPricing;
-  console.log("PRICING IS", pricing);
+        // case 2:
+        //   // All services are always included
+        //   const allServiceNames = [
+        //     'Ironing',
+        //     'Washing',
+        //     'Dry Wash',
+        //     'Wash & Iron',
+        //     'Steam Ironing',
+        //     'Spin Washing',
+        //     'Steam Washing',
+        //     'Stain Removal',
+        //   ];
 
-  if (!pricing || Object.keys(pricing).length === 0) {
-    setLocalError('Please set prices for each selected service');
-    validationFailed = true;
-    break;
-  }
+        //   const servicesPayload = {
+        //     services: allServiceNames,
+        //   };
 
-  // Validate every service/category/item
-  let missingPriceItems = [];
-  
-  for (const serviceName of Object.keys(pricing)) {
-    const categories = pricing[serviceName];
+        //   console.log('✅ SERVICES PAYLOAD (All services):', servicesPayload);
+        //   await dispatch(completeStep3(servicesPayload)).unwrap();
+        //   break;
 
-    for (const category of Object.keys(categories)) {
-      const items = categories[category];
+        case 2:
+          if (!services || services.length === 0) {
+            setLocalError('No services available for your plan');
+            validationFailed = true;
+            break;
+          }
 
-      for (const item of items) {
-        // Check if price is undefined, null, empty, or 0
-        if (item.price === undefined || item.price === null || item.price === "" || Number(item.price) <= 0) {
-          missingPriceItems.push({
-            service: serviceName,
-            category: category,
-            item: item.item,
-            price: item.price
+          // only unlocked / allowed services
+          const availableServices = services.filter(s => !s.locked);
+
+          if (availableServices.length === 0) {
+            setLocalError('No active services available');
+            validationFailed = true;
+            break;
+          }
+          break;
+
+        // case 3:
+        //   const pricing = formData.pricingData?.itemPricing;
+        //   console.log('PRICING IS', pricing);
+
+        //   if (!pricing || Object.keys(pricing).length === 0) {
+        //     setLocalError('Please set prices for each selected service');
+        //     validationFailed = true;
+        //     break;
+        //   }
+
+        //   // Validate every service/category/item
+        //   let missingPriceItems = [];
+
+        //   for (const serviceName of Object.keys(pricing)) {
+        //     const categories = pricing[serviceName];
+
+        //     for (const category of Object.keys(categories)) {
+        //       const items = categories[category];
+
+        //       for (const item of items) {
+        //         // Check if price is undefined, null, empty, or 0
+        //         if (
+        //           item.price === undefined ||
+        //           item.price === null ||
+        //           item.price === '' ||
+        //           Number(item.price) <= 0
+        //         ) {
+        //           missingPriceItems.push({
+        //             service: serviceName,
+        //             category: category,
+        //             item: item.item,
+        //             price: item.price,
+        //           });
+        //         }
+        //       }
+        //     }
+        //   }
+
+        //   if (missingPriceItems.length > 0) {
+        //     console.log('❌ Missing/Invalid prices found:', missingPriceItems);
+
+        //     // Show a more specific error message
+        //     const firstMissingItem = missingPriceItems[0];
+        //     showToast(
+        //       `Please set a valid price for ${firstMissingItem.item} under ${firstMissingItem.service}`,
+        //       'error',
+        //     );
+
+        //     validationFailed = true;
+        //     break;
+        //   }
+
+        //   console.log('✅ All prices are valid');
+        //   break;
+
+        case 3: {
+          const pricing = formData.pricingData?.itemPricing;
+
+          if (!pricing || Object.keys(pricing).length === 0) {
+            setLocalError('Please set pricing for services');
+            validationFailed = true;
+            break;
+          }
+
+          // Active (unlocked) services
+          const activeServiceNames = services
+            .filter(s => !s.locked)
+            .map(s => s.name);
+
+          const servicesWithNoPrice = [];
+
+          activeServiceNames.forEach(serviceName => {
+            const servicePricing = pricing[serviceName];
+
+            if (!servicePricing) {
+              servicesWithNoPrice.push(serviceName);
+              return;
+            }
+
+            let hasAtLeastOneValidPrice = false;
+
+            Object.values(servicePricing).forEach(items => {
+              items.forEach(item => {
+                if (
+                  item.price !== undefined &&
+                  item.price !== null &&
+                  item.price !== '' &&
+                  Number(item.price) > 0
+                ) {
+                  hasAtLeastOneValidPrice = true;
+                }
+              });
+            });
+
+            if (!hasAtLeastOneValidPrice) {
+              servicesWithNoPrice.push(serviceName);
+            }
           });
+
+          if (servicesWithNoPrice.length > 0) {
+            showToast(
+              `Please set at least one item price for ${servicesWithNoPrice[0]}`,
+              'error',
+            );
+            validationFailed = true;
+            break;
+          }
+
+          console.log(
+            '✅ Pricing validation passed (at least one item per service)',
+          );
+          break;
         }
-      }
-    }
-  }
-
-  if (missingPriceItems.length > 0) {
-    console.log("❌ Missing/Invalid prices found:", missingPriceItems);
-    
-    // Show a more specific error message
-    const firstMissingItem = missingPriceItems[0];
-    showToast(
-     `Please set a valid price for ${firstMissingItem.item} under ${firstMissingItem.service}`,
-      'error'
-    );
-    
-    validationFailed = true;
-    break;
-  }
-
-  console.log("✅ All prices are valid");
-  break;
- 
-
 
         case 4:
           if (!formData.deliveryOption) {
@@ -238,12 +418,13 @@ const VendorRegistration = ({ route }) => {
           await dispatch(
             completeStep1({
               businessName: formData.businessName.trim(),
+              city: formData.city.trim(),
               address: formData.selectedLocation?.address,
               location: {
                 lat: formData.selectedLocation?.latitude,
                 lng: formData.selectedLocation?.longitude,
               },
-            })
+            }),
           ).unwrap();
           break;
 
@@ -258,36 +439,81 @@ const VendorRegistration = ({ route }) => {
           await dispatch(completeStep2({ owners: ownerData })).unwrap();
           break;
 
-      case 2:
-  const serviceNames = formData.selectedServiceIds
-    .flatMap(id => {
-      const service = services.find(x => x.id === id);
-      if (!service) return [];
-      
-      if (id === 5) {
-        // Return all premium service names
-        return services
-          .filter(s => [6, 7, 8, 9].includes(s.id))
-          .map(s => s.name);
-      } else {
-        // Return the service name
-        return [service.name];
-      }
-    })
-    .filter((name, index, array) => array.indexOf(name) === index); // Remove duplicates
+        // case 2:
+        //   const serviceNames = formData.selectedServiceIds
+        //     .flatMap(id => {
+        //       const service = services.find(x => x.id === id);
+        //       if (!service) return [];
 
-  console.log("✅ SERVICES FOR BACKEND:", serviceNames);
-  await dispatch(completeStep3({ services: serviceNames })).unwrap();
-  break;
+        //       if (id === 5) {
+        //         // Return all premium service names
+        //         return services
+        //           .filter(s => [6, 7, 8, 9].includes(s.id))
+        //           .map(s => s.name);
+        //       } else {
+        //         // Return the service name
+        //         return [service.name];
+        //       }
+        //     })
+        //     .filter((name, index, array) => array.indexOf(name) === index); // Remove duplicates
 
-        case 3:
-          console.log("Submitting pricing data:",formData.pricingData)
-          await dispatch(completeStep4(formData.pricingData)).unwrap();
+        //   console.log('✅ SERVICES FOR BACKEND:', serviceNames);
+        //   await dispatch(completeStep3({ services: serviceNames })).unwrap();
+        //   break;
+
+        case 2:
+          const serviceNames = services.filter(s => !s.locked).map(s => s.name);
+
+          console.log('✅ SERVICES FOR BACKEND (dynamic):', serviceNames);
+
+          await dispatch(completeStep3({ services: serviceNames })).unwrap();
           break;
+
+        // case 3:
+        //   console.log('Submitting pricing data:', formData.pricingData);
+        //   await dispatch(completeStep4(formData.pricingData)).unwrap();
+        //   break;
+
+        case 3: {
+          const pricing = formData.pricingData?.itemPricing;
+
+          const filteredPricing = {};
+
+          Object.entries(pricing).forEach(([serviceName, categories]) => {
+            const filteredCategories = {};
+
+            Object.entries(categories).forEach(([category, items]) => {
+              const validItems = items.filter(
+                item =>
+                  item.price !== undefined &&
+                  item.price !== null &&
+                  item.price !== '' &&
+                  Number(item.price) > 0,
+              );
+
+              if (validItems.length > 0) {
+                filteredCategories[category] = validItems;
+              }
+            });
+
+            if (Object.keys(filteredCategories).length > 0) {
+              filteredPricing[serviceName] = filteredCategories;
+            }
+          });
+
+          const finalPayload = {
+            itemPricing: filteredPricing,
+          };
+
+          console.log('✅ Submitting FILTERED pricing data:', finalPayload);
+
+          await dispatch(completeStep4(finalPayload)).unwrap();
+          break;
+        }
 
         case 4:
           await dispatch(
-          completeStep5({ deliveryMethods: [formData.deliveryOption] })
+            completeStep5({ deliveryMethods: [formData.deliveryOption] }),
           ).unwrap();
           break;
       }
@@ -300,7 +526,6 @@ const VendorRegistration = ({ route }) => {
       } else {
         console.log('🎉 All steps completed!');
       }
-
     } catch (error) {
       console.log('❌ Step progression error:', error);
       setLocalError(error.message || 'Failed to complete step');
@@ -315,11 +540,18 @@ const VendorRegistration = ({ route }) => {
       await dispatch(
         completeStep5({ deliveryMethods: [deliveryOption] }),
       ).unwrap();
-      
+
       if (fromScreen) {
         navigation.goBack();
       } else {
         navigation.navigate('Main');
+        // await completeVendorRegistration();
+
+        // // Let root navigator decide Main
+        // navigation.reset({
+        //   index: 0,
+        //   routes: [{ name: 'VendorRegistration' }],
+        // });
       }
     } catch (err) {
       console.log('❌ Submit error:', err);
@@ -341,7 +573,7 @@ const VendorRegistration = ({ route }) => {
   };
 
   // Handle delivery option selection
-  const handleDeliveryOptionSelect = (option) => {
+  const handleDeliveryOptionSelect = option => {
     console.log('🚚 Delivery option selected:', option);
     setDeliveryOption(option);
     // Force immediate UI update by updating formData
@@ -379,13 +611,13 @@ const VendorRegistration = ({ route }) => {
     </View>
   );
 
-
-
-  
-
   return (
     <SafeAreaView style={styles.container}>
-    <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+      <StatusBar
+        barStyle="dark-content"
+        translucent
+        backgroundColor="transparent"
+      />
       <View style={styles.mainHeader}>
         <View style={styles.headerStyle}>
           <TouchableOpacity
@@ -402,7 +634,7 @@ const VendorRegistration = ({ route }) => {
         {renderStepSlider()}
       </View>
 
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         key={`step-${localCurrentStep}`} // Force re-render on step change
@@ -412,6 +644,8 @@ const VendorRegistration = ({ route }) => {
           <BusinessDetails
             businessName={formData.businessName}
             setBusinessName={handleBusinessNameChange}
+            city={formData.city}
+            setCity={handleCityChange}
             selectedLocation={formData.selectedLocation}
             setSelectedLocation={handleLocationChange}
           />
@@ -427,7 +661,11 @@ const VendorRegistration = ({ route }) => {
               subtitleStyle={styles.largeSubtitle}
             />
             {formData.owners.map((o, idx) => (
-              <VendorOwnCard key={o.id || idx} owner={o} navigation={navigation} />
+              <VendorOwnCard
+                key={o.id || idx}
+                owner={o}
+                navigation={navigation}
+              />
             ))}
             <TouchableOpacity
               style={styles.addButton}
@@ -440,43 +678,77 @@ const VendorRegistration = ({ route }) => {
         )}
 
         {/* Step 2: Services Provided */}
-{/* Step 2: Services Provided */}
-{localCurrentStep === 2 && (
-  <View style={styles.stepContainer}>
-    <TitleSubtitle
-      title="Services Provided"
-      subtitle="All laundry services are required for vendor registration."
-      titleStyle={styles.largeTitle}
-      subtitleStyle={styles.largeSubtitle}
-    />
-    
-
-    
-    {/* All Services Section - All Compulsory */}
-    <View style={styles.sectionContainer}>  
-      <View style={styles.servicesContainer}>
-        {services.map(s => (
-          <View
-            key={s.id}
-            style={[
-              styles.serviceCard,
-              styles.selectedServiceCard,
-              styles.compulsoryCard,
-            ]}
-          >
-            <Icon
-              name="checkmark-circle"
-              size={17}
-              color={appColors.success}
+        {localCurrentStep === 2 && (
+          <View style={styles.stepContainer}>
+            <TitleSubtitle
+              title="Services Provided"
+              // subtitle="All laundry services are required for vendor registration."
+              subtitle=" Services available based on your subscription plan"
+              titleStyle={styles.largeTitle}
+              subtitleStyle={styles.largeSubtitle}
             />
-            <Text style={styles.serviceName}>{s.name}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  </View>
-)}
 
+            {/* All Services Section - All Compulsory */}
+            {/* <View style={styles.sectionContainer}>
+              <View style={styles.servicesContainer}>
+                {services.map(s => (
+                  <View
+                    key={s.id}
+                    style={[
+                      styles.serviceCard,
+                      styles.selectedServiceCard,
+                      styles.compulsoryCard,
+                    ]}
+                  >
+                    <Icon
+                      name="checkmark-circle"
+                      size={17}
+                      color={appColors.success}
+                    />
+                    <Text style={styles.serviceName}>{s.name}</Text>
+                  </View>
+                ))}
+              </View>
+            </View> */}
+
+            {services?.length > 0 ? (
+              <View style={styles.servicesContainer}>
+                {services.map(service => {
+                  const isSelected = true;
+                  const isLocked = service.locked;
+
+                  return (
+                    <View
+                      key={service.id}
+                      style={[
+                        styles.serviceCard,
+                        isSelected && styles.selectedServiceCard,
+                      ]}
+                    >
+                      <View style={styles.serviceIconContainer}>
+                        <Icon
+                          name={isLocked ? 'lock-closed' : 'checkmark-circle'}
+                          size={18}
+                          color={isLocked ? '#9CA3AF' : appColors.success}
+                        />
+                      </View>
+
+                      <Text style={styles.serviceText}>{service.name}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            ) : (
+              <Text style={styles.emptyStateText}>
+                No services available for your plan
+              </Text>
+            )}
+
+            {servicesMeta?.readOnly && (
+              <Text style={styles.lockedInfo}>{servicesMeta.message}</Text>
+            )}
+          </View>
+        )}
 
         {/* Step 3: Set Pricing */}
         {localCurrentStep === 3 && (
@@ -489,6 +761,8 @@ const VendorRegistration = ({ route }) => {
               style={styles.mainView}
             />
             <SetPrice
+              services={services} // ✅ NEW
+              readOnly={servicesMeta?.readOnly}
               onOpenFilter={() => setShowFilterModal(true)}
               selectedFilter={selectedFilter}
               navigation={navigation}
@@ -512,7 +786,8 @@ const VendorRegistration = ({ route }) => {
                   key={opt}
                   style={[
                     styles.optionCard,
-                    formData.deliveryOption === opt && styles.selectedOptionCard,
+                    formData.deliveryOption === opt &&
+                      styles.selectedOptionCard,
                   ]}
                   onPress={() => handleDeliveryOptionSelect(opt)}
                 >
@@ -532,7 +807,8 @@ const VendorRegistration = ({ route }) => {
                   <Text
                     style={[
                       styles.optionText,
-                      formData.deliveryOption === opt && styles.selectedOptionText,
+                      formData.deliveryOption === opt &&
+                        styles.selectedOptionText,
                     ]}
                   >
                     {opt}
@@ -554,7 +830,8 @@ const VendorRegistration = ({ route }) => {
         style={[
           styles.navButtons,
           {
-            justifyContent: localCurrentStep === 0 ? 'flex-end' : 'space-between',
+            justifyContent:
+              localCurrentStep === 0 ? 'flex-end' : 'space-between',
           },
         ]}
       >

@@ -81,7 +81,7 @@ const CustomToast = ({ message, type = 'success', duration = 3000, onHide }) => 
 const styles = StyleSheet.create({
   toast: {
     position: 'absolute',
-    bottom: 30, // Position above bottom navigation
+    bottom: 45, // Position above bottom navigation
     left: 20,
     right: 20,
     flexDirection: 'row',

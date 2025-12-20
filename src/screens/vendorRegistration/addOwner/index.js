@@ -1,11 +1,11 @@
 import React, { useContext, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  Switch, 
-  TouchableOpacity, 
-  Alert, 
-  ScrollView 
+import {
+  View,
+  Text,
+  Switch,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -26,8 +26,11 @@ export default function AddOwner({ navigation, route }) {
   const [lastName, setLastName] = useState(editingOwner?.lastName || '');
   const [primary, setPrimary] = useState(editingOwner?.primary || '');
   const [whatsapp, setWhatsapp] = useState(editingOwner?.whatsapp || '');
-  const [sameAsPrimary, setSameAsPrimary] = useState(false);
-  const [governmentId, setGovernmentId] = useState(editingOwner?.governmentId || null);
+  const [sameAsPrimary, setSameAsPrimary] = useState(editingOwner?.whatsappNumber);
+  const [governmentId, setGovernmentId] = useState(
+    editingOwner?.governmentId || null
+  );
+ 
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -54,7 +57,10 @@ export default function AddOwner({ navigation, route }) {
         const asset = result.assets[0];
 
         if (asset.fileSize > 5 * 1024 * 1024) {
-          Alert.alert('File Too Large', 'Please select a file smaller than 5MB');
+          Alert.alert(
+            'File Too Large',
+            'Please select a file smaller than 5MB',
+          );
           return;
         }
 
@@ -79,7 +85,7 @@ export default function AddOwner({ navigation, route }) {
   };
 
   // Format file size
-  const formatFileSize = (bytes) => {
+  const formatFileSize = bytes => {
     if (!bytes) return 'Unknown size';
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -88,42 +94,51 @@ export default function AddOwner({ navigation, route }) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const isValidIndianMobile = (number = '') => {
+    return /^[6-9]\d{9}$/.test(number);
+  };
+
   // Validation
   const validate = () => {
     let newErrors = {};
+
     if (!firstName.trim()) newErrors.firstName = 'First name is required';
+
     if (!lastName.trim()) newErrors.lastName = 'Last name is required';
-    if (!primary.trim() || primary.length !== 10) newErrors.primary = 'Enter valid primary number';
-    if (!sameAsPrimary && (!whatsapp.trim() || whatsapp.length !== 10))
-      newErrors.whatsapp = 'Enter valid whatsapp number';
+
+    if (!isValidIndianMobile(primary))
+      newErrors.primary = 'Enter valid 10-digit Indian mobile number';
+
+    if (!sameAsPrimary && !isValidIndianMobile(whatsapp))
+      newErrors.whatsapp = 'Enter valid 10-digit Indian mobile number';
+
     if (!governmentId) newErrors.governmentId = 'Government ID is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-const submit = () => {
-  if (!validate()) return;
+  const submit = () => {
+    if (!validate()) return;
 
-  const newOwner = { 
-    firstName, 
-    lastName, 
-    primary, 
-    whatsapp: sameAsPrimary ? primary : whatsapp,
-    governmentId 
+    const newOwner = {
+      firstName,
+      lastName,
+      primary,
+      whatsapp: sameAsPrimary ? primary : whatsapp,
+      governmentId,
+    };
+
+    if (editingOwner) {
+      // Update existing owner
+      editOwner(editingOwner.id, newOwner);
+    } else {
+      // Add new owner
+      addOwner(newOwner);
+    }
+
+    navigation.goBack();
   };
-
-  if (editingOwner) {
-    // Update existing owner
-    editOwner(editingOwner.id, newOwner);
-  } else {
-    // Add new owner
-    addOwner(newOwner);
-  }
-
-  navigation.goBack();
-};
-
 
   return (
     <SafeAreaView style={styles.mainContainer}>
@@ -135,7 +150,7 @@ const submit = () => {
             <InputField
               label="First Name*"
               value={firstName}
-              onChangeText={(t) => {
+              onChangeText={t => {
                 setFirstName(t);
                 if (errors.firstName) setErrors({ ...errors, firstName: null });
               }}
@@ -146,7 +161,7 @@ const submit = () => {
             <InputField
               label="Last Name*"
               value={lastName}
-              onChangeText={(t) => {
+              onChangeText={t => {
                 setLastName(t);
                 if (errors.lastName) setErrors({ ...errors, lastName: null });
               }}
@@ -158,22 +173,30 @@ const submit = () => {
               label="Primary Number*"
               value={primary}
               keyboardType="phone-pad"
-              onChangeText={(t) => {
+              maxLength={10}
+              onChangeText={t => {
                 setPrimary(t);
                 if (errors.primary) setErrors({ ...errors, primary: null });
               }}
-              placeholder="e.g. 1234567890"
+              placeholder="e.g. 9876543210"
               error={errors.primary}
             />
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 12,
+              }}
+            >
               <Text style={{ fontWeight: '500' }}>Same as primary number</Text>
-              <Switch 
-                value={sameAsPrimary} 
-                onValueChange={(val) => { 
-                  setSameAsPrimary(val); 
-                  if (val) setWhatsapp(primary); 
-                }} 
+              <Switch
+                value={sameAsPrimary}
+                onValueChange={val => {
+                  setSameAsPrimary(val);
+                  if (val) setWhatsapp(primary);
+                }}
                 trackColor={{ false: appColors.border, true: appColors.blue }}
                 thumbColor={sameAsPrimary ? appColors.white : appColors.white}
               />
@@ -184,11 +207,12 @@ const submit = () => {
                 label="Whatsapp Number*"
                 value={whatsapp}
                 keyboardType="phone-pad"
-                onChangeText={(t) => {
+                maxLength={10}
+                onChangeText={t => {
                   setWhatsapp(t);
                   if (errors.whatsapp) setErrors({ ...errors, whatsapp: null });
                 }}
-                placeholder="e.g. 1234567890"
+                placeholder="e.g. 9876543210"
                 error={errors.whatsapp}
               />
             )}
@@ -197,13 +221,18 @@ const submit = () => {
             <View style={styles.uploadSection}>
               <Text style={styles.uploadLabel}>Government ID*</Text>
               <Text style={styles.uploadSubtitle}>
-                Upload Aadhaar Card, PAN Card, or other government ID (JPG, PNG, max 5MB, PDF)
+                Upload Aadhaar Card, PAN Card, or other government ID (JPG, PNG,
+                max 5MB, PDF)
               </Text>
 
               {governmentId ? (
                 <View style={styles.fileContainer}>
                   <View style={styles.fileInfo}>
-                    <Icon name="document-attach" size={24} color={appColors.secondary} />
+                    <Icon
+                      name="document-attach"
+                      size={24}
+                      color={appColors.secondary}
+                    />
                     <View style={styles.fileDetails}>
                       <Text style={styles.fileName} numberOfLines={1}>
                         {governmentId.name}
@@ -213,35 +242,56 @@ const submit = () => {
                       </Text>
                     </View>
                   </View>
-                  <TouchableOpacity onPress={handleRemoveFile} style={styles.removeButton}>
-                    <Icon name="close-circle" size={20} color={appColors.error} />
+                  <TouchableOpacity
+                    onPress={handleRemoveFile}
+                    style={styles.removeButton}
+                  >
+                    <Icon
+                      name="close-circle"
+                      size={20}
+                      color={appColors.error}
+                    />
                   </TouchableOpacity>
                 </View>
               ) : (
-                <TouchableOpacity 
-                  style={[styles.uploadButton, errors.governmentId && styles.uploadButtonError]}
+                <TouchableOpacity
+                  style={[
+                    styles.uploadButton,
+                    errors.governmentId && styles.uploadButtonError,
+                  ]}
                   onPress={handleSelectFromGallery}
                   disabled={uploading}
                 >
-                  <Icon 
-                    name="images" 
-                    size={24} 
-                    color={errors.governmentId ? appColors.error : appColors.secondary} 
+                  <Icon
+                    name="images"
+                    size={24}
+                    color={
+                      errors.governmentId
+                        ? appColors.error
+                        : appColors.secondary
+                    }
                   />
-                  <Text style={[styles.uploadButtonText, errors.governmentId && styles.uploadButtonTextError]}>
+                  <Text
+                    style={[
+                      styles.uploadButtonText,
+                      errors.governmentId && styles.uploadButtonTextError,
+                    ]}
+                  >
                     {uploading ? 'Uploading...' : 'Upload Government ID'}
                   </Text>
                 </TouchableOpacity>
               )}
 
-              {errors.governmentId && <Text style={styles.errorText}>{errors.governmentId}</Text>}
+              {errors.governmentId && (
+                <Text style={styles.errorText}>{errors.governmentId}</Text>
+              )}
             </View>
           </View>
 
-          <CustomButton 
-            buttonContainerStyle={{ marginHorizontal: windowHeight(15) }} 
-            title={editingOwner ? 'Update' : 'Submit'} 
-            onPress={submit} 
+          <CustomButton
+            buttonContainerStyle={{ marginHorizontal: windowHeight(15) }}
+            title={editingOwner ? 'Update' : 'Submit'}
+            onPress={submit}
           />
         </View>
       </ScrollView>

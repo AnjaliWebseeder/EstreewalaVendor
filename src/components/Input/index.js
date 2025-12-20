@@ -13,7 +13,8 @@ const CustomInput = ({
   secureTextEntry, 
   keyboardType, 
   iconName,
-  error // 👈 add error prop
+  error , // 👈 add error prop
+  maxLength, // ✅ NEW
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -33,6 +34,7 @@ const CustomInput = ({
           onChangeText={onChangeText}
           secureTextEntry={secureTextEntry && !isPasswordVisible}
           keyboardType={keyboardType || 'default'}
+          maxLength={maxLength} // ✅ PASS HERE
           placeholderTextColor={appColors.lightText}
         />
         {secureTextEntry && (

@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import VersionCheck from 'react-native-version-check';
-import appColors from "../../theme/appColors";
+import appColors from '../../theme/appColors';
 import { fontSizes } from '../../theme/appConstant';
+import fonts from '../../theme/appFonts';
 
 const UpdateModal = () => {
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
@@ -21,18 +22,18 @@ const UpdateModal = () => {
     checkForUpdate();
   }, []);
 
- const checkForUpdate = async () => {
-  try {
-    const updateInfo = await VersionCheck.needUpdate();
+  const checkForUpdate = async () => {
+    try {
+      const updateInfo = await VersionCheck.needUpdate();
 
-    if (updateInfo?.isNeeded) {
-      setStoreUrl(updateInfo.storeUrl);
-      setIsUpdateAvailable(true);
+      if (updateInfo?.isNeeded) {
+        setStoreUrl(updateInfo.storeUrl);
+        setIsUpdateAvailable(true);
+      }
+    } catch (e) {
+      console.log('Version check error', e);
     }
-  } catch (e) {
-    console.log('Version check error', e);
-  }
-};
+  };
 
   const handleUpdatePress = () => {
     if (storeUrl) {
@@ -44,7 +45,6 @@ const UpdateModal = () => {
     <Modal visible={isUpdateAvailable} transparent animationType="fade">
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => setIsUpdateAvailable(false)}
@@ -63,7 +63,6 @@ const UpdateModal = () => {
               <Text style={styles.buttonText}>Update Now</Text>
             </TouchableOpacity>
           </View>
-
         </View>
       </View>
     </Modal>
@@ -84,29 +83,29 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 20,
-    fontFamily: 'Inter-SemiBold',
+    fontSize: 18,
+    fontFamily: fonts.InterBold,
     marginBottom: 10,
     color: appColors.black,
   },
   message: {
-    fontSize: fontSizes.FONT13,
+    fontSize: fontSizes.FONT14,
     textAlign: 'center',
     marginBottom: 20,
-    fontFamily: 'Inter-Regular',
+    fontFamily: fonts.InterMedium,
     lineHeight: 20,
     color: appColors.font,
   },
   button: {
-    backgroundColor: appColors.darkBlue,
+    backgroundColor: appColors.black,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
-    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    fontFamily: fonts.InterSemiBold,
   },
   closeButton: {
     alignItems: 'flex-end',

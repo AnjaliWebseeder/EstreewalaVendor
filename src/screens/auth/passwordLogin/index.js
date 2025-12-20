@@ -19,6 +19,7 @@ import { loginVendor, resetVendorState } from '../../../redux/slices/loginSlice'
 import { VendorContext } from '../../../utils/context/vendorContext';
 import { getFcmToken } from '../../../utils/notification/notificationService';
 import { updateFcmToken } from '../../../redux/slices/notificationSlice';
+import { getMySubscriptions } from '../../../redux/slices/subscriptionSlice';
 
 const PasswordLoginScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -27,7 +28,7 @@ const PasswordLoginScreen = ({ navigation }) => {
   const [errors, setErrors] = useState({});
   const { showToast } = useToast();
   const { loading } = useSelector((state) => state.login);
-  const { login, saveUserDetails } = useContext(VendorContext);
+  const { login, markSubscriptionActive, saveUserDetails } = useContext(VendorContext);
   
   // ✅ Password validation regex (same as ResetPassword screen)
   const passwordRegex =
@@ -49,46 +50,108 @@ const PasswordLoginScreen = ({ navigation }) => {
     }
   };
 
+  // const handleLogin = async () => {
+  //   const newErrors = {};
+
+  //   // ✅ Email validation
+  //   if (!email.trim()) newErrors.email = 'Email is required';
+  //   else if (!/\S+@\S+\.\S+/.test(email))
+  //     newErrors.email = 'Enter a valid email address';
+
+  //   // ✅ Password validation
+  //   if (!password.trim()) {
+  //     newErrors.password = 'Password is required';
+  //   } else if (!passwordRegex.test(password)) {
+  //     newErrors.password =
+  //       'Password must be at least 8 characters, include a capital letter, a number and a special character';
+  //   }
+
+  //   setErrors(newErrors);
+  //   if (Object.keys(newErrors).length > 0) return;
+
+  //   const payload = { email: email.trim(), password };
+
+  //   try {
+  //     const resultAction = await dispatch(loginVendor(payload));
+  //     if (loginVendor.fulfilled.match(resultAction)) {
+  //         const {token,user} = resultAction.payload
+    
+  //       await login(token, user);
+  //       await dispatch(saveFcmTokenAfterLogin());
+          
+  //       setTimeout(() => {
+  //         navigation.replace('SubscriptionPlans');
+  //       }, 1500);
+  //     } else if (loginVendor.rejected.match(resultAction)) {
+  //       showToast(resultAction?.payload?.message || 'Sign In Failed', 'error');
+  //     }
+  //   } catch (err) {
+  //     console.error('Sign In Failed:', err);
+  //     showToast(err || 'Sign In Failed', 'error');
+  //   }
+  // };
+
+
   const handleLogin = async () => {
     const newErrors = {};
-
-    // ✅ Email validation
+  
     if (!email.trim()) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(email))
       newErrors.email = 'Enter a valid email address';
-
-    // ✅ Password validation
+  
     if (!password.trim()) {
       newErrors.password = 'Password is required';
     } else if (!passwordRegex.test(password)) {
       newErrors.password =
         'Password must be at least 8 characters, include a capital letter, a number and a special character';
     }
-
+  
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
-
-    const payload = { email: email.trim(), password };
-
+  
     try {
-      const resultAction = await dispatch(loginVendor(payload));
-      if (loginVendor.fulfilled.match(resultAction)) {
-          const {token,user} = resultAction.payload
-    
-        await login(token, user);
-        await dispatch(saveFcmTokenAfterLogin());
-          
-        setTimeout(() => {
-          navigation.replace('SubscriptionPlans');
-        }, 1500);
-      } else if (loginVendor.rejected.match(resultAction)) {
-        showToast(resultAction?.payload?.message || 'Sign In Failed', 'error');
+      // 🔐 LOGIN
+      const result = await dispatch(
+        loginVendor({ email: email.trim(), password }),
+      ).unwrap();
+  
+      const { token, user } = result;
+  
+      // ✅ Save auth in context
+      await login(token, user);
+  
+      // 🔔 Save FCM
+      await dispatch(saveFcmTokenAfterLogin());
+  
+      // 🔁 FETCH SUBSCRIPTIONS
+      const subResult = await dispatch(getMySubscriptions()).unwrap();
+      const subscriptions = subResult?.subscriptions || [];
+  
+      const hasActiveSubscription = subscriptions.some(
+        sub => sub.status === 'active',
+      );
+  
+      if (hasActiveSubscription) {
+        // ✅ VERY IMPORTANT
+        await markSubscriptionActive();
+  
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'SubscriptionPlans' }],
+        });
       }
     } catch (err) {
-      console.error('Sign In Failed:', err);
-      showToast(err || 'Sign In Failed', 'error');
+      console.log('❌ Login failed:', err);
+      showToast(err?.message || 'Login failed', 'error');
     }
   };
+  
+
 
   // ✅ Live validation for email
   const handleEmailChange = (text) => {

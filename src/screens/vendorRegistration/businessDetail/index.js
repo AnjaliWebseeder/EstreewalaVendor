@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import InputField from "../../../components/InputField";
+import InputField from '../../../components/InputField';
 import appColors from '../../../theme/appColors';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { styles } from "../styles";
+import { styles } from '../styles';
 
 const BusinessDetails = ({
   businessName,
   setBusinessName,
+  city,
+  setCity,
   selectedLocation,
   setSelectedLocation,
 }) => {
-
   const navigation = useNavigation();
 
   React.useEffect(() => {
@@ -20,20 +21,19 @@ const BusinessDetails = ({
     }
   }, [businessName, selectedLocation]);
 
-  const handleLocationSelect = (locationData) => {
-    console.log("📍 Location selected in BusinessDetails:", locationData);
+  const handleLocationSelect = locationData => {
+    console.log('📍 Location selected in BusinessDetails:', locationData);
     setSelectedLocation(locationData);
   };
 
   const handleAddressPress = () => {
-    navigation.navigate('SelectLocation', { 
+    navigation.navigate('SelectLocation', {
       onLocationSelect: handleLocationSelect,
-      initialLocation: selectedLocation 
+      initialLocation: selectedLocation,
     });
   };
 
-
- return (
+  return (
     <View style={styles.stepContainer}>
       {/* Business Name */}
       <InputField
@@ -41,6 +41,15 @@ const BusinessDetails = ({
         value={businessName}
         onChangeText={text => setBusinessName(text)}
         placeholder="Enter Business Name"
+        inputStyle={styles.largeInput}
+        labelStyle={styles.largeLabel}
+      />
+
+      <InputField
+        label="City*"
+        value={city}
+        onChangeText={text => setCity(text)}
+        placeholder="Enter City"
         inputStyle={styles.largeInput}
         labelStyle={styles.largeLabel}
       />
@@ -58,13 +67,17 @@ const BusinessDetails = ({
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          paddingVertical: 9
+          paddingVertical: 9,
         }}
       >
-        <Text style={{ 
-          color: selectedLocation?.address ? appColors.font : appColors.placeholder,
-          flex: 1 
-        }}>
+        <Text
+          style={{
+            color: selectedLocation?.address
+              ? appColors.font
+              : appColors.placeholder,
+            flex: 1,
+          }}
+        >
           {selectedLocation?.address || 'Select Laundry Shop Address'}
         </Text>
         <Icon name="location-outline" size={20} color={appColors.secondary} />
@@ -72,6 +85,5 @@ const BusinessDetails = ({
     </View>
   );
 };
-
 
 export default BusinessDetails;

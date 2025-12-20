@@ -177,6 +177,35 @@ export const styles = StyleSheet.create({
     borderColor: appColors.secondary,
     transform: [{ scale: 1.01 }],
   },
+  serviceIconContainer: {
+    marginRight: 12,
+  },
+  serviceText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#111827',
+    fontFamily:fonts.InterSemiBold
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginTop: 12,
+  },
+  lockedInfo: {
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: '#F9FAFB',        // light neutral background
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',             // soft gray border
+    color: '#6B7280',                   // muted text (not error red)
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: 'center',
+  },
+
   serviceName: {
     color: appColors.font,
     fontFamily: fonts.InterMedium,

@@ -19,8 +19,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import appColors from '../../../theme/appColors';
 import FilterIcon from '../../../assets/Icons/filter';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function SetPrice({
+  services = [], // ✅ from props
+  readOnly = false,
   onOpenFilter,
   selectedFilter,
   onPricingUpdate,
@@ -29,8 +32,8 @@ export default function SetPrice({
   const [priceInput, setPriceInput] = useState('');
   const [activeServiceId, setActiveServiceId] = useState(null);
   const {
-    services,
-    selectedServiceIds,
+    //  services,
+    // selectedServiceIds,
     priceMap,
     setItemPrice,
     getAllPricingData,
@@ -42,8 +45,8 @@ export default function SetPrice({
 
   // Initialize active service
   useEffect(() => {
-    if (selectedServiceIds.length > 0) {
-      setActiveServiceId(selectedServiceIds[0]);
+    if (services.length > 0) {
+      setActiveServiceId(services[0].id);
     }
 
     Animated.timing(fadeAnim, {
@@ -51,7 +54,7 @@ export default function SetPrice({
       duration: 400,
       useNativeDriver: true,
     }).start();
-  }, []);
+  }, [services]);
 
   // Notify parent when pricing changes
   useEffect(() => {
@@ -73,7 +76,12 @@ export default function SetPrice({
     Object.keys(mockData).forEach(category => {
       const categoryItems = mockData[category].map(item => ({
         ...item,
-        category: category === 'mens' ? 'man' : category === 'womens' ? 'woman' : 'kids',
+        category:
+          category === 'mens'
+            ? 'man'
+            : category === 'womens'
+            ? 'woman'
+            : 'kids',
       }));
       allItems = [...allItems, ...categoryItems];
     });
@@ -93,13 +101,18 @@ export default function SetPrice({
     if (mockData[dataKey]) {
       return mockData[dataKey].map(item => ({
         ...item,
-        category: selectedFilter === 'mens' ? 'man' : selectedFilter === 'womens' ? 'woman' : 'kids',
+        category:
+          selectedFilter === 'mens'
+            ? 'man'
+            : selectedFilter === 'womens'
+            ? 'woman'
+            : 'kids',
       }));
     }
     return [];
   };
 
-  const startEditing = (item) => {
+  const startEditing = item => {
     Keyboard.dismiss();
     setEditingItemId(item.id);
     // Get service-specific price
@@ -131,7 +144,8 @@ export default function SetPrice({
       // Get service-specific price
       const price = getItemPrice(activeServiceId, item.id, item.price);
       const isEditing = editingItemId === item.id;
-      const isCustomPrice = getItemPrice(activeServiceId, item.id) !== undefined;
+      const isCustomPrice =
+        getItemPrice(activeServiceId, item.id) !== undefined;
 
       return (
         <Animated.View
@@ -146,7 +160,8 @@ export default function SetPrice({
               <Text style={styles.itemName}>{item.name}</Text>
               <View style={styles.itemMeta}>
                 <Text style={styles.itemCategory}>
-                  {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
+                  {item.category.charAt(0).toUpperCase() +
+                    item.category.slice(1)}
                 </Text>
                 <Text style={styles.basePrice}>Base: ₹{item.price}</Text>
               </View>
@@ -212,7 +227,14 @@ export default function SetPrice({
         </Animated.View>
       );
     },
-    [editingItemId, priceInput, priceMap, fadeAnim, activeServiceId, getItemPrice],
+    [
+      editingItemId,
+      priceInput,
+      priceMap,
+      fadeAnim,
+      activeServiceId,
+      getItemPrice,
+    ],
   );
 
   const filteredItems = getFilteredItems();
@@ -224,31 +246,40 @@ export default function SetPrice({
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <KeyboardAvoidingView
+      {/* <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      > */}
+      <KeyboardAwareScrollView
+        contentContainerStyle={{ flex: 1 }}
+        keyboardShouldPersistTaps="handled"
+        extraScrollHeight={20}
+        enableOnAndroid
       >
         <View style={styles.container}>
           {/* Service Tabs */}
           <View style={styles.serviceTabsContainer}>
             <FlatList
-              data={services.filter(s => selectedServiceIds.includes(s.id))}
+              data={services}
               horizontal
               keyExtractor={item => item.id.toString()}
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ paddingHorizontal: 14 }}
               renderItem={({ item: service }) => (
                 <TouchableOpacity
+                  // disabled={readOnly} // 🔒 subscription lock
                   onPress={() => setActiveServiceId(service.id)}
                   style={[
                     styles.serviceTab,
                     activeServiceId === service.id && styles.serviceTabActive,
+                    // readOnly && { opacity: 0.7 },
                   ]}
                 >
                   <Text
                     style={[
                       styles.serviceTabText,
-                      activeServiceId === service.id && styles.serviceTabTextActive,
+                      activeServiceId === service.id &&
+                        styles.serviceTabTextActive,
                     ]}
                   >
                     {service.name}
@@ -256,7 +287,7 @@ export default function SetPrice({
                 </TouchableOpacity>
               )}
               ListEmptyComponent={
-                <Text style={styles.noServicesText}>No services selected</Text>
+                <Text style={styles.noServicesText}>No services available</Text>
               }
             />
           </View>
@@ -265,7 +296,8 @@ export default function SetPrice({
           {activeServiceId && (
             <View style={styles.currentServiceInfo}>
               <Text style={styles.currentServiceText}>
-                Setting prices for: <Text style={styles.serviceName}>
+                Setting prices for:{' '}
+                <Text style={styles.serviceName}>
                   {services.find(s => s.id === activeServiceId)?.name}
                 </Text>
               </Text>
@@ -306,7 +338,8 @@ export default function SetPrice({
             }
           />
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
+      {/* </KeyboardAvoidingView> */}
     </SafeAreaView>
   );
 }

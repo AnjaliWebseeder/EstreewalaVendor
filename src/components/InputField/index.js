@@ -10,7 +10,8 @@ export default function InputField({
   placeholder,
   keyboardType = 'default',
   error,
-  rowStyle
+  rowStyle,
+  maxLength, // ✅ NEW
 }) {
   return (
     <View style={[styles.row,rowStyle]}>
@@ -24,6 +25,7 @@ export default function InputField({
         onChangeText={onChangeText}
         placeholder={placeholder}
         keyboardType={keyboardType}
+        maxLength={maxLength} // ✅ PASS HERE
         placeholderTextColor={appColors.placeholder}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}

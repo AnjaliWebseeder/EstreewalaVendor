@@ -21,6 +21,8 @@ addTokenListener((token) => {
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = currentToken || getGlobalToken();
+
+    console.log("find token ===>>>", token)
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
