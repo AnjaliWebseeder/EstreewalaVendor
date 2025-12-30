@@ -111,6 +111,14 @@ const VendorRegistration = ({ route }) => {
     deliveryOption,
   ]);
 
+  const resolveStepFromLocalData = () => {
+    if (!businessName || !selectedLocation || !city) return 0;
+    if (!owners || owners.length === 0) return 1;
+    if (!selectedServiceIds || selectedServiceIds.length === 0) return 2;
+    if (!pricingData) return 3;
+    return 4;
+  };
+
   const handleBusinessNameChange = text => {
     updateBusinessDetails(text, selectedLocation, city);
   };
@@ -136,22 +144,23 @@ const VendorRegistration = ({ route }) => {
     const fetchStatus = async () => {
       try {
         const res = await dispatch(getCompletionStatus()).unwrap();
-        // const stepIndex = (res?.completionStep || 0) - 1;
-        // const safeIndex = Math.max(
-        //   0,
-        //   Math.min(stepIndex + 1, steps.length - 1),
-        // );
 
-        const completed = res?.completionStep || 0;
+        const apiCompletedStep = res?.completionStep || 0;
+        const derivedStep = resolveStepFromLocalData();
 
-        // next step = completed step
-        const nextStepIndex = Math.min(completed, steps.length - 1);
+        // 🔐 SAFE STEP (no jumping)
+        const safeStep = Math.min(
+          apiCompletedStep,
+          derivedStep,
+          steps.length - 1,
+        );
 
-        setCompletedStep(completed);
-        setLocalCurrentStep(nextStepIndex);
+        console.log('API step:', apiCompletedStep);
+        console.log('Derived step:', derivedStep);
+        console.log('Final safe step:', safeStep);
 
-        // setCompletedStep(stepIndex >= 0 ? stepIndex : 0);
-        // setLocalCurrentStep(safeIndex);
+        setCompletedStep(apiCompletedStep);
+        setLocalCurrentStep(safeStep);
 
         if (res?.isComplete) {
           await completeVendorRegistration();
@@ -163,15 +172,16 @@ const VendorRegistration = ({ route }) => {
         showToast(err?.message, 'error');
       }
     };
+
     fetchStatus();
   }, [dispatch]);
 
   // If Redux updates step externally
-  useEffect(() => {
-    if (apiCurrentStep !== undefined) {
-      setLocalCurrentStep(apiCurrentStep);
-    }
-  }, [apiCurrentStep]);
+  // useEffect(() => {
+  //   if (apiCurrentStep !== undefined) {
+  //     setLocalCurrentStep(apiCurrentStep);
+  //   }
+  // }, [apiCurrentStep]);
 
   const extractCityFromAddress = (address = '') => {
     if (!address) return '';
@@ -245,27 +255,8 @@ const VendorRegistration = ({ route }) => {
             validationFailed = true;
           }
           break;
-        // case 2:
-        //   // All services are always included
-        //   const allServiceNames = [
-        //     'Ironing',
-        //     'Washing',
-        //     'Dry Wash',
-        //     'Wash & Iron',
-        //     'Steam Ironing',
-        //     'Spin Washing',
-        //     'Steam Washing',
-        //     'Stain Removal',
-        //   ];
 
-        //   const servicesPayload = {
-        //     services: allServiceNames,
-        //   };
-
-        //   console.log('✅ SERVICES PAYLOAD (All services):', servicesPayload);
-        //   await dispatch(completeStep3(servicesPayload)).unwrap();
-        //   break;
-
+        // Step 2: Services
         case 2:
           if (!services || services.length === 0) {
             setLocalError('No services available for your plan');
@@ -273,70 +264,15 @@ const VendorRegistration = ({ route }) => {
             break;
           }
 
-          // only unlocked / allowed services
-          const availableServices = services.filter(s => !s.locked);
+          // 🔥 Subscription services are valid even if locked
+          const serviceNames = services.map(s => s.name);
 
-          if (availableServices.length === 0) {
+          if (serviceNames.length === 0) {
             setLocalError('No active services available');
             validationFailed = true;
             break;
           }
           break;
-
-        // case 3:
-        //   const pricing = formData.pricingData?.itemPricing;
-        //   console.log('PRICING IS', pricing);
-
-        //   if (!pricing || Object.keys(pricing).length === 0) {
-        //     setLocalError('Please set prices for each selected service');
-        //     validationFailed = true;
-        //     break;
-        //   }
-
-        //   // Validate every service/category/item
-        //   let missingPriceItems = [];
-
-        //   for (const serviceName of Object.keys(pricing)) {
-        //     const categories = pricing[serviceName];
-
-        //     for (const category of Object.keys(categories)) {
-        //       const items = categories[category];
-
-        //       for (const item of items) {
-        //         // Check if price is undefined, null, empty, or 0
-        //         if (
-        //           item.price === undefined ||
-        //           item.price === null ||
-        //           item.price === '' ||
-        //           Number(item.price) <= 0
-        //         ) {
-        //           missingPriceItems.push({
-        //             service: serviceName,
-        //             category: category,
-        //             item: item.item,
-        //             price: item.price,
-        //           });
-        //         }
-        //       }
-        //     }
-        //   }
-
-        //   if (missingPriceItems.length > 0) {
-        //     console.log('❌ Missing/Invalid prices found:', missingPriceItems);
-
-        //     // Show a more specific error message
-        //     const firstMissingItem = missingPriceItems[0];
-        //     showToast(
-        //       `Please set a valid price for ${firstMissingItem.item} under ${firstMissingItem.service}`,
-        //       'error',
-        //     );
-
-        //     validationFailed = true;
-        //     break;
-        //   }
-
-        //   console.log('✅ All prices are valid');
-        //   break;
 
         case 3: {
           const pricing = formData.pricingData?.itemPricing;
@@ -439,40 +375,13 @@ const VendorRegistration = ({ route }) => {
           await dispatch(completeStep2({ owners: ownerData })).unwrap();
           break;
 
-        // case 2:
-        //   const serviceNames = formData.selectedServiceIds
-        //     .flatMap(id => {
-        //       const service = services.find(x => x.id === id);
-        //       if (!service) return [];
-
-        //       if (id === 5) {
-        //         // Return all premium service names
-        //         return services
-        //           .filter(s => [6, 7, 8, 9].includes(s.id))
-        //           .map(s => s.name);
-        //       } else {
-        //         // Return the service name
-        //         return [service.name];
-        //       }
-        //     })
-        //     .filter((name, index, array) => array.indexOf(name) === index); // Remove duplicates
-
-        //   console.log('✅ SERVICES FOR BACKEND:', serviceNames);
-        //   await dispatch(completeStep3({ services: serviceNames })).unwrap();
-        //   break;
-
         case 2:
-          const serviceNames = services.filter(s => !s.locked).map(s => s.name);
-
+          // const serviceNames = services.filter(s => !s.locked).map(s => s.name);
+          const serviceNames = services.map(s => s.name);
           console.log('✅ SERVICES FOR BACKEND (dynamic):', serviceNames);
 
           await dispatch(completeStep3({ services: serviceNames })).unwrap();
           break;
-
-        // case 3:
-        //   console.log('Submitting pricing data:', formData.pricingData);
-        //   await dispatch(completeStep4(formData.pricingData)).unwrap();
-        //   break;
 
         case 3: {
           const pricing = formData.pricingData?.itemPricing;
@@ -620,17 +529,28 @@ const VendorRegistration = ({ route }) => {
       />
       <View style={styles.mainHeader}>
         <View style={styles.headerStyle}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
-            <BackIcon />
-          </TouchableOpacity>
+          {/* Left side */}
+          {fromScreen ? (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.backButton}
+            >
+              <BackIcon />
+            </TouchableOpacity>
+          ) : (
+            // 🔥 Placeholder to keep title centered
+            <View style={styles.backButtonPlaceholder} />
+          )}
+
+          {/* Title */}
           <Text style={styles.titleStyle}>
             {fromScreen ? 'Vendor Details' : 'Vendor Registration'}
           </Text>
+
+          {/* Right side (already exists) */}
           <View style={styles.right} />
         </View>
+
         {renderStepSlider()}
       </View>
 
@@ -687,29 +607,6 @@ const VendorRegistration = ({ route }) => {
               titleStyle={styles.largeTitle}
               subtitleStyle={styles.largeSubtitle}
             />
-
-            {/* All Services Section - All Compulsory */}
-            {/* <View style={styles.sectionContainer}>
-              <View style={styles.servicesContainer}>
-                {services.map(s => (
-                  <View
-                    key={s.id}
-                    style={[
-                      styles.serviceCard,
-                      styles.selectedServiceCard,
-                      styles.compulsoryCard,
-                    ]}
-                  >
-                    <Icon
-                      name="checkmark-circle"
-                      size={17}
-                      color={appColors.success}
-                    />
-                    <Text style={styles.serviceName}>{s.name}</Text>
-                  </View>
-                ))}
-              </View>
-            </View> */}
 
             {services?.length > 0 ? (
               <View style={styles.servicesContainer}>

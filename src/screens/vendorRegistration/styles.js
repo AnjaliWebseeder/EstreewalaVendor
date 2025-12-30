@@ -1,13 +1,13 @@
 // Updated styles.js
-import { StyleSheet } from "react-native";
-import appColors from "../../theme/appColors";
-import { fontSizes, windowHeight, windowWidth } from "../../theme/appConstant";
-import fonts from "../../theme/appFonts";
+import { StyleSheet } from 'react-native';
+import appColors from '../../theme/appColors';
+import { fontSizes, windowHeight, windowWidth } from '../../theme/appConstant';
+import fonts from '../../theme/appFonts';
 
 export const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: appColors.white 
+  container: {
+    flex: 1,
+    backgroundColor: appColors.white,
   },
   mainHeader: {
     backgroundColor: appColors.secondary,
@@ -42,20 +42,23 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // 🔥 Same size as backButton
+  backButtonPlaceholder: {
+    height: windowHeight(25),
+    width: windowHeight(25),
+  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
   },
-  mainContainer: {
- 
-  },
+  mainContainer: {},
   stepContainer: {
     marginHorizontal: windowHeight(14),
     marginTop: windowHeight(12),
   },
-  
+
   // Enhanced Typography
   largeTitle: {
     fontSize: fontSizes.FONT22,
@@ -68,11 +71,10 @@ export const styles = StyleSheet.create({
     color: appColors.gray,
     marginBottom: windowHeight(16),
   },
-  mainView:{
-    marginHorizontal:18,
-    marginTop:15,
-    marginBottom:1,
-    
+  mainView: {
+    marginHorizontal: 18,
+    marginTop: 15,
+    marginBottom: 1,
   },
   largeInput: {
     fontSize: fontSizes.FONT16,
@@ -83,23 +85,22 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.InterSemiBold,
     fontWeight: '600',
     fontSize: fontSizes.FONT17,
-    marginTop:2
+    marginTop: 2,
   },
 
   // Enhanced Stepper
   stepperContainer: {
     marginVertical: windowHeight(16),
-    marginTop:windowHeight(24)
+    marginTop: windowHeight(24),
   },
   stepsSegmentsContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    
   },
   stepWrapper: {
     flex: 1,
     alignItems: 'center',
-     marginHorizontal: windowWidth(6),
+    marginHorizontal: windowWidth(6),
   },
   stepSegment: {
     width: '100%',
@@ -107,8 +108,6 @@ export const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: appColors.lightBlue,
     marginBottom: windowHeight(6),
-    
-    
   },
   activeSegment: {
     backgroundColor: appColors.white,
@@ -131,7 +130,7 @@ export const styles = StyleSheet.create({
   completedStepLabel: {
     color: appColors.white,
     fontWeight: '600',
-      fontSize: fontSizes.FONT9,
+    fontSize: fontSizes.FONT9,
   },
 
   // Enhanced Buttons
@@ -152,7 +151,7 @@ export const styles = StyleSheet.create({
   addButtonText: {
     fontFamily: fonts.InterSemiBold,
     fontSize: fontSizes.FONT16,
-    fontWeight: "600",
+    fontWeight: '600',
     color: appColors.white,
     marginLeft: windowHeight(6),
   },
@@ -184,7 +183,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     color: '#111827',
-    fontFamily:fonts.InterSemiBold
+    fontFamily: fonts.InterSemiBold,
   },
   emptyStateText: {
     fontSize: 16,
@@ -196,11 +195,11 @@ export const styles = StyleSheet.create({
     marginTop: 12,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    backgroundColor: '#F9FAFB',        // light neutral background
+    backgroundColor: '#F9FAFB', // light neutral background
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E5E7EB',             // soft gray border
-    color: '#6B7280',                   // muted text (not error red)
+    borderColor: '#E5E7EB', // soft gray border
+    color: '#6B7280', // muted text (not error red)
     fontSize: 12,
     lineHeight: 18,
     textAlign: 'center',
@@ -217,120 +216,119 @@ export const styles = StyleSheet.create({
     color: appColors.white,
     fontWeight: '600',
   },
-sectionContainer: {
-  marginBottom: 10,
-},
-sectionTitle: {
-  fontSize: 16,
-  fontWeight: 'bold',
-  marginBottom: 4,
-  color: appColors.text,
-},
-masterCardContainer: {
-  backgroundColor: '#f8f9fa',
-  borderRadius: 12,
-  borderWidth: 1,
-  borderColor: '#e9ecef',
-  overflow: 'hidden',
-  marginBottom: 12,
-  marginTop:2
-},
-selectedMasterContainer: {
-  backgroundColor: '#e9edf1ff',
-  borderColor: appColors.primary,
-},
-masterCardHeader: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: 16,
-  paddingVertical:10
-},
-masterCardLeft: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  flex: 1,
-},
-masterCardTextContainer: {
-  marginLeft: 12,
-  flex: 1,
-},
-masterCardTitle: {
-  fontSize: 14,
-  fontWeight: '600',
-  color: appColors.text,
-  marginBottom: 2,
-},
-masterCardSubtitle: {
-  fontSize: 10,
-  color: '#666',
-},
-dropdownContent: {
-  padding: 16,
-  paddingTop: 0,
-  backgroundColor: '#fff',
-  borderTopWidth: 1,
-  borderTopColor: '#f0f0f0',
-},
-includedServicesHeader: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  marginBottom: 12,
-  paddingTop: 12,
-  borderTopWidth: 1,
-  borderTopColor: '#f0f0f0',
-},
-includedServicesTitle: {
-  fontSize: 14,
-  fontWeight: '500',
-  color: '#666',
-  marginLeft: 8,
-},
-includedServicesGrid: {
-  marginBottom: 12,
-},
-includedServiceItem: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingVertical: 8,
-  borderBottomWidth: 1,
-  borderBottomColor: '#f8f8f8',
-},
-serviceBadge: {
-  width: 24,
-  height: 24,
-  borderRadius: 12,
-  backgroundColor: appColors.primary + '20',
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginRight: 12,
-},
-serviceBadgeNumber: {
-  fontSize: 12,
-  fontWeight: '600',
-  color: appColors.primary,
-},
-includedServiceName: {
-  flex: 1,
-  fontSize: 14,
-  color: '#555',
-},
-allSelectedNote: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  backgroundColor: appColors.success + '15',
-  padding: 10,
-  borderRadius: 8,
-  marginTop: 1,
-  paddingVertical:0
-},
-allSelectedText: {
-  fontSize: 13,
-  color: appColors.success,
-  marginLeft: 8,
-  fontWeight: '500',
-},
-
+  sectionContainer: {
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    color: appColors.text,
+  },
+  masterCardContainer: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    overflow: 'hidden',
+    marginBottom: 12,
+    marginTop: 2,
+  },
+  selectedMasterContainer: {
+    backgroundColor: '#e9edf1ff',
+    borderColor: appColors.primary,
+  },
+  masterCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    paddingVertical: 10,
+  },
+  masterCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  masterCardTextContainer: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  masterCardTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: appColors.text,
+    marginBottom: 2,
+  },
+  masterCardSubtitle: {
+    fontSize: 10,
+    color: '#666',
+  },
+  dropdownContent: {
+    padding: 16,
+    paddingTop: 0,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  includedServicesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  includedServicesTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666',
+    marginLeft: 8,
+  },
+  includedServicesGrid: {
+    marginBottom: 12,
+  },
+  includedServiceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f8f8f8',
+  },
+  serviceBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: appColors.primary + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  serviceBadgeNumber: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: appColors.primary,
+  },
+  includedServiceName: {
+    flex: 1,
+    fontSize: 14,
+    color: '#555',
+  },
+  allSelectedNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: appColors.success + '15',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 1,
+    paddingVertical: 0,
+  },
+  allSelectedText: {
+    fontSize: 13,
+    color: appColors.success,
+    marginLeft: 8,
+    fontWeight: '500',
+  },
 
   // Enhanced Options Section
   optionsContainer: {
@@ -365,8 +363,8 @@ allSelectedText: {
 
   // Enhanced Navigation Buttons
   navButtons: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: windowHeight(14),
     paddingVertical: windowHeight(8),
     backgroundColor: appColors.white,
@@ -374,7 +372,7 @@ allSelectedText: {
     borderTopColor: appColors.borderLight,
   },
   backButtonContainer: {
-  flexDirection: 'row',
+    flexDirection: 'row',
 
     backgroundColor: appColors.white,
     paddingVertical: windowHeight(6),
@@ -384,8 +382,8 @@ allSelectedText: {
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
-    borderColor:appColors.secondary,
-    borderWidth:1
+    borderColor: appColors.secondary,
+    borderWidth: 1,
   },
   backButtonText: {
     color: appColors.secondary,
@@ -393,17 +391,15 @@ allSelectedText: {
     fontSize: fontSizes.FONT15,
     fontWeight: '600',
     marginLeft: windowHeight(4),
-      paddingHorizontal:10,
-    paddingLeft:5,
+    paddingHorizontal: 10,
+    paddingLeft: 5,
   },
   disabledButtonStyle: {
- 
-  opacity: 0.5,              // Makes it look inactive
-  backgroundColor: appColors.border, // Optional subtle background
-  borderColor: appColors.gray,          // Match your theme
-  borderWidth: 1,
-
-},
+    opacity: 0.5, // Makes it look inactive
+    backgroundColor: appColors.border, // Optional subtle background
+    borderColor: appColors.gray, // Match your theme
+    borderWidth: 1,
+  },
   nextButton: {
     flexDirection: 'row',
 
@@ -422,11 +418,11 @@ allSelectedText: {
     fontSize: fontSizes.FONT15,
     fontWeight: '600',
     marginRight: windowHeight(4),
-    paddingHorizontal:10,
-    paddingLeft:15
+    paddingHorizontal: 10,
+    paddingLeft: 15,
   },
-  buttonStyle:{
-      paddingRight:10
+  buttonStyle: {
+    paddingRight: 10,
   },
   submitButton: {
     flexDirection: 'row',
@@ -436,7 +432,7 @@ allSelectedText: {
     paddingHorizontal: windowHeight(20),
     borderRadius: 8,
     elevation: 4,
-    shadowColor:  '#4CAF50',
+    shadowColor: '#4CAF50',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -450,13 +446,14 @@ allSelectedText: {
   },
 
   // Enhanced Error Style
-   errorStyle:{
-     color:appColors.error,textAlign:"left",marginHorizontal:windowHeight(14),
-     fontSize:fontSizes.FONT14,
-     fontWeight:"500",
-     marginTop:windowHeight(4)
+  errorStyle: {
+    color: appColors.error,
+    textAlign: 'left',
+    marginHorizontal: windowHeight(14),
+    fontSize: fontSizes.FONT14,
+    fontWeight: '500',
+    marginTop: windowHeight(4),
   },
-
 
   titleStyle: {
     fontSize: fontSizes.FONT20,

@@ -21,6 +21,8 @@ export const getCompletionStatus = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(COMPLETIONSTATUS);
+      console.log('✅ Completion Status API RAW RESPONSE:', response);
+      console.log('✅ Completion Status API DATA:', response.data);
       return response.data;
     } catch (error) {
       console.log(
