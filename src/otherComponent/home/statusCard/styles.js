@@ -1,7 +1,5 @@
-// styles.js
-import { StyleSheet } from "react-native";
-import { windowHeight } from "../../../theme/appConstant";
-import appColors from "../../../theme/appColors";
+import { StyleSheet } from 'react-native';
+import { windowHeight } from '../../../theme/appConstant';
 
 export const styles = StyleSheet.create({
   grid: {
@@ -15,19 +13,13 @@ export const styles = StyleSheet.create({
     width: '48.5%',
     minHeight: 170,
     borderRadius: 20,
-    padding: 0,
-    paddingHorizontal:3,
-    marginBottom: 10,
+    marginBottom: 12,
     overflow: 'hidden',
-    // Modern shadow effects
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
     backgroundColor: '#fff',
   },
   gradientOverlay: {
@@ -35,13 +27,14 @@ export const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: '100%',
-    opacity: 0.6,
+    bottom: 0,
+    borderRadius: 20,
+    opacity: 0.9,
   },
   cardContent: {
-    padding: 10,
     flex: 1,
     justifyContent: 'space-between',
+    padding: 16,
   },
   header: {
     flexDirection: 'row',
@@ -50,34 +43,29 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
   },
   iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    width: 50,
+    height: 50,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
-    backdropFilter: 'blur(10px)',
   },
   statusBadge: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 14,
   },
   statusText: {
     fontSize: 10,
     fontWeight: '700',
     color: '#fff',
-    letterSpacing: 0.5,
   },
   cardTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: '#fff',
     marginBottom: 8,
-    lineHeight: 18,
-    opacity: 0.9,
+    lineHeight: 20,
   },
   countSection: {
     flexDirection: 'row',
@@ -85,19 +73,16 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   countText: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '800',
     color: '#fff',
-    letterSpacing: -0.5,
   },
   arrowCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
 });

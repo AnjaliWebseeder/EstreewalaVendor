@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../api/axiosConfig';
+import { BASE_URL } from '../../api';
 
 /* -------------------- 1️⃣ Get Orders by Status -------------------- */
 export const fetchVendorOrders = createAsyncThunk(
@@ -15,7 +16,7 @@ export const fetchVendorOrders = createAsyncThunk(
 
       if (!token) throw new Error('No token found. Please log in again.');
 
-      const url = `https://api.estreewalla.com/api/v1/vendors/order?status=${status}`;
+      const url = `${BASE_URL}/vendors/order?status=${status}`;
       const response = await axiosInstance.get(url, {
         headers: { Authorization: `Bearer ${token}` },
         timeout: 10000,
@@ -48,7 +49,7 @@ export const fetchOrderSummary = createAsyncThunk(
 
       if (!token) throw new Error('No token found. Please log in again.');
 
-      const url = `https://api.estreewalla.com/api/v1/vendors/orders/${orderId}/summary`;
+      const url = `${BASE_URL}/vendors/orders/${orderId}/summary`;
       const response = await axiosInstance.get(url, {
         headers: { Authorization: `Bearer ${token}` },
         timeout: 10000,
@@ -89,7 +90,7 @@ export const updateOrderStatus = createAsyncThunk(
 
       const payload = finalReason ? { status, reason: finalReason } : { status };
 
-      const url = `https://api.estreewalla.com/api/v1/vendors/orders/${orderId}/status`;
+      const url = `${BASE_URL}/vendors/orders/${orderId}/status`;
 
       const response = await axiosInstance.put(url, payload, {
         headers: {
@@ -129,16 +130,16 @@ const vendorOrderSlice = createSlice({
     // NEW: Optimistic update for immediate UI changes
     optimisticallyUpdateOrderStatus: (state, action) => {
       const { orderId, newStatus, orderData } = action.payload;
-      
+
       // Remove from all arrays first
       state.pendingOrders = state.pendingOrders.filter(order => order.id !== orderId);
       state.acceptedOrders = state.acceptedOrders.filter(order => order.id !== orderId);
       state.completedOrders = state.completedOrders.filter(order => order.id !== orderId);
       state.rejectedOrders = state.rejectedOrders.filter(order => order.id !== orderId);
-      
+
       // Add to the appropriate array with updated status
       const updatedOrder = orderData ? { ...orderData, status: newStatus } : null;
-      
+
       if (updatedOrder) {
         switch (newStatus) {
           case 'pending':
@@ -209,14 +210,14 @@ const vendorOrderSlice = createSlice({
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
         state.statusUpdateLoading = false;
         const updatedOrder = action.payload;
-        
+
         if (updatedOrder) {
           // Remove from all arrays
           state.pendingOrders = state.pendingOrders.filter(order => order.id !== updatedOrder.id);
           state.acceptedOrders = state.acceptedOrders.filter(order => order.id !== updatedOrder.id);
           state.completedOrders = state.completedOrders.filter(order => order.id !== updatedOrder.id);
           state.rejectedOrders = state.rejectedOrders.filter(order => order.id !== updatedOrder.id);
-          
+
           // Add to correct array based on new status
           switch (updatedOrder.status) {
             case 'pending':

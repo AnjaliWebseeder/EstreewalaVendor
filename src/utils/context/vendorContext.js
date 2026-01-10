@@ -3,6 +3,9 @@ import React, { createContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAppLaunchStatus, setAppLaunched } from './appLaunchStatus';
 import { mockData } from '../data';
+import { useDispatch, useSelector } from 'react-redux';
+import { getVendorServices } from '../../redux/slices/vendorSlice';
+import Splash from '../../screens/spalsh';
 
 export const VendorContext = createContext();
 
@@ -53,6 +56,7 @@ export const addTokenListener = listener => {
 };
 
 export const VendorProvider = ({ children }) => {
+  const dispatch = useDispatch();
   const [userToken, setUserToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFirstLaunch, setIsFirstLaunch] = useState(true);
@@ -62,24 +66,26 @@ export const VendorProvider = ({ children }) => {
     useState(false);
   const [subscriptionShownOnce, setSubscriptionShownOnce] = useState(false);
 
-  // In VendorContext.js, update the services:
-  const initialServices = [
-    { id: 1, name: 'Ironing', type: 'basic' },
-    { id: 2, name: 'Washing', type: 'basic' },
-    { id: 3, name: 'Dry Wash', type: 'basic' },
-    { id: 4, name: 'Wash & Iron', type: 'basic' },
-    // Premium services - now all required
-    { id: 6, name: 'Steam Ironing', type: 'premium' },
-    { id: 7, name: 'Spin Washing', type: 'premium' },
-    { id: 8, name: 'Steam Washing', type: 'premium' },
-    { id: 9, name: 'Stain Removal', type: 'premium' },
-  ];
+  // // In VendorContext.js, update the services:
+  // const initialServices = [
+  //   { id: 1, name: 'Ironing', type: 'basic' },
+  //   { id: 2, name: 'Washing', type: 'basic' },
+  //   { id: 3, name: 'Dry Wash', type: 'basic' },
+  //   { id: 4, name: 'Wash & Iron', type: 'basic' },
+  //   // Premium services - now all required
+  //   { id: 6, name: 'Steam Ironing', type: 'premium' },
+  //   { id: 7, name: 'Spin Washing', type: 'premium' },
+  //   { id: 8, name: 'Steam Washing', type: 'premium' },
+  //   { id: 9, name: 'Stain Removal', type: 'premium' },
+  // ];
 
   // States
   const [owners, setOwners] = useState([]);
   const [branches, setBranches] = useState([]);
   const [location, setLocation] = useState(null);
-  const [services] = useState(initialServices); // Only initialServices now
+  const { services } = useSelector(state => state.vendor);
+
+  // const [services] = useState(initialServices); // Only initialServices now
   const [selectedServiceIds, setSelectedServiceIds] = useState([
     1, 2, 3, 4, 6, 7, 8, 9,
   ]);
@@ -90,6 +96,12 @@ export const VendorProvider = ({ children }) => {
   const [qrImage, setQrImage] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
+
+  useEffect(() => {
+    // logout();
+    loadStorageData();
+    dispatch(getVendorServices());
+  }, []);
 
   const [formData, setFormData] = useState({
     businessName: '',
@@ -143,7 +155,7 @@ export const VendorProvider = ({ children }) => {
         };
 
         setFormData(updatedFormData);
-        console.log('💾 Form data loaded from storage:', updatedFormData);
+        console.log('💾 Form data loaded from storage :', updatedFormData);
 
         // Sync with individual states
         setOwners(updatedFormData.owners || []);
@@ -188,17 +200,24 @@ export const VendorProvider = ({ children }) => {
 
   const updateOwners = useCallback(
     owners => {
-      setFormData(prevFormData => {
+      setFormData(prev => {
+        if (!owners || owners.length === 0) {
+          console.log('⛔ Prevented empty owners overwrite');
+          return prev;
+        }
+
         const newFormData = {
-          ...prevFormData,
+          ...prev,
           owners,
         };
+
         saveFormDataToStorage(newFormData);
         return newFormData;
       });
     },
     [saveFormDataToStorage],
   );
+
 
   const updateServices = useCallback(
     selectedServiceIds => {
@@ -217,16 +236,20 @@ export const VendorProvider = ({ children }) => {
   const updatePricing = useCallback(
     pricingData => {
       setFormData(prevFormData => {
+        console.log("prevFormData", prevFormData);
+
         const newFormData = {
           ...prevFormData,
-          pricingData,
+          pricingData, // ✅ replaces pricingData
         };
+
         saveFormDataToStorage(newFormData);
         return newFormData;
       });
     },
     [saveFormDataToStorage],
   );
+
 
   const updateDeliveryOption = useCallback(
     deliveryOption => {
@@ -325,6 +348,7 @@ export const VendorProvider = ({ children }) => {
         AsyncStorage.getItem('vendorFormData'),
       ]);
 
+
       setHasCompletedVendorRegistration(registrationCompleted === 'true');
       setHasCompletedSubscription(subscriptionCompleted === 'true');
 
@@ -382,10 +406,8 @@ export const VendorProvider = ({ children }) => {
     }
   }, []);
 
-  // Load data on mount - only once
-  useEffect(() => {
-    loadStorageData();
-  }, []); // Empty dependency array - run only once
+
+  // Empty dependency array - run only once
 
   // FIXED: Remove circular dependency useEffects
   // These are no longer needed because the sync functions handle the updates
@@ -407,6 +429,9 @@ export const VendorProvider = ({ children }) => {
         AsyncStorage.setItem('userDetails', JSON.stringify(user)),
         AsyncStorage.setItem('vendorRegistrationCompleted', 'false'),
       ]);
+
+      //  AsyncStorage.removeItem('userToken'),
+
 
       // Then update state and global auth
       setUserToken(token);
@@ -536,57 +561,26 @@ export const VendorProvider = ({ children }) => {
   };
 
   const getAllPricingData = useCallback(() => {
-    const itemPricing = {
-      'Dry Wash': { man: [], woman: [], kids: [] },
-      Washing: { man: [], woman: [], kids: [] },
-      Ironing: { man: [], woman: [], kids: [] },
-      'Wash & Iron': { man: [], woman: [], kids: [] },
-      'Steam Ironing': { man: [], woman: [], kids: [] },
-      'Spin Washing': { man: [], woman: [], kids: [] },
-      'Steam Washing': { man: [], woman: [], kids: [] },
-      'Stain Removal': { man: [], woman: [], kids: [] },
-    };
+    const activeServiceNames = services.map(s => s.name);
+    console.log('✅ Active services:', activeServiceNames);
 
-    const allServiceNames = [
-      'Dry Wash',
-      'Washing',
-      'Ironing',
-      'Wash & Iron',
-      'Steam Ironing',
-      'Spin Washing',
-      'Steam Washing',
-      'Stain Removal',
-    ];
+    // 🔹 Existing pricing (from API / previous step)
+    const existingPricing =
+      formData.pricingData?.itemPricing
+        ? JSON.parse(JSON.stringify(formData.pricingData.itemPricing))
+        : {};
 
-    console.log('✅ ALL Services for Pricing:', allServiceNames);
-
-    const basicServiceNames = ['Dry Wash', 'Washing', 'Ironing', 'Wash & Iron'];
-
-    const premiumMappings = {
-      6: 'Steam Ironing',
-      7: 'Spin Washing',
-      8: 'Steam Washing',
-      9: 'Stain Removal',
-    };
-
-    const selectedServices = [...basicServiceNames];
-
-    selectedServiceIds.forEach(id => {
-      if (
-        premiumMappings[id] &&
-        !selectedServices.includes(premiumMappings[id])
-      ) {
-        selectedServices.push(premiumMappings[id]);
-      }
+    console.log("existingPricing", existingPricing);
+    // ServiceName → ServiceId map
+    const serviceMap = {};
+    services.forEach(s => {
+      serviceMap[s.name] = s.id;
     });
-
-    console.log('✅ Selected Services for Pricing:', selectedServices);
 
     const categoryItems = {
       man: [
         { name: 'Formal Shirt', dataKey: 'mens' },
         { name: 'T Shirt', dataKey: 'mens' },
-        // { name: "Casual Shirt", dataKey: "mens" },
         { name: 'Jeans', dataKey: 'mens' },
         { name: 'Trousers', dataKey: 'mens' },
         { name: 'Suit', dataKey: 'mens' },
@@ -607,130 +601,74 @@ export const VendorProvider = ({ children }) => {
       ],
     };
 
-    // ADD THIS DETAILED DEBUGGING
-    console.log('🔍 ====== DEBUGGING T-SHIRT ISSUE ======');
+    const finalPricing = { ...existingPricing };
 
-    // Check what's actually in mockData
-    console.log(
-      '🔍 MockData mens items:',
-      mockData.mens.map(item => item.name),
-    );
-    console.log(
-      '🔍 MockData kids items:',
-      mockData.kids.map(item => item.name),
-    );
+    // 🔹 Only calculate pricing for services which are NOT already saved
+    activeServiceNames.forEach(serviceName => {
+      const serviceId = serviceMap[serviceName];
+      if (!serviceId) return;
 
-    // Check if "T Shirt" exists in mockData
-    const tShirtInMens = mockData.mens.find(item => item.name === 'T Shirt');
-    const tShirtInKids = mockData.kids.find(item => item.name === 'T Shirt');
-    console.log("🔍 'T Shirt' in mens:", tShirtInMens);
-    console.log("🔍 'T Shirt' in kids:", tShirtInKids);
+      const existingServicePricing = finalPricing[serviceName] || {
+        man: [],
+        woman: [],
+        kids: [],
+      };
 
-    let tShirtFoundCount = 0;
-    let totalProcessed = 0;
+      const servicePricing = { man: [], woman: [], kids: [] };
 
-    selectedServices.forEach(serviceName => {
-      if (itemPricing[serviceName]) {
-        Object.keys(categoryItems).forEach(category => {
-          categoryItems[category].forEach(itemConfig => {
-            totalProcessed++;
-            const categoryData = mockData[itemConfig.dataKey];
+      Object.keys(categoryItems).forEach(category => {
+        categoryItems[category].forEach(itemConfig => {
+          const categoryData = mockData[itemConfig.dataKey];
+          if (!categoryData) return;
 
-            if (categoryData) {
-              // SPECIFIC CHECK FOR T-SHIRT
-              if (itemConfig.name === 'T Shirt') {
-                console.log(
-                  `🔍 Looking for "T Shirt" in ${itemConfig.dataKey}:`,
-                  {
-                    categoryDataExists: !!categoryData,
-                    itemsInCategory: categoryData.map(item => item.name),
-                    exactMatch: categoryData.find(
-                      item => item.name === 'T Shirt',
-                    ),
-                    allMatches: categoryData.filter(
-                      item =>
-                        item.name.includes('T') && item.name.includes('Shirt'),
-                    ),
-                  },
-                );
-              }
+          const foundItem = categoryData.find(
+            item => item.name === itemConfig.name
+          );
+          if (!foundItem) return;
 
-              const foundItem = categoryData.find(
-                item => item.name === itemConfig.name,
-              );
+          const price = getItemPrice(serviceId, foundItem.id);
 
-              if (foundItem) {
-                if (itemConfig.name === 'T Shirt') {
-                  tShirtFoundCount++;
-                  console.log(
-                    `✅ FOUND "T Shirt" in ${itemConfig.dataKey} for service ${serviceName}`,
-                  );
-                }
-
-                const service = services.find(s => s.name === serviceName);
-                const currentPrice = getItemPrice(
-                  service.id,
-                  foundItem.id,
-                  foundItem.price,
-                );
-                const priceValue = Math.max(
-                  0,
-                  Math.round(parseFloat(currentPrice) || 0),
-                );
-
-                itemPricing[serviceName][category].push({
-                  item: itemConfig.name,
-                  price: priceValue,
-                });
-              } else {
-                if (itemConfig.name === 'T Shirt') {
-                  console.log(
-                    `❌ "T Shirt" NOT FOUND in ${itemConfig.dataKey} for service ${serviceName}`,
-                  );
-                  console.log(
-                    `   Available items:`,
-                    categoryData.map(item => `"${item.name}"`),
-                  );
-                }
-              }
-            } else {
-              console.log(
-                `❌ Category data not found for: ${itemConfig.dataKey}`,
-              );
-            }
-          });
+          if (Number(price) > 0) {
+            servicePricing[category].push({
+              item: itemConfig.name,
+              price: Number(price),
+            });
+          }
         });
-      }
-    });
+      });
 
-    console.log(
-      `🔍 DEBUG SUMMARY: T-Shirt found ${tShirtFoundCount} times, Total processed: ${totalProcessed}`,
-    );
+      // 🔁 MERGE existing + new
+      Object.keys(servicePricing).forEach(category => {
+        const existingItems = existingServicePricing[category] || [];
 
-    // Log final counts
-    Object.keys(itemPricing).forEach(serviceName => {
-      if (selectedServices.includes(serviceName)) {
-        console.log(`📊 ${serviceName}:`, {
-          man: itemPricing[serviceName].man.length,
-          woman: itemPricing[serviceName].woman.length,
-          kids: itemPricing[serviceName].kids.length,
-          manItems: itemPricing[serviceName].man.map(item => item.item),
-          kidsItems: itemPricing[serviceName].kids.map(item => item.item),
+        servicePricing[category].forEach(newItem => {
+          const index = existingItems.findIndex(
+            i => i.item === newItem.item
+          );
+
+          if (index >= 0) {
+            existingItems[index].price = newItem.price;
+          } else {
+            existingItems.push(newItem);
+          }
         });
-      }
+
+        existingServicePricing[category] = existingItems;
+      });
+
+      finalPricing[serviceName] = existingServicePricing;
     });
 
-    Object.keys(itemPricing).forEach(serviceName => {
-      if (!selectedServices.includes(serviceName)) {
-        delete itemPricing[serviceName];
-      }
-    });
 
-    console.log('✅ Final Pricing Data for API:', { itemPricing });
-    const pricingData = { itemPricing };
+    console.log('✅ Final Pricing Data for API:', finalPricing);
+
+    const pricingData = { itemPricing: finalPricing };
     updatePricing(pricingData);
+
     return pricingData;
-  }, [priceMap, services, selectedServiceIds, updatePricing, getItemPrice]);
+  }, [services, mockData, getItemPrice, updatePricing, formData.pricingData]);
+
+
 
   const [newPickups, setNewPickups] = useState([
     {
@@ -927,36 +865,46 @@ export const VendorProvider = ({ children }) => {
 
   const addCoupon = coupon => setCoupons(p => [...p, coupon]);
 
-  const saveLocation = async location => {
+  const saveLocation = async (location) => {
     try {
-      if (!location?.address) {
-        console.log('⚠️ No address found in location object:', location);
+      if (!location) {
+        console.log('❌ Location object itself is null');
         return;
       }
 
-      let cityName = location.city;
-      if (!cityName && location.address) {
-        const parts = location.address.split(',').map(p => p.trim());
-        cityName = parts[parts.length - 3] || '';
+      let fullAddress = location.address || '';
+      let cityName = location.city || '';
+
+      // ✅ Try extracting city safely
+      if (!cityName && fullAddress) {
+        const parts = fullAddress.split(',').map(p => p.trim());
+        cityName = parts.length >= 2 ? parts[parts.length - 2] : '';
       }
 
-      const shortAddress = getShortAddress(location.address, cityName);
+      const shortAddress = fullAddress
+        ? getShortAddress(fullAddress, cityName)
+        : '';
+
       const cleanedLocation = {
         ...location,
-        city: cityName || location.city || '',
-        address: shortAddress || location.address,
+        city: cityName,
+        address: shortAddress || fullAddress,
       };
 
       await AsyncStorage.setItem(
         'userLocation',
         JSON.stringify(cleanedLocation),
       );
-      console.log('📍 Saved Cleaned Location:', cleanedLocation);
+
       setUserLocation(cleanedLocation);
+
+      console.log('📍 Saved Cleaned Location:', cleanedLocation);
+
     } catch (error) {
       console.log('❌ Save location error:', error);
     }
   };
+
 
   const getShortAddress = (fullAddress, cityName) => {
     if (!fullAddress) return '';

@@ -1,11 +1,12 @@
 import { StyleSheet } from "react-native";
 import appColors from "../../../theme/appColors";
-import { windowHeight } from "../../../theme/appConstant";
+import { windowHeight, windowWidth } from "../../../theme/appConstant";
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F2F4F7', // soft neutral background
+    marginTop: 50
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -109,21 +110,23 @@ export const styles = StyleSheet.create({
 
   /* ─────────── Subscription Card ─────────── */
   card: {
-    backgroundColor: '#FFFFFFCC',
-    borderRadius: 18,
-    padding: windowHeight(30),
-    marginBottom: 18,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    paddingVertical: windowHeight(10),
+    paddingHorizontal: windowWidth(15),
+    marginBottom: 8,
+
     borderWidth: 0.5,
     borderColor: '#E5E7EB',
+
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 4,
-    
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   firstCard: {
-    marginTop: 12,
+    marginTop: 0,
   },
   cardHeader: {
     flexDirection: 'row',

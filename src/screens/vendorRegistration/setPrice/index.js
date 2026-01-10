@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -30,7 +30,10 @@ export default function SetPrice({
 }) {
   const [editingItemId, setEditingItemId] = useState(null);
   const [priceInput, setPriceInput] = useState('');
+  const priceDraftRef = useRef('');
   const [activeServiceId, setActiveServiceId] = useState(null);
+  const inputRef = React.useRef(null);
+
   const {
     //  services,
     // selectedServiceIds,
@@ -39,6 +42,7 @@ export default function SetPrice({
     getAllPricingData,
     getItemPrice, // Add this new function
   } = useContext(VendorContext);
+
 
   // Animation
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -64,6 +68,12 @@ export default function SetPrice({
     }
   }, [priceMap, activeServiceId]);
 
+  useEffect(() => {
+    if (editingItemId && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [editingItemId]);
+
   const filters = [
     { key: 'all', label: 'All Items', icon: 'grid-outline' },
     { key: 'mens', label: "Men's Wear", icon: 'man-outline' },
@@ -80,8 +90,8 @@ export default function SetPrice({
           category === 'mens'
             ? 'man'
             : category === 'womens'
-            ? 'woman'
-            : 'kids',
+              ? 'woman'
+              : 'kids',
       }));
       allItems = [...allItems, ...categoryItems];
     });
@@ -105,32 +115,28 @@ export default function SetPrice({
           selectedFilter === 'mens'
             ? 'man'
             : selectedFilter === 'womens'
-            ? 'woman'
-            : 'kids',
+              ? 'woman'
+              : 'kids',
       }));
     }
     return [];
   };
 
   const startEditing = item => {
-    Keyboard.dismiss();
     setEditingItemId(item.id);
-    // Get service-specific price
     const currentPrice = getItemPrice(activeServiceId, item.id, item.price);
-    setPriceInput(currentPrice.toString());
+    priceDraftRef.current = currentPrice.toString();
   };
 
   const savePrice = () => {
-    if (editingItemId && priceInput && activeServiceId) {
-      const priceValue = parseFloat(priceInput);
-      if (!isNaN(priceValue) && priceValue >= 0) {
-        // Save service-specific price
-        setItemPrice(activeServiceId, editingItemId, priceValue);
-        setEditingItemId(null);
-        setPriceInput('');
-      } else {
-        Alert.alert('❌ Invalid Price', 'Please enter a valid price');
-      }
+    const value = parseFloat(priceDraftRef.current);
+
+    if (!isNaN(value) && value >= 0) {
+      setItemPrice(activeServiceId, editingItemId, value);
+      setEditingItemId(null);
+      priceDraftRef.current = '';
+    } else {
+      Alert.alert('❌ Invalid Price', 'Please enter a valid price');
     }
   };
 
@@ -176,9 +182,9 @@ export default function SetPrice({
                   ]}
                 >
                   ₹{price}
-                  {isCustomPrice && (
+                  {/* {isCustomPrice && (
                     <Text style={styles.priceChangeIndicator}> *</Text>
-                  )}
+                  )} */}
                 </Text>
                 <View style={styles.actionButtons}>
                   <TouchableOpacity
@@ -196,13 +202,16 @@ export default function SetPrice({
             ) : (
               <View style={styles.editingContainer}>
                 <TextInput
+                  ref={inputRef}
                   style={styles.priceInput}
-                  value={priceInput}
-                  onChangeText={setPriceInput}
+                  defaultValue={priceDraftRef.current}
+                  onChangeText={text => {
+                    priceDraftRef.current = text;
+                  }}
                   keyboardType="numeric"
-                  placeholder="Enter price"
-                  autoFocus
+                  blurOnSubmit={false}
                 />
+
                 <View style={styles.editActions}>
                   <TouchableOpacity
                     style={styles.saveEditButton}
@@ -264,6 +273,7 @@ export default function SetPrice({
               horizontal
               keyExtractor={item => item.id.toString()}
               showsHorizontalScrollIndicator={false}
+              extraData={editingItemId}
               contentContainerStyle={{ paddingHorizontal: 14 }}
               renderItem={({ item: service }) => (
                 <TouchableOpacity
@@ -279,7 +289,7 @@ export default function SetPrice({
                     style={[
                       styles.serviceTabText,
                       activeServiceId === service.id &&
-                        styles.serviceTabTextActive,
+                      styles.serviceTabTextActive,
                     ]}
                   >
                     {service.name}

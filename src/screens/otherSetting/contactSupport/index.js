@@ -86,7 +86,7 @@ export default function ContactSupport({ navigation }) {
 
      
       </ScrollView>
-         <TouchableOpacity 
+         {/* <TouchableOpacity 
           style={styles.submitBtn} 
           onPress={handleSubmit}
          
@@ -94,7 +94,7 @@ export default function ContactSupport({ navigation }) {
           <Text style={styles.submitText}>
             {'Submit'}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
     </View>
  </SafeAreaView>
   );

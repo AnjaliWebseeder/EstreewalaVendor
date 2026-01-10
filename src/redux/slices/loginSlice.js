@@ -6,15 +6,19 @@ export const loginVendor = createAsyncThunk(
   "vendor/loginVendor",
   async (vendorData, { rejectWithValue }) => {
     try {
+      console.log("vendorData", vendorData);
       const response = await axios.post(LOGIN,
         vendorData,
         {
           headers: {
             "Content-Type": "application/json",
           },
-          timeout: 10000, 
+          timeout: 10000,
         }
       );
+
+      console.log("login response.data",response.data);
+
       return response.data;
     } catch (error) {
       console.log("❌ Login API Error:", error.response?.data || error.message);
@@ -57,7 +61,7 @@ const vendorSlice = createSlice({
         state.success = true;
         state.token = action.payload.token || action.payload.accessToken;
 
-        console.log("LOGIN VENDOR IS => ",action.payload.token)
+        console.log("LOGIN VENDOR IS => ", action.payload.token)
       })
       .addCase(loginVendor.rejected, (state, action) => {
         state.loading = false;

@@ -1,49 +1,72 @@
 import { StyleSheet } from "react-native";
-import appColors from "../../../theme/appColors";
-import fonts from "../../../theme/appFonts";
-import { windowHeight } from "../../../theme/appConstant";
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:appColors.background,
+    backgroundColor: "#F9FAFC",
   },
+
   listContainer: {
-    paddingHorizontal: 16,
-    marginTop:windowHeight(20)
+    padding: 16,
   },
+
   card: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: appColors.menuCard,
     padding: 14,
-    borderRadius: 12,
+    backgroundColor: "#fff",
+    borderRadius: 14,
     marginBottom: 12,
+    alignItems: "center",
     shadowColor: "#000",
     shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 8,
+    elevation: 3,
   },
+
+  unreadCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: "#4F8AF2",
+    backgroundColor: "#F2F6FF",
+  },
+
   iconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
   },
+
   textContainer: {
     flex: 1,
+    marginLeft: 12,
   },
+
   title: {
     fontSize: 14,
-    fontFamily:fonts.InterMedium,
-    color:appColors.font,
-    marginBottom: 2,
+    color: "#555",
   },
+
+  unreadTitle: {
+    fontWeight: "700",
+    color: "#000",
+  },
+
   time: {
     fontSize: 12,
-    fontFamily:fonts.InterRegular,
-    color:appColors.subTitle,
+    color: "#888",
+    marginTop: 4,
+  },
+
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  emptyText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: "#999",
   },
 });

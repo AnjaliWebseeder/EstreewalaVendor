@@ -5,16 +5,16 @@ import { styles } from './styles';
 import appColors from '../../../theme/appColors';
 import ArrowRightIcon from '../../../assets/Icons/back-btn';
 import { SafeAreaView } from 'react-native-safe-area-context';
- import { sendOtp, clearError } from '../../../redux/slices/otpSlice';
-import { useToast } from '../../../utils/context/toastContext'; 
+import { sendOtp, clearError } from '../../../redux/slices/otpSlice';
+import { useToast } from '../../../utils/context/toastContext';
 
 const WelcomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { loading , error} = useSelector((state) => state.otp);
+  const { loading, error } = useSelector((state) => state.otp);
   const [phone, setPhone] = useState('');
   const [localError, setLocalError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const { showToast } = useToast(); 
+  const { showToast } = useToast();
 
   // Clear error automatically when user types a valid phone number
   useEffect(() => {
@@ -31,7 +31,7 @@ const WelcomeScreen = ({ navigation }) => {
     setIsSubmitted(true);
 
     const phoneDigits = phone.replace(/\D/g, '');
-    
+
     // Local validation
     if (!phoneDigits) {
       setLocalError('Please enter your phone number');
@@ -50,22 +50,31 @@ const WelcomeScreen = ({ navigation }) => {
       phone: phoneDigits
     };
 
-    // COMMENTED OUT API CALL
     try {
       const result = await dispatch(sendOtp(payload));
+
       if (sendOtp.fulfilled.match(result)) {
-        //  showToast('OTP sent to mobile for login!', 'success');
-       setPhone(phoneDigits);
+        setPhone(phoneDigits);
+        // Navigate to OTP screen after short delay
         setTimeout(() => {
           navigation.navigate('Otp', { phone: phoneDigits });
-        }, 1000);
+        }, 500);
       } else if (sendOtp.rejected.match(result)) {
-         showToast(result?.payload || 'Failed to Send OTP', "error");
+        const errorMessage = result?.payload || 'Failed to Send OTP';
+        showToast(errorMessage, "error");
+
+        // Redirect to Register if phone is not registered
+        if (errorMessage.includes("not registered as a vendor")) {
+          setTimeout(() => {
+            navigation.navigate('Register', { phone: phoneDigits });
+          }, 500);
+        }
       }
     } catch (err) {
       console.error('Error dispatching OTP:', err);
-         showToast(err || 'Failed to Send OTP', "error");
+      showToast(err?.message || 'Failed to Send OTP', "error");
     }
+
     setPhone(phoneDigits);
   };
 
@@ -73,17 +82,17 @@ const WelcomeScreen = ({ navigation }) => {
   const handlePhoneChange = (text) => {
     // Remove non-digit characters
     const digits = text.replace(/\D/g, '');
-    
+
     // Limit to 10 digits
     if (digits.length <= 10) {
       setPhone(digits);
     }
-    
+
     // Clear errors when user starts typing
     if (localError && digits.length > 0) {
       setLocalError('');
     }
-    
+
     //Clear Redux error when user types
     if (error) {
       dispatch(clearError());
@@ -93,91 +102,91 @@ const WelcomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
-    <View style={styles.container}>
+      <View style={styles.container}>
         <Image source={require('../../../assets/images/login.png')} style={styles.banner} />
         <ScrollView contentContainerStyle={styles.contentContainerStyle}>
           <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subText}>
-          Enter your phone number we will send you a confirmation code there
-        </Text>
-
-        <View style={styles.main}>
-          <View style={styles.phoneContainer}>
-            <Text style={styles.flag}>🇮🇳</Text>
-            <Text style={styles.prefix}>+91</Text>
-            <TextInput
-              style={styles.phoneInput}
-              placeholder="1234567890"
-              keyboardType="phone-pad"
-              value={phone}
-              onChangeText={handlePhoneChange}
-              placeholderTextColor={appColors.lightText}
-              maxLength={10}
-              editable={!loading}
-            />
-          </View>
-
-          <Text style={styles.text}>
-            Securing your personal information is our priority.
+          <Text style={styles.subText}>
+            Enter your phone number we will send you a confirmation code there
           </Text>
 
-          <TouchableOpacity 
-            style={[
-              styles.button,
-              {
-                backgroundColor: phone.length === 10 
-                  ? appColors.secondary 
-                  : appColors.inActive
-              }
-            ]} 
-            onPress={handleRequestOtp}
-            disabled={phone.length < 10}
-          >
-            <Text style={[
-              styles.buttonText,
-              { 
-                color: phone.length === 10
-                  ? appColors.white 
-                  : appColors.disableText 
-              }
-            ]}>
-               {loading ? 'Sending OTP...' : 'Request OTP'} 
-          
-            </Text>
-           {!loading && ( 
-              <ArrowRightIcon color={
-                phone.length === 10
-                  ? appColors.white 
-                  : appColors.disableText
-              } />
-         )} 
-          </TouchableOpacity>
+          <View style={styles.main}>
+            <View style={styles.phoneContainer}>
+              <Text style={styles.flag}>🇮🇳</Text>
+              <Text style={styles.prefix}>+91</Text>
+              <TextInput
+                style={styles.phoneInput}
+                placeholder="1234567890"
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={handlePhoneChange}
+                placeholderTextColor={appColors.lightText}
+                maxLength={10}
+                editable={!loading}
+              />
+            </View>
 
-          <View style={styles.divider}>
-            <View style={styles.line} />
-            <Text style={styles.dividerText}>or continue with</Text>
-            <View style={styles.line} />
+            <Text style={styles.text}>
+              Securing your personal information is our priority.
+            </Text>
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                {
+                  backgroundColor: phone.length === 10
+                    ? appColors.secondary
+                    : appColors.inActive
+                }
+              ]}
+              onPress={handleRequestOtp}
+              disabled={phone.length < 10}
+            >
+              <Text style={[
+                styles.buttonText,
+                {
+                  color: phone.length === 10
+                    ? appColors.white
+                    : appColors.disableText
+                }
+              ]}>
+                {loading ? 'Sending OTP...' : 'Request OTP'}
+
+              </Text>
+              {!loading && (
+                <ArrowRightIcon color={
+                  phone.length === 10
+                    ? appColors.white
+                    : appColors.disableText
+                } />
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.divider}>
+              <View style={styles.line} />
+              <Text style={styles.dividerText}>or continue with</Text>
+              <View style={styles.line} />
+            </View>
+
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={() => navigation.navigate('PasswordLogin')}
+              disabled={loading}
+            >
+              <Text style={styles.secondaryText}>Sign in with Password</Text>
+              <ArrowRightIcon color={"gray"} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{ alignItems: "center", bottom: 6 }}
+              onPress={() => navigation.navigate('Register')}
+              disabled={loading}
+            >
+              <Text style={styles.footerText}>
+                Don't have an account? <Text style={styles.link}>Register</Text>
+              </Text>
+            </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => navigation.navigate('PasswordLogin')}
-            disabled={loading}
-          >
-            <Text style={styles.secondaryText}>Sign in with Password</Text>
-            <ArrowRightIcon color={"gray"} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={{ alignItems: "center", bottom: 6 }}
-            onPress={() => navigation.navigate('Register')}
-            disabled={loading}
-          >
-            <Text style={styles.footerText}>
-              Don't have an account? <Text style={styles.link}>Register</Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
         </ScrollView>
       </View>
     </SafeAreaView>

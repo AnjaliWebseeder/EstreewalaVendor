@@ -48,6 +48,7 @@ const VendorRegistration = ({ route }) => {
   const { services, servicesMeta } = useSelector(state => state.vendor);
 
   useEffect(() => {
+    console.log("services in vendor registraion", services);
     dispatch(getVendorServices());
   }, []);
 
@@ -288,40 +289,31 @@ const VendorRegistration = ({ route }) => {
             .filter(s => !s.locked)
             .map(s => s.name);
 
-          const servicesWithNoPrice = [];
+          const servicesWithInvalidPrices = [];
 
           activeServiceNames.forEach(serviceName => {
             const servicePricing = pricing[serviceName];
 
             if (!servicePricing) {
-              servicesWithNoPrice.push(serviceName);
+              servicesWithInvalidPrices.push(serviceName);
               return;
             }
 
-            let hasAtLeastOneValidPrice = false;
-
-            Object.values(servicePricing).forEach(items => {
+            Object.entries(servicePricing).forEach(([category, items]) => {
               items.forEach(item => {
-                if (
-                  item.price !== undefined &&
-                  item.price !== null &&
-                  item.price !== '' &&
-                  Number(item.price) > 0
-                ) {
-                  hasAtLeastOneValidPrice = true;
+                if (!item.price || Number(item.price) <= 0) {
+                  servicesWithInvalidPrices.push(
+                    `${serviceName} - ${category} - ${item.item}`
+                  );
                 }
               });
             });
-
-            if (!hasAtLeastOneValidPrice) {
-              servicesWithNoPrice.push(serviceName);
-            }
           });
 
-          if (servicesWithNoPrice.length > 0) {
+          if (servicesWithInvalidPrices.length > 0) {
             showToast(
-              `Please set at least one item price for ${servicesWithNoPrice[0]}`,
-              'error',
+              `Please set valid price (>0) for ${servicesWithInvalidPrices[0]}`,
+              'error'
             );
             validationFailed = true;
             break;
@@ -385,19 +377,15 @@ const VendorRegistration = ({ route }) => {
 
         case 3: {
           const pricing = formData.pricingData?.itemPricing;
-
           const filteredPricing = {};
 
           Object.entries(pricing).forEach(([serviceName, categories]) => {
             const filteredCategories = {};
 
             Object.entries(categories).forEach(([category, items]) => {
+              // ✅ ONLY price > 0 allowed
               const validItems = items.filter(
-                item =>
-                  item.price !== undefined &&
-                  item.price !== null &&
-                  item.price !== '' &&
-                  Number(item.price) > 0,
+                item => Number(item.price) > 0
               );
 
               if (validItems.length > 0) {
@@ -414,11 +402,12 @@ const VendorRegistration = ({ route }) => {
             itemPricing: filteredPricing,
           };
 
-          console.log('✅ Submitting FILTERED pricing data:', finalPayload);
+          console.log('✅ FINAL PRICING PAYLOAD  for step 4 :', finalPayload);
 
           await dispatch(completeStep4(finalPayload)).unwrap();
           break;
         }
+
 
         case 4:
           await dispatch(
@@ -684,7 +673,7 @@ const VendorRegistration = ({ route }) => {
                   style={[
                     styles.optionCard,
                     formData.deliveryOption === opt &&
-                      styles.selectedOptionCard,
+                    styles.selectedOptionCard,
                   ]}
                   onPress={() => handleDeliveryOptionSelect(opt)}
                 >
@@ -705,7 +694,7 @@ const VendorRegistration = ({ route }) => {
                     style={[
                       styles.optionText,
                       formData.deliveryOption === opt &&
-                        styles.selectedOptionText,
+                      styles.selectedOptionText,
                     ]}
                   >
                     {opt}
@@ -744,7 +733,7 @@ const VendorRegistration = ({ route }) => {
               size={15}
               color={appColors.secondary}
             />
-            <Text style={styles.backButtonText}>Back</Text>
+            <Text style={styles.backButtonText}>Previous</Text>
           </TouchableOpacity>
         )}
 
@@ -755,7 +744,7 @@ const VendorRegistration = ({ route }) => {
             disabled={loading}
           >
             <Text style={styles.nextButtonText}>
-              {loading ? 'Processing...' : 'Next'}
+              {loading ? 'Processing...' : 'Save and Next'}
             </Text>
             {!loading && (
               <Icon

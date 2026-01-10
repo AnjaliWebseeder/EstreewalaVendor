@@ -11,14 +11,14 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { getMySubscriptions } from '../../../redux/slices/subscriptionSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {styles} from "./styles"
+import { styles } from "./styles"
 import Header from "../../../components/header";
 
-const MySubscriptions = ({navigation}) => {
+const MySubscriptions = ({ navigation }) => {
   const dispatch = useDispatch();
   const { mySubscriptions, loading, error } = useSelector(state => state.subscription);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   useEffect(() => {
     loadSubscriptions();
   }, []);
@@ -27,7 +27,7 @@ const MySubscriptions = ({navigation}) => {
     try {
       await dispatch(getMySubscriptions()).unwrap();
     } catch (error) {
-    //   Alert.alert('Error', error || 'Failed to load subscriptions');
+      //   Alert.alert('Error', error || 'Failed to load subscriptions');
     }
   };
 
@@ -83,13 +83,13 @@ const MySubscriptions = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-           <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+      {/* <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" /> */}
 
       {/* Header */}
-       <Header
-              title="My Subscription"
-              onBack={() => navigation.goBack()}
-            />
+      <Header
+        title="My Subscription"
+        onBack={() => navigation.goBack()}
+      />
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -140,13 +140,13 @@ const MySubscriptions = ({navigation}) => {
   );
 };
 
-const SubscriptionCard = ({ 
-  subscription, 
-  statusColor, 
-  statusIcon, 
-  formatDate, 
+const SubscriptionCard = ({
+  subscription,
+  statusColor,
+  statusIcon,
+  formatDate,
   calculateDaysLeft,
-  isFirst 
+  isFirst
 }) => {
   const daysLeft = calculateDaysLeft(subscription.endDate);
 

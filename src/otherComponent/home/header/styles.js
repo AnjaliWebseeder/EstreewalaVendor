@@ -10,10 +10,10 @@ export const styles = StyleSheet.create({
     backgroundColor: appColors.secondary,
     paddingHorizontal: 20,
     paddingBottom: windowHeight(20),
-    paddingTop:windowHeight(9),
+    paddingTop: windowHeight(9),
     overflow: 'hidden',
     position: 'relative',
-       borderBottomLeftRadius: 30,
+    borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
   },
   waveBackground: {
@@ -32,8 +32,8 @@ export const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
+    alignItems: 'center'
   },
   locationContainer: {
     flexDirection: 'row',
@@ -53,7 +53,7 @@ export const styles = StyleSheet.create({
   locationTextContainer: {
     flex: 1,
   },
-  
+
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -72,7 +72,7 @@ export const styles = StyleSheet.create({
   },
   iconButton: {
     position: 'relative',
-   width: 30,
+    width: 30,
     height: 30,
     borderRadius: 22,
     alignItems: 'center',
@@ -100,8 +100,8 @@ export const styles = StyleSheet.create({
     fontSize: 7,
     fontFamily: fonts.InterBold,
     lineHeight: 14,
-    bottom:2,
-    fontWeight:"bold"
+    bottom: 2,
+    fontWeight: "bold"
   },
   profileImage: {
     width: 28,
@@ -111,5 +111,5 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  
+
 });

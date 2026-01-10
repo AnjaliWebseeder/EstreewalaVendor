@@ -1,83 +1,104 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { styles } from "./styles"
+import LinearGradient from 'react-native-linear-gradient'; // For smooth gradient overlay
+import { styles } from './styles';
+import axiosInstance from '../../../api/axiosConfig';
+import { DASHBOARD_DATA } from '../../../api/index';
 
 export default function StatusCard() {
-  const StatCard = ({ bgColor, iconName, iconLib: IconLib, statusText, title, count, gradient }) => {
-    return (
-      <TouchableOpacity activeOpacity={0.9} style={[styles.card, { backgroundColor: bgColor }]}>
-        {/* Background Gradient Effect */}
-        <View style={[styles.gradientOverlay, { backgroundColor: gradient }]} />
-        
-        {/* Content */}
-        <View style={styles.cardContent}>
-          <View style={styles.header}>
-            <View style={styles.iconContainer}>
-              {IconLib ? (
-                <IconLib name={iconName} size={20} color="#fff" />
-              ) : (
-                <MaterialCommunityIcons name={iconName} size={20} color="#fff" />
-              )}
-            </View>
-            <View style={[styles.statusBadge, { backgroundColor: `${bgColor}20` }]}>
-              <Text style={styles.statusText}>{statusText}</Text>
-            </View>
-          </View>
+  const [analytics, setAnalytics] = useState({
+    totalOrders: 0,
+    pending: 0,
+    accepted: 0,
+    completed: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
-          <Text style={styles.cardTitle}>{title}</Text>
-          
-          <View style={styles.countSection}>
-            <Text style={styles.countText}>{count}</Text>
-            <View style={styles.arrowCircle}>
-              <MaterialCommunityIcons name="arrow-right" size={16} color="#fff" />
-            </View>
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        const { data } = await axiosInstance.get(DASHBOARD_DATA);
+
+        if (data.success && data.analytics) {
+          setAnalytics(data.analytics);
+        } else {
+          setAnalytics({ totalOrders: 0, pending: 0, accepted: 0, completed: 0 });
+        }
+      } catch (err) {
+        console.error('Dashboard fetch error:', err);
+        setAnalytics({ totalOrders: 0, pending: 0, accepted: 0, completed: 0 });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
+  const StatCard = ({ colors, iconName, statusText, title, count }) => (
+    <TouchableOpacity activeOpacity={0.9} style={styles.card}>
+      <LinearGradient
+        colors={colors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradientOverlay}
+      />
+      <View style={styles.cardContent}>
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <MaterialCommunityIcons name={iconName} size={22} color="#fff" />
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: `${colors[0]}30` }]}>
+            <Text style={styles.statusText}>{statusText}</Text>
           </View>
         </View>
-      </TouchableOpacity>
-    );
-  };
+
+        <Text style={styles.cardTitle}>{title}</Text>
+
+        <View style={styles.countSection}>
+          <Text style={styles.countText}>{count}</Text>
+          <View style={styles.arrowCircle}>
+            <MaterialCommunityIcons name="arrow-right" size={16} color="#fff" />
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  if (loading)
+    return <ActivityIndicator size="large" color="#4f8af2" style={{ marginTop: 20 }} />;
 
   return (
     <View style={styles.grid}>
       <StatCard
-        bgColor="#4f8af2"
-        gradient="rgba(79, 138, 242, 0.1)"
+        colors={['#4f8af2', '#a0c4ff']}
+        iconName="format-list-bulleted"
+        statusText="Total"
+        title="Total Orders"
+        count={analytics.totalOrders}
+      />
+      <StatCard
+        colors={['#ff7f7f', '#ffc1c1']}
         iconName="calendar-clock"
-        iconLib={MaterialCommunityIcons}
         statusText="Pending"
-        title="Customer Pickup"
-        count="8"
+        title="Pending Orders"
+        count={analytics.pending}
       />
       <StatCard
-        bgColor="#ff6161"
-        gradient="rgba(255, 97, 97, 0.1)"
+        colors={['#ffa500', '#ffde7d']}
         iconName="truck-delivery"
-        iconLib={MaterialCommunityIcons}
-        statusText="Pending"
-        title="Customer Delivery"
-        count="2"
+        statusText="Accepted"
+        title="Accepted Orders"
+        count={analytics.accepted}
       />
       <StatCard
-        bgColor="#8b3df3"
-        gradient="rgba(139, 61, 243, 0.1)"
+        colors={['#8b3df3', '#cda4ff']}
         iconName="truck-check"
-        iconLib={MaterialCommunityIcons}
         statusText="Completed"
-        title="Completed Pickups"
-        count="25"
-      />
-      <StatCard
-        bgColor="#2f9b63"
-        gradient="rgba(47, 155, 99, 0.1)"
-        iconName="check-circle"
-        iconLib={MaterialCommunityIcons}
-        statusText="Completed"
-        title="Completed Delivery"
-        count="20"
+        title="Completed Orders"
+        count={analytics.completed}
       />
     </View>
   );

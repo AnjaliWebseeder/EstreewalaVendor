@@ -44,16 +44,6 @@ const BusinessDetails = ({
         inputStyle={styles.largeInput}
         labelStyle={styles.largeLabel}
       />
-
-      <InputField
-        label="City*"
-        value={city}
-        onChangeText={text => setCity(text)}
-        placeholder="Enter City"
-        inputStyle={styles.largeInput}
-        labelStyle={styles.largeLabel}
-      />
-
       {/* Laundry Shop Address */}
       <Text style={styles.largeLabel}>Laundry Shop Address*</Text>
       <TouchableOpacity
@@ -82,6 +72,17 @@ const BusinessDetails = ({
         </Text>
         <Icon name="location-outline" size={20} color={appColors.secondary} />
       </TouchableOpacity>
+
+      <InputField
+        label="City*"
+        value={city}
+        onChangeText={text => setCity(text)}
+        placeholder="Enter City"
+        inputStyle={styles.largeInput}
+        labelStyle={styles.largeLabel}
+      />
+
+
     </View>
   );
 };

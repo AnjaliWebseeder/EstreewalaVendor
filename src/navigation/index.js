@@ -47,6 +47,7 @@ const Navigation = () => {
   const [navigationReady, setNavigationReady] = useState(false);
 
   useEffect(() => {
+    console.log("userToken", userToken);
     console.log('🔍 NAVIGATION DEBUG - Detailed State:', {
       isLoading,
       userToken: userToken
@@ -75,7 +76,10 @@ const Navigation = () => {
       }
 
       console.log('🎯 FINAL ROUTE DECISION:', route);
+      // yha waps correct krna 
+
       setInitialRoute(route);
+      // setInitialRoute('Main');
 
       const timer = setTimeout(() => {
         setNavigationReady(true);

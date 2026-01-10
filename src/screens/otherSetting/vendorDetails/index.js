@@ -16,7 +16,6 @@ import appColors from '../../../theme/appColors';
 import Header from '../../../components/header';
 import SetPrice from '../../vendorRegistration/setPrice';
 import FilterCategoryModal from '../../../otherComponent/vendorRegistration/filterCategoryModal';
-import { getVendorServices } from '../../../redux/slices/vendorSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useToast } from '../../../utils/context/toastContext';
 import {
@@ -53,16 +52,14 @@ const VendorDetails = ({ navigation }) => {
   const { showToast } = useToast();
 
   useEffect(() => {
-    dispatch(getStep1());
-    dispatch(getStep2());
-    dispatch(getStep3());
-    dispatch(getStep4());
-    dispatch(getStep5());
-  }, []);
+    if (currentStep === 0) dispatch(getStep1());
+    if (currentStep === 1) dispatch(getStep2());
+    if (currentStep === 2) dispatch(getStep3());
+    if (currentStep === 3) dispatch(getStep4());
+    if (currentStep === 4) dispatch(getStep5());
+  }, [currentStep]);
 
-  useEffect(() => {
-    dispatch(getVendorServices());
-  }, []);
+
 
   const {
     formData,
@@ -82,6 +79,8 @@ const VendorDetails = ({ navigation }) => {
     if (services?.length) {
       updateServices(services.map(s => s.id));
     }
+    console.log("services in vendor details ", services)
+    console.log("owners in vendor details ", owners)
   }, [services]);
 
   // Define steps
@@ -111,6 +110,9 @@ const VendorDetails = ({ navigation }) => {
   const [selectedFilter, setSelectedFilter] = useState('all');
 
   useEffect(() => {
+    const pricing = formData.pricingData?.itemPricing || {};
+    console.log("pricing in vendor detials ",pricing);
+
     if (!step1Data) return;
 
     updateBusinessDetails(
@@ -127,23 +129,30 @@ const VendorDetails = ({ navigation }) => {
   useEffect(() => {
     if (!step2Data?.owners?.length) return;
 
+    // ✅ DO NOT overwrite if context already has owners
+    if (owners?.length > 0) {
+      console.log('⏭️ Skipping owners overwrite (already in context)');
+      return;
+    }
+
     const mappedOwners = step2Data.owners.map((o, index) => ({
-      id: `${o.primaryNumber}-${index}`, // ✅ stable id
+      id: `${o.primaryNumber}-${index}`,
       firstName: o.firstName || '',
       lastName: o.lastName || '',
       primary: o.primaryNumber || '',
       whatsapp: o.whatsappNumber || o.primaryNumber || '',
       governmentId: o.governmentId
         ? {
-            uri: o.governmentId, // ✅ URL → file-like
-            name: o.governmentId.split('/').pop(),
-            type: 'image/jpeg',
-          }
+          uri: o.governmentId,
+          name: o.governmentId.split('/').pop(),
+          type: 'image/jpeg',
+        }
         : null,
     }));
 
     updateOwners(mappedOwners);
   }, [step2Data]);
+
 
   useEffect(() => {
     if (step3Data?.services?.length && services?.length) {
@@ -157,6 +166,7 @@ const VendorDetails = ({ navigation }) => {
 
   useEffect(() => {
     if (step4Data?.itemPricing) {
+      console.log("step4Data?.itemPricing",step4Data?.itemPricing);
       updatePricing({ itemPricing: step4Data.itemPricing });
     }
   }, [step4Data]);
@@ -312,6 +322,7 @@ const VendorDetails = ({ navigation }) => {
 
   const savePricing = async () => {
     const pricing = formData.pricingData?.itemPricing || {};
+    console.log("pricing in vendor detials ",pricing);
 
     // ✅ ALL services from API must be validated
     const requiredServices = services;
@@ -605,7 +616,7 @@ const VendorDetails = ({ navigation }) => {
                   style={[
                     styles.deliveryOptionCard,
                     tempDelivery === option.value &&
-                      styles.selectedDeliveryCard,
+                    styles.selectedDeliveryCard,
                   ]}
                   onPress={() => setTempDelivery(option.value)}
                 >
@@ -624,7 +635,7 @@ const VendorDetails = ({ navigation }) => {
                         style={[
                           styles.deliveryOptionTitle,
                           tempDelivery === option.value &&
-                            styles.selectedDeliveryTitle,
+                          styles.selectedDeliveryTitle,
                         ]}
                       >
                         {option.value}
@@ -714,7 +725,7 @@ const VendorDetails = ({ navigation }) => {
             else if (currentStep === 4) saveDeliveryOption();
           }}
         >
-          <Text style={[styles.nextButtonText]}>Save & Finish</Text>
+          <Text style={[styles.nextButtonText]}>Save & Next</Text>
         </TouchableOpacity>
       </View>
 

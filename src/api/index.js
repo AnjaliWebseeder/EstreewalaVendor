@@ -1,5 +1,6 @@
 export const BASE_URL = 'https://www.api.estreewalla.com/api/v1';
-export const SIGNUP = `${BASE_URL}/auth/register`;
+export const REGISTER_SENDOTP = `${BASE_URL}/vendor-auth/register-send-otp`;
+export const REGISTER_VERIFYOTP = `${BASE_URL}/vendor-auth/register-verify-otp`;
 export const LOGIN = `${BASE_URL}/auth/login`;
 export const SENDOTP = `${BASE_URL}/vendor-auth/send-otp`;
 export const VERIFYOTP = `${BASE_URL}/vendor-auth/verify-otp-login`;
@@ -26,3 +27,15 @@ export const GETMULTISTEPONBOARDINGSTEP2 = `${BASE_URL}/vendors/onboarding/step2
 export const GETMULTISTEPONBOARDINGSTEP3 = `${BASE_URL}/vendors/onboarding/step3`;
 export const GETMULTISTEPONBOARDINGSTEP4 = `${BASE_URL}/vendors/onboarding/step4`;
 export const GETMULTISTEPONBOARDINGSTEP5 = `${BASE_URL}/vendors/onboarding/step5`;
+
+// notification
+
+export const GET_VENDER_NOTIFICATIONS =
+    `${BASE_URL}/vendors/my-notifications`;
+
+export const MARK_NOTIFICATION_READ = (id) =>
+    `${BASE_URL}/vendors/notifications/${id}/read`;
+
+// dashboard data 
+
+export const DASHBOARD_DATA = `${BASE_URL}/vendors/dashboard-analytics`;

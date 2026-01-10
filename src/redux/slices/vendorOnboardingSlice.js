@@ -107,6 +107,7 @@ export const completeStep3 = createAsyncThunk(
         MULTISTEPONBOARDINGSTEP3,
         stepData,
       );
+      console.log("Complete3 stepData",stepData);
 
       console.log('✅ Step 3 Completed:', response.data);
       return response.data;
@@ -128,6 +129,7 @@ export const completeStep4 = createAsyncThunk(
         MULTISTEPONBOARDINGSTEP4,
         stepData,
       );
+      console.log("step 4 stepData",stepData);
 
       console.log('✅ Step 4 Completed:', response.data);
       return response.data;
